@@ -20,6 +20,9 @@ class modelLineaire(nn.Module):
         z = self.weights * xb + self.bias
         return z
 
+    def calcPointForGraph(self, lineSpace):
+        return np.add(np.multiply(lineSpace, self.weights.item()), self.bias.item())
+
 
 class modelQuad(nn.Module):
     def __init__(self):
@@ -34,6 +37,11 @@ class modelQuad(nn.Module):
              self.weights2 * (xb) +
              self.bias1)
         return y
+
+    def calculatePointForGraph(self, lineSpace):
+        return np.add(self.weights1.item() * np.multiply(lineSpace, lineSpace),
+               np.add(self.weights2.item() * lineSpace,
+                      self.bias1.item()))
 
 
 def mse(y, y_hat):
@@ -92,20 +100,18 @@ while lastLoss > TARGETMAXLOSS:
         data["newA"] = data["a"].apply(modelA).apply(lambda x: x.item())
         #predict function
         numberOfPointInGraphToDoTheLine = 200
-        xGraph = np.linspace(min(data["x"]), max(data["x"]), numberOfPointInGraphToDoTheLine)
-        zGraph = np.linspace(min(data["z"]), max(data["z"]), numberOfPointInGraphToDoTheLine)
-        aGraph = np.linspace(min(data["a"]), max(data["a"]), numberOfPointInGraphToDoTheLine)
+        xPoint = np.linspace(min(data["x"]), max(data["x"]), numberOfPointInGraphToDoTheLine)
+        zPoint = np.linspace(min(data["z"]), max(data["z"]), numberOfPointInGraphToDoTheLine)
+        aPoint = np.linspace(min(data["a"]), max(data["a"]), numberOfPointInGraphToDoTheLine)
 
-        yPredBaseOnX = np.add(params[0].data.item() * np.multiply(xGraph, xGraph),
-                              np.add(params[1].data.item() * xGraph,
-                                     params[2].data.item()))
-        yPredBaseOnZ = np.add(np.multiply(zGraph, params[3].data.item()), params[4].data.item())
-        yPredBaseOnA = np.multiply(aGraph, params[5].data.item())
+        yPredBaseOnX = modelX.calculatePointForGraph(xPoint)
+        yPredBaseOnZ = modelZ.calcPointForGraph(zPoint)
+        yPredBaseOnA = modelA.calcPointForGraph(aPoint)
         yGraph = np.add(np.add(yPredBaseOnX, yPredBaseOnZ), yPredBaseOnA)
 
         fig = plt.figure()
-        createFig(fig, 1, xGraph, yPredBaseOnX, data["x"].values, (data["y"] - data["newZ"] - data["newA"]).values)
-        createFig(fig, 2, zGraph, yPredBaseOnZ, data["z"].values, (data["y"] - data["newX"] - data["newA"]).values)
-        createFig(fig, 3, aGraph, yPredBaseOnA, data["a"].values, (data["y"] - data["newX"] - data["newZ"]).values)
+        createFig(fig, 1, xPoint, yPredBaseOnX, data["x"].values, (data["y"] - data["newZ"] - data["newA"]).values)
+        createFig(fig, 2, zPoint, yPredBaseOnZ, data["z"].values, (data["y"] - data["newX"] - data["newA"]).values)
+        createFig(fig, 3, aPoint, yPredBaseOnA, data["a"].values, (data["y"] - data["newX"] - data["newZ"]).values)
         fig.suptitle(f"iter {i}, Loss = {loss.data}")
         plt.show()
