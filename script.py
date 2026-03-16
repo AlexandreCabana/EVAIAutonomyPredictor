@@ -9,6 +9,7 @@ import random
 import math
 import matplotlib.pyplot as plt
 
+numberOfPointInGraphToDoTheLine = 200
 
 class modelLineaire(nn.Module):
     def __init__(self):
@@ -20,7 +21,7 @@ class modelLineaire(nn.Module):
         z = self.weights * xb + self.bias
         return z
 
-    def calcPointForGraph(self, lineSpace):
+    def calculatePointForGraph(self, lineSpace):
         return np.add(np.multiply(lineSpace, self.weights.item()), self.bias.item())
 
 
@@ -48,12 +49,20 @@ def mse(y, y_hat):
     return ((y - y_hat) ** 2).mean()
 
 
-def createFig(fig, index, point, pointPredBaseOnA, realValue, realValueMinusOtherPrediction):
+def createFig(fig, index, point, pointPredBaseOnA, realValue, realValueMinusOtherPrediction, letter):
     currentFig = fig.add_subplot(1, 3, index)
-    currentFig.set_title(f"y based on a")
+    currentFig.set_title(f"y based on {letter}")
     currentFig.plot(point, pointPredBaseOnA, label="Function predicted")
     currentFig.scatter(realValue, realValueMinusOtherPrediction, label="Data", color="red")
     currentFig.legend()
+
+class Param:
+    def __init__(self, letter, model, data):
+        self.letter = letter
+        self.model = model
+        self.pandasData = data[letter]
+        self.tensorData = torch.tensor(self.pandasData.values, dtype=torch.float32).view(-1, 1)
+        self.lineSpace = np.linspace(min(self.pandasData), max(self.pandasData), numberOfPointInGraphToDoTheLine)
 
 
 #generate dataset
@@ -67,22 +76,24 @@ data["y"] = ((random.randint(-50, 50) * data["x"] ** 2 +
              random.randint(-50, 50) * data["z"] +
              random.randint(-50, 50) * data["a"])
 
-x = torch.tensor(data["x"].values, dtype=torch.float32).view(-1, 1)
+
 y = torch.tensor(data["y"].values, dtype=torch.float32).view(-1, 1)
-z = torch.tensor(data["z"].values, dtype=torch.float32).view(-1, 1)
-a = torch.tensor(data["a"].values, dtype=torch.float32).view(-1, 1)
 
 modelX = modelQuad()
 modelZ = modelLineaire()
 modelA = modelLineaire()
-params = list(modelX.parameters()) + list(modelZ.parameters()) + list(modelA.parameters())
+listModel: list[Param] = [Param("x",modelX, data), Param("z", modelZ, data), Param("a", modelA, data)]
+params = []
+for model in listModel:
+    params.extend(model.model.parameters())
 opt = optim.Adam(params, lr=5e2)  #lr = learning rate
 lastLoss = math.inf
 i = 0
-data.sort_values('x', inplace=True)
-TARGETMAXLOSS = 1000
+TARGETMAXLOSS = 10
 while lastLoss > TARGETMAXLOSS:
-    yPredict = modelX(x) + modelZ(z) + modelA(a)
+    yPredict = 0
+    for model in listModel:
+        yPredict += model.model(model.tensorData)
     loss = mse(y, yPredict)
     loss.backward()
     opt.step()
@@ -95,23 +106,21 @@ while lastLoss > TARGETMAXLOSS:
             if param.requires_grad:
                 print(param.data.item())
         print()
-        data["newZ"] = data["z"].apply(modelZ).apply(lambda x: x.item())
-        data["newX"] = data["x"].apply(modelX).apply(lambda x: x.item())
-        data["newA"] = data["a"].apply(modelA).apply(lambda x: x.item())
+        for model in listModel:
+            data["new"+model.letter] = model.pandasData.apply(model.model).apply(lambda x : x.item())
         #predict function
-        numberOfPointInGraphToDoTheLine = 200
-        xPoint = np.linspace(min(data["x"]), max(data["x"]), numberOfPointInGraphToDoTheLine)
-        zPoint = np.linspace(min(data["z"]), max(data["z"]), numberOfPointInGraphToDoTheLine)
-        aPoint = np.linspace(min(data["a"]), max(data["a"]), numberOfPointInGraphToDoTheLine)
-
-        yPredBaseOnX = modelX.calculatePointForGraph(xPoint)
-        yPredBaseOnZ = modelZ.calcPointForGraph(zPoint)
-        yPredBaseOnA = modelA.calcPointForGraph(aPoint)
-        yGraph = np.add(np.add(yPredBaseOnX, yPredBaseOnZ), yPredBaseOnA)
 
         fig = plt.figure()
-        createFig(fig, 1, xPoint, yPredBaseOnX, data["x"].values, (data["y"] - data["newZ"] - data["newA"]).values)
-        createFig(fig, 2, zPoint, yPredBaseOnZ, data["z"].values, (data["y"] - data["newX"] - data["newA"]).values)
-        createFig(fig, 3, aPoint, yPredBaseOnA, data["a"].values, (data["y"] - data["newX"] - data["newZ"]).values)
+        index = 0
+        for model in listModel:
+            index += 1
+            yPredBaseOnModel = model.model.calculatePointForGraph(model.lineSpace)
+            excludeData = 0
+            for othermodel in listModel:
+                if othermodel.letter != model.letter:
+                    excludeData+=data["new"+othermodel.letter]
+            createFig(fig, index, model.lineSpace, yPredBaseOnModel, model.pandasData.values,
+                      (data["y"]-excludeData).values,
+                      model.letter)
         fig.suptitle(f"iter {i}, Loss = {loss.data}")
         plt.show()
