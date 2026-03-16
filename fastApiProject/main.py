@@ -26,20 +26,21 @@ class CarInfo:
         self.is_ac_used = is_ac_used
 
 class EnvironmentInfo:
-    temperature: int
-    meteo: str
-    chaussee: str
+    def __init__(self, temperature: str, meteo:str, chaussee: int, rougness: int):
+        self.temp = temperature
+        self.meteo = meteo
+        self.chaussee = chaussee
 
 class FormInfo:
-    car_info: CarInfo
-    env_info: EnvironmentInfo
-
-formInfo = FormInfo()
+    def __init__(self, carInfo : CarInfo, environmentInfo : EnvironmentInfo):
+        self.carInfo = carInfo
+        self.environmentInfo = environmentInfo
 
 class User:
-    def __init__(self, name, last_name):
+    def __init__(self, name, last_name, driving_style):
         self.name = name
         self.last_name = last_name
+        self.driving_style = driving_style
 
 # function
 
@@ -63,14 +64,27 @@ async def read_items(request: Request):
     )
 
 @app.post("/results/")
-async def results(marque: str = Form(...), modele: str = Form(...), is_ac_used: bool = Form(False)):
-    car_info = CarInfo(marque, modele,None, is_ac_used)
-    return car_info
+async def results(
+        marque: str = Form(...),
+        modele: str = Form(...),
+        is_ac_used: bool = Form(False),
+        conduite: str = Form(...),
+
+        temperature: str = Form(...),
+        meteo: str = Form(...),
+        slide_range: int = Form(...),
+        roughness_range: int = Form(...)):
+
+    car_info = CarInfo(marque, modele, conduite, is_ac_used)
+    env_info = EnvironmentInfo(temperature, meteo, slide_range, roughness_range)
+
+    return FormInfo(car_info, env_info)
 
 
 @app.post("/submit/")
-async def submit(name: str = Form(...), last_name: str = Form(...)):
-    user = User(name,last_name)
+async def submit(name: str = Form(...),last_name: str = Form(...), conduite: str = Form(...)):
+    user = User(name,last_name,conduite)
+    print(conduite)
     return user
 
 @app.post("/submit_selected")
