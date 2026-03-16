@@ -1,9 +1,14 @@
+from random import random, randint
 from typing import Annotated
 from fastapi import FastAPI, Path, Request, Form, requests
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from starlette import status
+from starlette.responses import RedirectResponse
 from starlette.staticfiles import StaticFiles
+from sympy import Float
+
 
 app = FastAPI()
 
@@ -42,29 +47,14 @@ class User:
         self.last_name = last_name
         self.driving_style = driving_style
 
-# function
-
-@app.put("/items/{item_id}")
-async def update_item(
-    item_id: Annotated[int, Path(title="The ID of the item to get", ge=0, le=1000)],
-    q: str | None = None,
-    item: Item | None = None,
-):
-    results = {"item_id": item_id}
-    if q:
-        results.update({"q": q})
-    if item:
-        results.update({"item": item})
-    return results
-
 @app.get("/", response_class=HTMLResponse)
-async def read_items(request: Request):
+async def main_page(request: Request):
     return templates.TemplateResponse(
         request=request, name="index.html"
     )
 
-@app.post("/results/")
-async def results(
+@app.post("/submit")
+async def submit(
         marque: str = Form(...),
         modele: str = Form(...),
         is_ac_used: bool = Form(False),
@@ -77,22 +67,15 @@ async def results(
 
     car_info = CarInfo(marque, modele, conduite, is_ac_used)
     env_info = EnvironmentInfo(temperature, meteo, slide_range, roughness_range)
+    result =randint(0,1000)/10
+    # return FormInfo(car_info, env_info)
+    return RedirectResponse(url=f"/result?battery={result}",
+                                status_code=status.HTTP_303_SEE_OTHER)
 
-    return FormInfo(car_info, env_info)
-
-
-@app.post("/submit/")
-async def submit(name: str = Form(...),last_name: str = Form(...), conduite: str = Form(...)):
-    user = User(name,last_name,conduite)
-    print(conduite)
-    return user
-
-@app.post("/submit_selected")
-async def handle_selection(selected_option: Annotated[str, Form()]):
-    return {"message": f"You chose : {selected_option}"}
-
-def get_info_from_user(user: User):
-    string = ""
-    # get length
-    string += f"Your first name, {user.name}, contains {len(user.name)} letters and your last name, {user.last_name}, contains {len(user.last_name)} letters"
-    return string
+@app.get("/result")
+def page_resultat(request: Request, battery: float):
+    print(battery)
+    return templates.TemplateResponse(
+        "resultat.html",
+        {"request": request, "battery": battery}
+    )
