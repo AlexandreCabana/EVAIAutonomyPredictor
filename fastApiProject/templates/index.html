@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/styles.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="page">
+        <h1>Prédiction de l'<b>autonomie</b> d'une <b><br>VOITURE ÉLECTRIQUE</b></h1>
+        <form action="/results" method="post" id="selectionForm">
+            <div class="div-sections-parametres">
+                <div class="panel">
+                    <div class="section-parametres">
+                        <h2>Information du véhicule</h2>
+                        <label for="marque-list">Marque:</label>
+                        <select name="marque" id="marque-list">
+                        </select>
+                        <br>
+                        <label for="modele-list">Modèle:</label>
+                        <select name="modele" id="modele-list">
+                            <option value="-- modèle --">-- modèle --</option>
+                        </select>
+                    </div>
+
+                    <div class="section-parametres">
+                        <h2>Habitude de conduite</h2>
+                        <p>Style de conduite</p>
+                        <div class="meteo-icons">
+                            <div class="icon-wrapper">
+                                <p>Éco-conduite</p>
+                            </div>
+                            <div class="icon-wrapper">
+                                <p>Normal</p>
+                            </div>
+                            <div class="icon-wrapper">
+                                <p>Aggressif</p>
+                            </div>
+                            <div class="icon-wrapper">
+                                <p>Assassin</p>
+                            </div>
+                        </div>
+                        <p>Utilisation de la climatisation</p>
+                        <!-- toggle button-->
+                        <label class="switch">
+                            <input type="checkbox" id="climatisation-toggle" name="is_ac_used" value="True">
+                        </label>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="section-parametres">
+                        <h2>Conditions extérieures</h2>
+                        <label for="temperature">Température (°C):</label>
+                        <br>
+                        <input type="number" id="temperature" name="temperature">
+
+                        <p>Météo</p>
+                        <div class="meteo-icons">
+                            <div class="icon-wrapper">
+                                <svg width="59" height="44" viewBox="0 0 59 44" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M43.56 16.94H40.5108C39.6054 13.4334 37.7345 10.2511 35.1109 7.75462C32.4872 5.25816 29.2159 3.54768 25.6687 2.81753C22.1215 2.08738 18.4406 2.36684 15.0443 3.62416C11.6479 4.88147 8.67237 7.06623 6.45568 9.93017C4.23899 12.7941 2.87006 16.2224 2.50444 19.8255C2.13882 23.4286 2.79117 27.062 4.38737 30.3128C5.98356 33.5637 8.4596 36.3016 11.5341 38.2156C14.6086 40.1295 18.1584 41.1427 21.78 41.14H43.56C46.7691 41.14 49.8468 39.8652 52.116 37.596C54.3851 35.3268 55.66 32.2491 55.66 29.04C55.66 25.8309 54.3851 22.7532 52.116 20.484C49.8468 18.2148 46.7691 16.94 43.56 16.94Z"
+                                        stroke="#1E1E1E" stroke-width="4.84" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+
+                            <div class="icon-wrapper">
+                                <svg width="59" height="59" viewBox="0 0 59 59" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0_4_34)">
+                                        <path
+                                            d="M29.04 2.41998V7.25998M29.04 50.82V55.66M10.2124 10.2124L13.6488 13.6488M44.4312 44.4312L47.8676 47.8676M2.42004 29.04H7.26004M50.82 29.04H55.66M10.2124 47.8676L13.6488 44.4312M44.4312 13.6488L47.8676 10.2124M41.14 29.04C41.14 35.7226 35.7227 41.14 29.04 41.14C22.3574 41.14 16.94 35.7226 16.94 29.04C16.94 22.3573 22.3574 16.94 29.04 16.94C35.7227 16.94 41.14 22.3573 41.14 29.04Z"
+                                            stroke="#1E1E1E" stroke-width="4.84" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </g>
+                                    <defs>
+                                        <clipPath id="clip0_4_34">
+                                            <rect width="58.08" height="58.08" fill="white" />
+                                        </clipPath>
+                                    </defs>
+                                </svg>
+                            </div>
+
+                            <div class="icon-wrapper">
+                                <svg width="59" height="59" viewBox="0 0 59 59" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M38.72 31.4593V50.8193M19.36 31.4593V50.8193M29.04 36.2993V55.6593M48.4 40.1229C50.944 39.0087 53.0273 37.0533 54.3002 34.5848C55.573 32.1164 55.958 29.2852 55.3904 26.5665C54.8228 23.8478 53.3373 21.4071 51.1831 19.6541C49.029 17.9011 46.3373 16.9426 43.56 16.9393H40.5108C39.7437 13.9688 38.2817 11.2231 36.2451 8.92861C34.2086 6.63409 31.6559 4.85641 28.7975 3.74211C25.939 2.62781 22.8567 2.20879 19.8045 2.51958C16.7524 2.83038 13.8178 3.86209 11.2426 5.52967C8.66744 7.19726 6.52546 9.45298 4.99322 12.1109C3.46097 14.7688 2.58234 17.7528 2.42973 20.817C2.27712 23.8811 2.85492 26.9377 4.11548 29.7347C5.37605 32.5317 7.2833 34.9891 9.68002 36.9043"
+                                        stroke="#1E1E1E" stroke-width="4.84" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+
+                            <div class="icon-wrapper">
+                                <svg width="59" height="54" viewBox="0 0 59 54" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M48.4 40.1229C50.944 39.0087 53.0273 37.0533 54.3002 34.5848C55.573 32.1164 55.958 29.2852 55.3904 26.5665C54.8228 23.8478 53.3373 21.4071 51.1831 19.6541C49.029 17.9011 46.3373 16.9426 43.56 16.9393H40.5108C39.7437 13.9688 38.2817 11.2231 36.2451 8.92861C34.2086 6.63409 31.6559 4.85641 28.7975 3.74211C25.939 2.62781 22.8567 2.20879 19.8045 2.51958C16.7524 2.83038 13.8178 3.86209 11.2426 5.52967C8.66744 7.19726 6.52546 9.45298 4.99322 12.1109C3.46097 14.7688 2.58234 17.7528 2.42973 20.817C2.27712 23.8811 2.85492 26.9377 4.11548 29.7347C5.37605 32.5317 7.2833 34.9891 9.68002 36.9043M19.36 36.2993H19.3842M19.36 45.9793H19.3842M29.04 41.1393H29.0642M29.04 50.8193H29.0642M38.72 36.2993H38.7442M38.72 45.9793H38.7442"
+                                        stroke="#1E1E1E" stroke-width="4.84" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <p>Type de chaussé</p>
+                        <div class="chausse-parametres">
+                            <div class="parametre-slider-wrapper">
+                                <p>Pas glissant</p>
+                                <div class="slidecontainer">
+                                    <input type="range" min="-30" max="30" id="glissant-range" name="temperature-range"
+                                        class="slider">
+                                </div>
+                                <p>Glissant</p>
+                            </div>
+                            <div class="parametre-slider-wrapper">
+                                <p>Lisse</p>
+                                <div class="slidecontainer">
+                                    <input type="range" min="-30" max="30" id="bumpy-range" name="temperature-range"
+                                        class="slider">
+                                </div>
+                                <p>Cahoteux</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <button type="submit">Envoyer</button>
+
+        </form>
+
+    </div>
+
+</body>
+<script src="../static/script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</html>
