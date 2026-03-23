@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/styles.css">
-    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <title>Prediction d'autonomie d'un VE</title>
 </head>
-
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <body>
     <div class="page">
         <h1>Prédiction de l'<b>autonomie</b> d'une <b><br>VOITURE ÉLECTRIQUE</b></h1>
@@ -118,6 +119,18 @@
                     </div>
                 </div>
 
+            </div>
+
+            <input type="hidden" name="start_lat" id="start_lat">
+            <input type="hidden" name="start_lng" id="start_lng">
+            <input type="hidden" name="end_lat" id="end_lat">
+            <input type="hidden" name="end_lng" id="end_lng">
+            <button type="button" onclick="openMap()">Sélectionner sa localisation</button>
+
+            <div id="map-container" style="display:none; margin-top:20px;">
+            <div id="map" style="height:400px;"></div>
+             <p id="coords"></p>
+            <button type="button" onclick="confirmMap()">Confirmer la position</button>
             </div>
             <button type="submit">Envoyer</button>
         </form>
