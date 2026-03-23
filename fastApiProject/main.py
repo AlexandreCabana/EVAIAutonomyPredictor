@@ -124,6 +124,7 @@ async def submit(
 
     car_info = CarInfo(marque, modele, conduite, is_ac_used)
     env_info = EnvironmentInfo(temperature, meteo, slide_range, roughness_range)
+    print(car_info, env_info)
     result =randint(0,1000)/10
     # return FormInfo(car_info, env_info)
     return RedirectResponse(url=f"/result?battery={result}",

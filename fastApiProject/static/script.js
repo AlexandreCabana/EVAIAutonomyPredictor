@@ -199,9 +199,54 @@ async function test() {
         });
     });
 
-
-    
     console.log("working");
 }
-
 test();
+
+// METEO PART
+// - get localisation
+const x = document.getElementById("demo");
+
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(success, error);
+  } else {
+    x.innerHTML = "Geolocation is not supported by this browser.";
+  }
+}
+
+function success(position) {
+  x.innerHTML = "Latitude: " + position.coords.latitude +
+  "<br>Longitude: " + position.coords.longitude;
+  fetchMeteo(position);
+}
+
+function error() {
+  alert("Sorry, no position available.");
+}
+
+//- api call with open-meteo
+// ex:https://api.open-meteo.com/v1/forecast?latitude=45.53670606232232&longitude=-73.67448869055289&hourly=temperature_2m&current=temperature_2m&start_date=2026-03-23&end_date=2026-03-23
+
+function fetchMeteo(position){
+    const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${position.coords.latitude}&longitude=${position.coords.longitude}&hourly=temperature_2m`;
+
+    fetch(apiUrl)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Weather data:', data);
+        const hourly_data = data.hourly;
+        const data_time = hourly_data.time;
+        const data_temperature = hourly_data.temperature_2m;
+        console.log(data_time);
+        console.log(data_temperature);
+      })
+      .catch(error => {
+        console.error('There has been a problem with your fetch operation:', error);
+      });
+}
