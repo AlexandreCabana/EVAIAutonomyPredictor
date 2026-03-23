@@ -55,14 +55,13 @@ class modelCube(nn.Module):
         self.bias1 = nn.Parameter(torch.zeros(1))
 
     def forward(self, xb):
-        y = (self.weights3 * (xb) ** 3 +
+        y = (self.weights1 * (xb) ** 3 +
              self.weights2 * (xb) ** 2 +
              self.weights3 * (xb) +
              self.bias1)
         return y
 
     def calculatePointForGraph(self, lineSpace):
-        print(f"a={self.weights1.item()}, b={self.weights2.item()}, c={self.weights3.item()}, d={self.bias1.item()}")
         return np.add(self.weights1.item() * np.multiply(lineSpace, np.multiply(lineSpace, lineSpace)),
             np.add(self.weights2.item() * np.multiply(lineSpace, lineSpace),
                np.add(self.weights3.item() * lineSpace,
@@ -96,38 +95,33 @@ def normalized(x, mean, std):
 #generate dataset
 NUMBEROFPOINTFORAI = 1000
 data = pd.DataFrame(pd.Series(np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)), columns=['x'])
-data["z"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
+data["d"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
 data["a"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
 data["b"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
 
-data["x"] = data["x"].apply(lambda x: normalized(x, data["x"].mean(), data["x"].std()))
-data["z"] = data["z"].apply(lambda x: normalized(x, data["z"].mean(), data["z"].std()))
+data["c"] = data["c"].apply(lambda x: normalized(x, data["c"].mean(), data["c"].std()))
+data["d"] = data["d"].apply(lambda x: normalized(x, data["d"].mean(), data["d"].std()))
 data["a"] = data["a"].apply(lambda x: normalized(x, data["a"].mean(), data["a"].std()))
 data["b"] = data["b"].apply(lambda x: normalized(x, data["b"].mean(), data["b"].std()))
 
-data["y"] = (0 * data["b"] ** 3 +
-              (random.randint(-10, 0) * data["b"] ** 2 +
-              random.randint(-50, 50) * data["b"] +
-              random.randint(-50, 50))+
-             (random.randint(-50, 10) * data["x"] ** 2 +
-              random.randint(-50, 50) * data["x"] +
+data["y"] = (random.randint(-50, 10) * data["b"] ** 3 +
+              (random.randint(-50, 10) * data["b"] ** 2 +
+              random.randint(-50, 10) * data["b"] +
+              random.randint(-50, 10))+
+             (random.randint(-50, 10) * data["c"] ** 2 +
+              random.randint(-50, 50) * data["c"] +
               random.randint(-50, 50)) +
-             random.randint(-50, 50) * data["z"] +
+             random.randint(-50, 50) * data["d"] +
              random.randint(-50, 50) * data["a"])
 
 
 
 y = torch.tensor(data["y"].values, dtype=torch.float32).view(-1, 1)
 
-listModel: list[Param] = [Param("x",modelQuad(), data),
-                          Param("z", modelLineaire(), data),
+listModel: list[Param] = [Param("c",modelQuad(), data),
+                          Param("d", modelLineaire(), data),
                           Param("a", modelLineaire(), data),
                           Param("b",modelCube(), data)]
-
-listModel: list[Param] = [Param("x",modelQuad(), data),
-                          Param("z", modelLineaire(), data),
-                          Param("a", modelLineaire(), data),
-                          Param("b",modelQuad(), data)]
 
 params = []
 for model in listModel:
@@ -135,7 +129,7 @@ for model in listModel:
 opt = optim.Adam(params, lr=0.0005)  #lr = learning rate
 lastLoss = math.inf
 i = 0
-TARGETMAXLOSS = 0.25
+TARGETMAXLOSS = 0
 
 iteration = []
 lossHistory = []
@@ -153,8 +147,8 @@ while lastLoss> TARGETMAXLOSS:
         lossHistory.append(loss.data)
         print(f"iter {i}, Loss = {loss.data}, deltaLoss = {lastLoss-loss.data}, elapseTime = {time.time()-startTime}")
         lastLoss = loss.data
-        """
-        for param in params:
+
+        """for param in params:
             if param.requires_grad:
                 print(param.data.item())
         print()"""
