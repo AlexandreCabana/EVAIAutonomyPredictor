@@ -9,7 +9,10 @@ import random
 import math
 import matplotlib.pyplot as plt
 import time
-numberOfPointInGraphToDoTheLine = 200
+from scipy.interpolate import interp1d
+
+NUMBEROFPOINTPERGRAPH = 200
+NUMBEROFGRAPHPERROW = 2
 startTime = time.time()
 
 class modelLineaire(nn.Module):
@@ -70,8 +73,8 @@ def mse(y, y_hat):
     return ((y - y_hat) ** 2).mean()
 
 
-def createFig(fig, index, point, pointPredBaseOnA, realValue, realValueMinusOtherPrediction, letter):
-    currentFig = fig.add_subplot(1, 4, index)
+def createFig(fig, point, pointPredBaseOnA, realValue, realValueMinusOtherPrediction, letter, nbRow, nbCol, index):
+    currentFig = fig.add_subplot(nbRow, nbCol, index)
     currentFig.set_title(f"y based on {letter}")
     currentFig.plot(point, pointPredBaseOnA, label="Function predicted")
     currentFig.scatter(realValue, realValueMinusOtherPrediction, label="Data", color="red")
@@ -83,9 +86,9 @@ class Param:
         self.model = model
         self.pandasData = data[letter]
         self.tensorData = torch.tensor(self.pandasData.values, dtype=torch.float32).view(-1, 1)
-        self.lineSpace = np.linspace(min(self.pandasData), max(self.pandasData), numberOfPointInGraphToDoTheLine)
+        self.lineSpace = np.linspace(min(self.pandasData), max(self.pandasData), NUMBEROFPOINTPERGRAPH)
     def reCalculateLineSpace(self):
-        self.lineSpace = np.linspace(min(self.pandasData), max(self.pandasData), numberOfPointInGraphToDoTheLine)
+        self.lineSpace = np.linspace(min(self.pandasData), max(self.pandasData), NUMBEROFPOINTPERGRAPH)
 
 
 def normalized(x, mean, std):
@@ -94,45 +97,74 @@ def normalized(x, mean, std):
 
 #generate dataset
 NUMBEROFPOINTFORAI = 1000
-data = pd.DataFrame(pd.Series(np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)), columns=['x'])
+data = pd.DataFrame(pd.Series(np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)), columns=['c'])
 data["d"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
 data["a"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
 data["b"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
+data["e"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
+data["f"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
 
-data["c"] = data["c"].apply(lambda x: normalized(x, data["c"].mean(), data["c"].std()))
-data["d"] = data["d"].apply(lambda x: normalized(x, data["d"].mean(), data["d"].std()))
 data["a"] = data["a"].apply(lambda x: normalized(x, data["a"].mean(), data["a"].std()))
 data["b"] = data["b"].apply(lambda x: normalized(x, data["b"].mean(), data["b"].std()))
+data["c"] = data["c"].apply(lambda x: normalized(x, data["c"].mean(), data["c"].std()))
+data["d"] = data["d"].apply(lambda x: normalized(x, data["d"].mean(), data["d"].std()))
+data["e"] = data["e"].apply(lambda x: normalized(x, data["e"].mean(), data["e"].std()))
+data["f"] = data["f"].apply(lambda x: normalized(x, data["f"].mean(), data["f"].std()))
 
-data["y"] = (random.randint(-50, 10) * data["b"] ** 3 +
-              (random.randint(-50, 10) * data["b"] ** 2 +
+data["y"] = (random.randint(-50, 10) * data["a"] ** 3 +
+              random.randint(-50, 10) * data["a"] ** 2 +
+              random.randint(-50, 10) * data["a"] +
+              random.randint(-50, 10)+
+              random.randint(-50, 10) * data["b"] ** 3 +
+              random.randint(-50, 10) * data["b"] ** 2 +
               random.randint(-50, 10) * data["b"] +
-              random.randint(-50, 10))+
-             (random.randint(-50, 10) * data["c"] ** 2 +
+              random.randint(-50, 10)+
+              (random.randint(-50, 10) * data["c"] ** 2 +
               random.randint(-50, 50) * data["c"] +
               random.randint(-50, 50)) +
-             random.randint(-50, 50) * data["d"] +
-             random.randint(-50, 50) * data["a"])
+              random.randint(-50, 10) * data["d"] ** 2 +
+              random.randint(-50, 50) * data["d"] +
+              random.randint(-50, 50) +
+              random.randint(-50, 50) * data["e"] +
+              random.randint(-50, 50) * data["f"])
 
 
 
 y = torch.tensor(data["y"].values, dtype=torch.float32).view(-1, 1)
 
-listModel: list[Param] = [Param("c",modelQuad(), data),
-                          Param("d", modelLineaire(), data),
-                          Param("a", modelLineaire(), data),
-                          Param("b",modelCube(), data)]
-
+listModel: list[Param] = [Param("a",modelCube(), data),
+                          Param("b", modelCube(), data),
+                          Param("c", modelQuad(), data),
+                          Param("d",modelQuad(), data),
+                          Param("e", modelLineaire(), data),
+                          Param("f", modelLineaire(), data),]
+numberOfColumnForGraph = len(listModel)//NUMBEROFGRAPHPERROW + (len(listModel)%NUMBEROFGRAPHPERROW >0)
 params = []
 for model in listModel:
     params.extend(model.model.parameters())
 opt = optim.Adam(params, lr=0.0005)  #lr = learning rate
 lastLoss = math.inf
 i = 0
-TARGETMAXLOSS = 0
+TARGETMAXLOSS = 10E-6
 
 iteration = []
 lossHistory = []
+
+
+def plotEvolution(x, y):
+    x=pd.Series(x)
+    y=pd.Series(y)
+    fig = plt.figure()
+    currentFig = fig.add_subplot(1, 1, 1)
+    x_new = np.linspace(x.min(), x.max(), 500)
+    f = interp1d(x, y, kind='quadratic')
+    y_smooth = f(x_new)
+    currentFig.plot(x_new, y_smooth)
+    currentFig.scatter(x, y)
+    fig.suptitle("loss evolution")
+    plt.show()
+
+
 while lastLoss> TARGETMAXLOSS:
     yPredict = 0
     for model in listModel:
@@ -165,14 +197,12 @@ while lastLoss> TARGETMAXLOSS:
             for othermodel in listModel:
                 if othermodel.letter != model.letter:
                     excludeData+=data["new"+othermodel.letter]
-            createFig(fig, index, model.lineSpace, yPredBaseOnModel, model.pandasData.values,
+            createFig(fig, model.lineSpace, yPredBaseOnModel, model.pandasData.values,
                       (data["y"]-excludeData).values,
-                      model.letter)
+                      model.letter, NUMBEROFGRAPHPERROW ,numberOfColumnForGraph, index)
         fig.suptitle(f"iter {i}, Loss = {loss.data}, elapseTime = {round(time.time()-startTime)}")
-        plt.show()
-        fig = plt.figure()
-        currentFig = fig.add_subplot(1, 1, 1)
-        currentFig.scatter(iteration, lossHistory, label="Data", color="red")
-        fig.suptitle("loss evolution")
         plt.legend()
+        plt.show()
+        if len(iteration)>=3:
+            plotEvolution(iteration, lossHistory)
 
