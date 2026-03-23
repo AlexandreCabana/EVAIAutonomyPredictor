@@ -1,3 +1,62 @@
+let map;
+let markers = [];
+let start = null;
+let end = null;
+
+function openMap() {
+    const container = document.getElementById("map-container");
+    container.style.display = "block";
+
+    if (!map) {
+        map = L.map('map').setView([45.5, -73.56], 10); // Montreal
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        map.on('click', (e) => onMapClick(e));
+    }
+}
+function onMapClick(e) {
+    // Reset si déjà 2 points
+    if (markers.length >= 2) {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            start = null;
+            end = null;
+    }
+            const marker = L.marker(e.latlng).addTo(map);
+    markers.push(marker);
+
+    if (!start) {
+        start = e.latlng;
+        document.getElementById("coords").innerText =
+            `Départ: ${start.lat.toFixed(5)}, ${start.lng.toFixed(5)}`;
+    } else {
+        end = e.latlng;
+        document.getElementById("coords").innerText =
+            `Départ: ${start.lat.toFixed(5)}, ${start.lng.toFixed(5)}
+            Arrivée: ${end.lat.toFixed(5)}, ${end.lng.toFixed(5)}`;
+    }
+        }
+
+function confirmMap() {
+    if (!start || !end) {
+        alert("Choisis un point de depart ET d'arrivee !");
+        return;
+    }
+
+
+    document.getElementById("start_lat").value = start.lat;
+    document.getElementById("start_lng").value = start.lng;
+    document.getElementById("end_lat").value = end.lat;
+    document.getElementById("end_lng").value = end.lng;
+
+    getRoute(start, end);
+}
+
+
+
 async function fetchCarInfo() {
     try {
         const response = await fetch('static/car_info.csv');
