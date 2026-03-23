@@ -62,6 +62,7 @@ class modelCube(nn.Module):
         return y
 
     def calculatePointForGraph(self, lineSpace):
+        print(f"a={self.weights1.item()}, b={self.weights2.item()}, c={self.weights3.item()}, d={self.bias1.item()}")
         return np.add(self.weights1.item() * np.multiply(lineSpace, np.multiply(lineSpace, lineSpace)),
             np.add(self.weights2.item() * np.multiply(lineSpace, lineSpace),
                np.add(self.weights3.item() * lineSpace,
@@ -98,20 +99,23 @@ data = pd.DataFrame(pd.Series(np.random.randint(-1000, 1000, size=NUMBEROFPOINTF
 data["z"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
 data["a"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
 data["b"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
-data["y"] = (random.randint(-25, 25) * data["b"] ** 3 +
-              (random.randint(-25, 25) * data["b"] ** 2 +
+
+data["x"] = data["x"].apply(lambda x: normalized(x, data["x"].mean(), data["x"].std()))
+data["z"] = data["z"].apply(lambda x: normalized(x, data["z"].mean(), data["z"].std()))
+data["a"] = data["a"].apply(lambda x: normalized(x, data["a"].mean(), data["a"].std()))
+data["b"] = data["b"].apply(lambda x: normalized(x, data["b"].mean(), data["b"].std()))
+
+data["y"] = (0 * data["b"] ** 3 +
+              (random.randint(-10, 0) * data["b"] ** 2 +
               random.randint(-50, 50) * data["b"] +
               random.randint(-50, 50))+
-             (random.randint(-50, 50) * data["x"] ** 2 +
+             (random.randint(-50, 10) * data["x"] ** 2 +
               random.randint(-50, 50) * data["x"] +
               random.randint(-50, 50)) +
              random.randint(-50, 50) * data["z"] +
              random.randint(-50, 50) * data["a"])
 
-data["z"] = data["z"].apply(lambda x: normalized(x, data["z"].mean(), data["z"].std()))
-data["a"] = data["a"].apply(lambda x: normalized(x, data["a"].mean(), data["a"].std()))
-data["b"] = data["b"].apply(lambda x: normalized(x, data["b"].mean(), data["b"].std()))
-data["y"] = data["y"].apply(lambda x: normalized(x, data["y"].mean(), data["y"].std()))
+
 
 y = torch.tensor(data["y"].values, dtype=torch.float32).view(-1, 1)
 
@@ -119,13 +123,19 @@ listModel: list[Param] = [Param("x",modelQuad(), data),
                           Param("z", modelLineaire(), data),
                           Param("a", modelLineaire(), data),
                           Param("b",modelCube(), data)]
+
+listModel: list[Param] = [Param("x",modelQuad(), data),
+                          Param("z", modelLineaire(), data),
+                          Param("a", modelLineaire(), data),
+                          Param("b",modelQuad(), data)]
+
 params = []
 for model in listModel:
     params.extend(model.model.parameters())
 opt = optim.Adam(params, lr=0.0005)  #lr = learning rate
 lastLoss = math.inf
 i = 0
-TARGETMAXLOSS = 0.5
+TARGETMAXLOSS = 0.25
 
 iteration = []
 lossHistory = []
@@ -164,7 +174,7 @@ while lastLoss> TARGETMAXLOSS:
             createFig(fig, index, model.lineSpace, yPredBaseOnModel, model.pandasData.values,
                       (data["y"]-excludeData).values,
                       model.letter)
-        fig.suptitle(f"iter {i}, Loss = {loss.data}")
+        fig.suptitle(f"iter {i}, Loss = {loss.data}, elapseTime = {round(time.time()-startTime)}")
         plt.show()
         fig = plt.figure()
         currentFig = fig.add_subplot(1, 1, 1)
