@@ -2,6 +2,7 @@ let map;
 let markers = [];
 let start = null;
 let end = null;
+let currentPolyline = null;
 
 function openMap() {
     const container = document.getElementById("map-container");
@@ -46,14 +47,92 @@ function confirmMap() {
         return;
     }
 
-
     document.getElementById("start_lat").value = start.lat;
     document.getElementById("start_lng").value = start.lng;
     document.getElementById("end_lat").value = end.lat;
     document.getElementById("end_lng").value = end.lng;
 
-    getRoute(start, end);
+    // Affiche la route automatiquement après confirmation
+    displayRoute();
 }
+
+async function displayRoute() {
+    if (!start || !end) {
+        alert("Choisis un point de depart ET d'arrivee !");
+        return;
+    }
+    
+    console.log("Affichage de la route...");
+    console.log(`Start: ${start.lat}, ${start.lng}`);
+    console.log(`End: ${end.lat}, ${end.lng}`);
+
+    try {
+        
+        const response = await fetch('http://127.0.0.1:8000/route', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                start_lat: start.lat,
+                start_lng: start.lng,
+                end_lat: end.lat,
+                end_lng: end.lng
+            })
+        });
+
+        if (!response.ok) {
+            console.error(`Erreur HTTP: ${response.status} ${response.statusText}`);
+            return;
+        }
+
+        const data = await response.json();
+        console.log("Données reçues:", data);
+        
+        // Extract route coordinates
+        const routeCoords = data.route.map(coord => [coord[0], coord[1]]);
+        console.log("Coordonnées de la route:", routeCoords);
+        
+        // Remove previous route if it exists
+        if (currentPolyline) {
+            map.removeLayer(currentPolyline);
+            console.log("Ancienne route supprimée");
+        }
+        
+        // Draw the route on the map as a polyline
+        currentPolyline = L.polyline(routeCoords, {
+            color: 'blue',
+            weight: 4,
+            opacity: 0.7
+        }).addTo(map);
+        
+        console.log("Polyline ajoutée à la carte");
+
+        // Show distance and duration
+        const distance = data.distance.toFixed(2);
+        const duration = data.duration.toFixed(2);
+        console.log(`Distance: ${distance} km`);
+        console.log(`Duration: ${duration} minutes`);
+        
+        // Display route info on the page
+        document.getElementById('route-distance').textContent = distance;
+        document.getElementById('route-duration').textContent = duration;
+        document.getElementById('route-info').style.display = 'block';
+        
+        // Optional: fit map to route bounds
+        const group = new L.featureGroup([currentPolyline]);
+        map.fitBounds(group.getBounds());
+        
+    } catch (error) {
+        console.error("Erreur lors de la récupération du trajet:", error);
+    }
+}
+
+
+
+
+    
+
 
 
 

@@ -1,6 +1,9 @@
 from random import random, randint
 from typing import Annotated
-from fastapi import FastAPI, Path, Request, Form, requests
+import requests
+import os
+from fastapi import FastAPI, Path, Request, Form
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -12,8 +15,20 @@ from sympy import Float
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Get the directory of the current file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 # Base Model exemple
 class Item(BaseModel):
@@ -96,6 +111,7 @@ async def submit(
         meteo: str = Form(...),
         slide_range: int = Form(...),
         roughness_range: int = Form(...),
+        
         start_lat: float = Form(...),
         start_lng: float = Form(...),
         end_lat: float = Form(...),
@@ -114,13 +130,13 @@ async def submit(
                                 status_code=status.HTTP_303_SEE_OTHER)
 
 @app.get("/result")
-def page_resultat(request: Request, battery: float, distance: float = None,
-    duration: float = None):
+def page_resultat(request: Request, battery: float, distance: float | None = None,
+    duration: float | None = None):
     print(battery)
     return templates.TemplateResponse(
-        "resultat.html",
-        {
-            "request": request,
+        request=request,
+        name="resultat.html",
+        context={
             "battery": battery,
             "distance": distance,
             "duration": duration

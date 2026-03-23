@@ -107,6 +107,11 @@
             <div id="map" style="height:400px;"></div>
              <p id="coords"></p>
             <button type="button" onclick="confirmMap()">Confirmer la position</button>
+            <div id="route-info" style="margin-top:15px; padding:10px; background-color:#f0f0f0; border-radius:5px; display:none;">
+                <h3>Informations du trajet</h3>
+                <p><strong>Distance:</strong> <span id="route-distance">0</span> km</p>
+                <p><strong>Temps estimé:</strong> <span id="route-duration">0</span> minutes</p>
+            </div>
             </div>
             <button type="submit">Envoyer</button>
         </form>
