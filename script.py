@@ -28,6 +28,9 @@ class modelLineaire(nn.Module):
     def calculatePointForGraph(self, lineSpace):
         return np.add(np.multiply(lineSpace, self.weights.item()), self.bias.item())
 
+    def __str__(self):
+        return f"linear function with a: {self.weights.item()}, b: {self.bias.item()}"
+
 
 class modelQuad(nn.Module):
     def __init__(self):
@@ -47,6 +50,10 @@ class modelQuad(nn.Module):
         return np.add(self.weights1.item() * np.multiply(lineSpace, lineSpace),
                np.add(self.weights2.item() * lineSpace,
                       self.bias1.item()))
+
+
+    def __str__(self):
+        return f"Quad function with a: {self.weights1.item()}, b: {self.weights2.item()}, c: {self.bias1.item()}"
 
 class modelCube(nn.Module):
     def __init__(self):
@@ -69,6 +76,10 @@ class modelCube(nn.Module):
             np.add(self.weights2.item() * np.multiply(lineSpace, lineSpace),
                np.add(self.weights3.item() * lineSpace,
                       self.bias1.item())))
+
+    def __str__(self):
+        return f"cubic function with a: {self.weights1.item()}, b: {self.weights2.item()}, c: {self.weights3.item()}, d: {self.bias1.item()}"
+
 def mse(y, y_hat):
     return ((y - y_hat) ** 2).mean()
 
@@ -90,6 +101,8 @@ class Param:
     def reCalculateLineSpace(self):
         self.lineSpace = np.linspace(min(self.pandasData), max(self.pandasData), NUMBEROFPOINTPERGRAPH)
 
+    def __str__(self):
+        return f"{self.letter} with {self.model}"
 
 def normalized(x, mean, std):
     return (x - mean) / std
@@ -97,52 +110,21 @@ def normalized(x, mean, std):
 
 #generate dataset
 NUMBEROFPOINTFORAI = 1000
-data = pd.DataFrame(pd.Series(np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)), columns=['c'])
-data["d"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
-data["a"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
-data["b"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
-data["e"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
-data["f"] = np.random.randint(-1000, 1000, size=NUMBEROFPOINTFORAI)
+data = pd.read_csv("DB/Kagle/EV_Energy_Consumption_Dataset.csv")
+data["consumption_KWH_per_KM"] = data["Energy_Consumption_kWh"]/data["Distance_Travelled_km"]
+comparedColumn = data["consumption_KWH_per_KM"]
 
-data["a"] = data["a"].apply(lambda x: normalized(x, data["a"].mean(), data["a"].std()))
-data["b"] = data["b"].apply(lambda x: normalized(x, data["b"].mean(), data["b"].std()))
-data["c"] = data["c"].apply(lambda x: normalized(x, data["c"].mean(), data["c"].std()))
-data["d"] = data["d"].apply(lambda x: normalized(x, data["d"].mean(), data["d"].std()))
-data["e"] = data["e"].apply(lambda x: normalized(x, data["e"].mean(), data["e"].std()))
-data["f"] = data["f"].apply(lambda x: normalized(x, data["f"].mean(), data["f"].std()))
+y = torch.tensor(comparedColumn.values, dtype=torch.float32).view(-1, 1)
 
-data["y"] = (random.randint(-50, 50) * data["a"] ** 3 +
-              random.randint(-50, 50) * data["a"] ** 2 +
-              random.randint(-50, 50) * data["a"] +
-              random.randint(-50, 50)+
-              random.randint(-50, 50) * data["b"] ** 3 +
-              random.randint(-50, 50) * data["b"] ** 2 +
-              random.randint(-50, 10) * data["b"] +
-              random.randint(-50, 50)+
-              (random.randint(-50, 10) * data["c"] ** 2 +
-              random.randint(-50, 50) * data["c"] +
-              random.randint(-50, 50)) +
-              random.randint(-50, 50) * data["d"] ** 2 +
-              random.randint(-50, 50) * data["d"] +
-              random.randint(-50, 50) +
-              random.randint(-50, 50) * data["e"] +
-              random.randint(-50, 50) * data["f"])
-
-
-
-y = torch.tensor(data["y"].values, dtype=torch.float32).view(-1, 1)
-
-listModel: list[Param] = [Param("a",modelCube(), data),
-                          Param("b", modelCube(), data),
-                          Param("c", modelQuad(), data),
-                          Param("d",modelQuad(), data),
-                          Param("e", modelLineaire(), data),
-                          Param("f", modelLineaire(), data),]
+listModel: list[Param] = [Param("Speed_kmh",modelQuad(), data),
+                          Param("Acceleration_ms2", modelLineaire(), data),
+                          Param("Slope_%", modelCube(), data),
+                          Param("Temperature_C",modelQuad(), data)]
 numberOfColumnForGraph = len(listModel)//NUMBEROFGRAPHPERROW + (len(listModel)%NUMBEROFGRAPHPERROW >0)
 params = []
 for model in listModel:
     params.extend(model.model.parameters())
-opt = optim.Adam(params, lr=0.0005)  #lr = learning rate
+opt = optim.Adam(params, lr=0.00005)  #lr = learning rate
 lastLoss = math.inf
 i = 0
 TARGETMAXLOSS = 10E-6
@@ -180,10 +162,9 @@ while lastLoss> TARGETMAXLOSS:
         print(f"iter {i}, Loss = {loss.data}, deltaLoss = {lastLoss-loss.data}, elapseTime = {time.time()-startTime}")
         lastLoss = loss.data
 
-        """for param in params:
-            if param.requires_grad:
-                print(param.data.item())
-        print()"""
+        for model in listModel:
+            print(model)
+        print()
         for model in listModel:
             data["new"+model.letter] = model.pandasData.apply(model.model).apply(lambda x : x.item())
         #predict function
@@ -198,7 +179,7 @@ while lastLoss> TARGETMAXLOSS:
                 if othermodel.letter != model.letter:
                     excludeData+=data["new"+othermodel.letter]
             createFig(fig, model.lineSpace, yPredBaseOnModel, model.pandasData.values,
-                      (data["y"]-excludeData).values,
+                      (comparedColumn-excludeData).values,
                       model.letter, NUMBEROFGRAPHPERROW ,numberOfColumnForGraph, index)
         fig.suptitle(f"iter {i}, Loss = {loss.data}, elapseTime = {round(time.time()-startTime)}")
         plt.legend()
