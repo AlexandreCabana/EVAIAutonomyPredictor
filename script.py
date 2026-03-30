@@ -108,31 +108,6 @@ def normalized(x, mean, std):
     return (x - mean) / std
 
 
-#generate dataset
-NUMBEROFPOINTFORAI = 1000
-data = pd.read_csv("DB/Kagle/EV_Energy_Consumption_Dataset.csv")
-data["consumption_KWH_per_KM"] = data["Energy_Consumption_kWh"]/data["Distance_Travelled_km"]
-comparedColumn = data["consumption_KWH_per_KM"]
-
-y = torch.tensor(comparedColumn.values, dtype=torch.float32).view(-1, 1)
-
-listModel: list[Param] = [Param("Speed_kmh",modelQuad(), data),
-                          Param("Acceleration_ms2", modelLineaire(), data),
-                          Param("Slope_%", modelCube(), data),
-                          Param("Temperature_C",modelQuad(), data)]
-numberOfColumnForGraph = len(listModel)//NUMBEROFGRAPHPERROW + (len(listModel)%NUMBEROFGRAPHPERROW >0)
-params = []
-for model in listModel:
-    params.extend(model.model.parameters())
-opt = optim.Adam(params, lr=0.00005)  #lr = learning rate
-lastLoss = math.inf
-i = 0
-TARGETMAXLOSS = 10E-6
-
-iteration = []
-lossHistory = []
-
-
 def plotEvolution(x, y):
     x=pd.Series(x)
     y=pd.Series(y)
@@ -146,44 +121,68 @@ def plotEvolution(x, y):
     fig.suptitle("loss evolution")
     plt.show()
 
-
-while lastLoss> TARGETMAXLOSS:
-    yPredict = 0
+def train():
+    i=0
+    params = []
     for model in listModel:
-        yPredict += model.model(model.tensorData)
-    loss = mse(y, yPredict)
-    loss.backward()
-    opt.step()
-    opt.zero_grad()
-    i += 1
-    if i % 10000 == 0 or loss < TARGETMAXLOSS:
-        iteration.append(i)
-        lossHistory.append(loss.data)
-        print(f"iter {i}, Loss = {loss.data}, deltaLoss = {lastLoss-loss.data}, elapseTime = {time.time()-startTime}")
-        lastLoss = loss.data
+        params.extend(model.model.parameters())
+    opt = optim.Adam(params, lr=0.00005)  # lr = learning rate
+    lastLoss = math.inf
+    TARGETMAXLOSS = 10
 
+    iteration = []
+    lossHistory = []
+    while lastLoss> TARGETMAXLOSS:
+        yPredict = 0
         for model in listModel:
-            print(model)
-        print()
-        for model in listModel:
-            data["new"+model.letter] = model.pandasData.apply(model.model).apply(lambda x : x.item())
-        #predict function
+            yPredict += model.model(model.tensorData)
+        loss = mse(y, yPredict)
+        loss.backward()
+        opt.step()
+        opt.zero_grad()
+        i += 1
+        if i % 10000 == 0 or loss < TARGETMAXLOSS:
+            iteration.append(i)
+            lossHistory.append(loss.data)
+            print(f"iter {i}, Loss = {loss.data}, deltaLoss = {lastLoss-loss.data}, elapseTime = {time.time()-startTime}")
+            lastLoss = loss.data
 
-        fig = plt.figure()
-        index = 0
-        for model in listModel:
-            index += 1
-            yPredBaseOnModel = model.model.calculatePointForGraph(model.lineSpace)
-            excludeData = 0
-            for othermodel in listModel:
-                if othermodel.letter != model.letter:
-                    excludeData+=data["new"+othermodel.letter]
-            createFig(fig, model.lineSpace, yPredBaseOnModel, model.pandasData.values,
-                      (comparedColumn-excludeData).values,
-                      model.letter, NUMBEROFGRAPHPERROW ,numberOfColumnForGraph, index)
-        fig.suptitle(f"iter {i}, Loss = {loss.data}, elapseTime = {round(time.time()-startTime)}")
-        plt.legend()
-        plt.show()
-        if len(iteration)>=3:
-            plotEvolution(iteration, lossHistory)
+            for model in listModel:
+                print(model)
+            print()
+            for model in listModel:
+                data["new"+model.letter] = model.pandasData.apply(model.model).apply(lambda x : x.item())
+            #predict function
 
+            fig = plt.figure()
+            index = 0
+            for model in listModel:
+                index += 1
+                yPredBaseOnModel = model.model.calculatePointForGraph(model.lineSpace)
+                excludeData = 0
+                for othermodel in listModel:
+                    if othermodel.letter != model.letter:
+                        excludeData+=data["new"+othermodel.letter]
+                createFig(fig, model.lineSpace, yPredBaseOnModel, model.pandasData.values,
+                          (comparedColumn-excludeData).values,
+                          model.letter, NUMBEROFGRAPHPERROW ,numberOfColumnForGraph, index)
+            fig.suptitle(f"iter {i}, Loss = {loss.data}, elapseTime = {round(time.time()-startTime)}")
+            plt.legend()
+            plt.show()
+            if len(iteration)>=3:
+                plotEvolution(iteration, lossHistory)
+
+if __name__ == "__main__":
+    # generate dataset
+    NUMBEROFPOINTFORAI = 1000
+    data = pd.read_csv("DB/Kagle/EV_Energy_Consumption_Dataset.csv")
+    data["consumption_KWH_per_KM"] = data["Energy_Consumption_kWh"] / data["Distance_Travelled_km"]
+    comparedColumn = data["consumption_KWH_per_KM"]
+
+    y = torch.tensor(comparedColumn.values, dtype=torch.float32).view(-1, 1)
+
+    listModel: list[Param] = [Param("Speed_kmh", modelQuad(), data),
+                              Param("Acceleration_ms2", modelLineaire(), data),
+                              Param("Slope_%", modelCube(), data),
+                              Param("Temperature_C", modelQuad(), data)]
+    numberOfColumnForGraph = len(listModel) // NUMBEROFGRAPHPERROW + (len(listModel) % NUMBEROFGRAPHPERROW > 0)
