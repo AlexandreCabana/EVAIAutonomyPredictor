@@ -76,7 +76,7 @@ def mse(y, y_hat):
 def createFig(fig, point, pointPredBaseOnA, realValue, realValueMinusOtherPrediction, letter, nbRow, nbCol, index):
     currentFig = fig.add_subplot(nbRow, nbCol, index)
     currentFig.set_title(f"y based on {letter}")
-    currentFig.plot(point, pointPredBaseOnA, label="Function predicted")
+    currentFig.plot(point, pointPredBaseOnA, label="Prediction")
     currentFig.scatter(realValue, realValueMinusOtherPrediction, label="Data", color="red")
     currentFig.legend()
 
@@ -111,18 +111,18 @@ data["d"] = data["d"].apply(lambda x: normalized(x, data["d"].mean(), data["d"].
 data["e"] = data["e"].apply(lambda x: normalized(x, data["e"].mean(), data["e"].std()))
 data["f"] = data["f"].apply(lambda x: normalized(x, data["f"].mean(), data["f"].std()))
 
-data["y"] = (random.randint(-50, 10) * data["a"] ** 3 +
-              random.randint(-50, 10) * data["a"] ** 2 +
-              random.randint(-50, 10) * data["a"] +
-              random.randint(-50, 10)+
-              random.randint(-50, 10) * data["b"] ** 3 +
-              random.randint(-50, 10) * data["b"] ** 2 +
+data["y"] = (random.randint(-50, 50) * data["a"] ** 3 +
+              random.randint(-50, 50) * data["a"] ** 2 +
+              random.randint(-50, 50) * data["a"] +
+              random.randint(-50, 50)+
+              random.randint(-50, 50) * data["b"] ** 3 +
+              random.randint(-50, 50) * data["b"] ** 2 +
               random.randint(-50, 10) * data["b"] +
-              random.randint(-50, 10)+
+              random.randint(-50, 50)+
               (random.randint(-50, 10) * data["c"] ** 2 +
               random.randint(-50, 50) * data["c"] +
               random.randint(-50, 50)) +
-              random.randint(-50, 10) * data["d"] ** 2 +
+              random.randint(-50, 50) * data["d"] ** 2 +
               random.randint(-50, 50) * data["d"] +
               random.randint(-50, 50) +
               random.randint(-50, 50) * data["e"] +
