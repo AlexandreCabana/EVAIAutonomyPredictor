@@ -11,6 +11,7 @@ from starlette import status
 from starlette.responses import RedirectResponse, JSONResponse
 from starlette.staticfiles import StaticFiles
 from sympy import Float
+import uvicorn
 
 
 app = FastAPI()
@@ -256,3 +257,6 @@ async def get_route(data: RouteRequest):
 @app.post("/meteo")
 async def meteo(data: MeteoRequest):
     return JSONResponse(content=get_meteo(data.lat, data.lon))
+
+if __name__=="__main__":
+    uvicorn.run("main:app", reload=True)

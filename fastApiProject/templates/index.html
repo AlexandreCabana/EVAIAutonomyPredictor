@@ -46,13 +46,12 @@
                             <input type="radio" id="conduiteChoix4" name="conduite" value="singe">
                             <label for="conduiteChoix4">Singe</label>
                         </div>
-
                         <p>Utilisation de la climatisation</p>
                         <label class="switch">
                             <input type="checkbox" id="climatisation-toggle" name="is_ac_used" value="True">
                         </label>
-
                         <p>Utilisation du chauffage</p>
+                        <!-- toggle button-->
                         <div class="options">
                             <input type="radio" id="chauffageChoix1" name="chauffage" value="non" checked>
                             <label for="chauffageChoix1">Non</label>
@@ -68,17 +67,66 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="panel">
+            <input type="hidden" name="start_lat" id="start_lat">
+            <input type="hidden" name="start_lng" id="start_lng">
+            <input type="hidden" name="end_lat" id="end_lat">
+            <input type="hidden" name="end_lng" id="end_lng">
+            <button type="button" onclick="openMap()">Sélectionner sa localisation</button>
+
+            <button type="button" id="location-btn" onclick="getLocation()">Utiliser ma localisation</button>
+            <p id="demo"></p>
+
+            <div id="map-container" style="display:none; margin-top:20px;">
+            <div id="map" style="height:400px;"></div>
+             <p id="coords"></p>
+            <button type="button" onclick="confirmMap()">Confirmer la position</button>
+            <div id="route-info"
+                    style="margin-top:15px; padding:10px; background-color:#f0f0f0; border-radius:5px; display:none;">
+                    <h3>Informations du trajet</h3>
+                    <p><strong>Distance:</strong> <span id="route-distance">0</span> km</p>
+                    <p><strong>Duree avec trafic:</strong> <span id="route-duration">0</span> minutes</p>
+                    <p><strong>Duree sans trafic:</strong> <span id="route-base-duration">0</span> minutes</p>
+                    <p><strong>Retard trafic:</strong> <span id="route-traffic-delay">0</span> minutes</p>
+                    <p><strong>Source:</strong> <span id="route-provider">osrm</span></p>
+                </div>
+            </div>
+
+            <hr>
+
+            <input type="checkbox" id="start-time-check" >
+            <label for="start-time-check">Spécifier une date et une heure de départ</label>
+            <div class="start-time-div hidden" id="start-time-div">
+                <p>Heure et date de départ</p>
+                <label for="start_date"></label><input type="date" id="start_date">
+                <label for="start_time"></label><input type="time" id="start_time">
+            </div>
+
+            <div class="manuel-auto-choix-section">
+                <div class="btn-manuel-auto-choix">
+                    <div class="">
+                            <input type="radio" id="meteo-manuelle" name="meteo-mode" value="manuel" checked>
+                            <label for="meteo-manuelle">Météo manuelle</label>
+
+                            <input type="radio" id="meteo-auto" name="meteo-mode" value="auto">
+                            <label for="meteo-auto">Météo automatique</label>
+                    </div>
+                </div>
+                <div class="panel" id="meteo-manuelle-section">
                     <div class="section-parametres">
-                        <h2>Conditions exterieures</h2>
+                        <h2>Conditions extérieures</h2>
+
+<!--                        <button type="button" id="location-btn" onclick="getLocation()">Utiliser ma localisation</button>-->
+<!--                        <p id="demo"></p>-->
 
                         <br>
-                        <label for="temperature">Temperature (C):</label>
+                        <label for="temperature">Température (°C):</label>
                         <br>
                         <input type="number" id="temperature" name="temperature" value="25">
 
-                        <p>Meteo</p>
+
+                        <p>Météo</p>
                         <div class="options radio-toolbar">
                             <input type="radio" id="meteoChoix1" name="meteo" value="soleil" checked>
                             <label for="meteoChoix1">Soleil</label>
@@ -93,7 +141,7 @@
                             <label for="meteoChoix4">Neige</label>
                         </div>
 
-                        <p>Type de chaussee</p>
+                        <p>Type de chaussé</p>
                         <div class="chausse-parametres">
                             <div class="parametre-slider-wrapper">
                                 <p>Pas glissant</p>
@@ -112,41 +160,18 @@
                                 <p>Cahoteux</p>
                             </div>
                         </div>
+
                     </div>
                 </div>
+
             </div>
-
-            <input type="hidden" name="start_lat" id="start_lat">
-            <input type="hidden" name="start_lng" id="start_lng">
-            <input type="hidden" name="end_lat" id="end_lat">
-            <input type="hidden" name="end_lng" id="end_lng">
-            <button type="button" onclick="openMap()">Selectionner sa localisation</button>
-
-            <div id="map-container" style="display:none; margin-top:20px;">
-                <div id="map" style="height:400px;"></div>
-                <p id="coords"></p>
-                <button type="button" onclick="confirmMap()">Confirmer la position</button>
-                <div id="route-info"
-                    style="margin-top:15px; padding:10px; background-color:#f0f0f0; border-radius:5px; display:none;">
-                    <h3>Informations du trajet</h3>
-                    <p><strong>Distance:</strong> <span id="route-distance">0</span> km</p>
-                    <p><strong>Duree avec trafic:</strong> <span id="route-duration">0</span> minutes</p>
-                    <p><strong>Duree sans trafic:</strong> <span id="route-base-duration">0</span> minutes</p>
-                    <p><strong>Retard trafic:</strong> <span id="route-traffic-delay">0</span> minutes</p>
-                    <p><strong>Source:</strong> <span id="route-provider">osrm</span></p>
-                </div>
-            </div>
-
-            <p>Heure et date de depart</p>
-            <label for="start_date"></label><input type="date" id="start_date">
-            <label for="start_time"></label><input type="time" id="start_time">
-
             <button type="submit">Envoyer</button>
         </form>
+
     </div>
+
 </body>
 
 <script src="../static/script.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-
 </html>
