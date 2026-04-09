@@ -128,14 +128,6 @@ async function displayRoute() {
     }
 }
 
-
-
-
-    
-
-
-
-
 async function fetchCarInfo() {
     try {
         const response = await fetch('static/car_info.csv');
@@ -157,6 +149,9 @@ function getBrands(data){
     console.log(brandsSet);
     return brandsSet;
 }
+
+
+
 
 async function test() {
     const data = await fetchCarInfo();
@@ -249,4 +244,43 @@ function fetchMeteo(position){
       .catch(error => {
         console.error('There has been a problem with your fetch operation:', error);
       });
+}
+
+const check_starttime = document.getElementById('start-time-check');
+const startTimeSection = document.getElementById('start-time-div');
+const radioButtonName = document.getElementsByName('meteo-mode');
+const meteoManuelSection = document.getElementById('meteo-manuelle-section');
+
+let lastValidMode = "manuel";
+
+check_starttime.addEventListener('change', (event) => {
+    startTimeSection.classList.toggle('hidden', !event.target.checked);
+    if(!event.target.checked){
+        toggleMeteoSection('manuel');
+        document.querySelector(`input[name="meteo-mode"][value="manuel"]`).checked = true;
+        lastValidMode = "manuel"
+    }
+});
+
+radioButtonName.forEach(radio => {
+    radio.addEventListener("change", (event) => {
+        const selectedValue = event.target.value;
+
+        if (selectedValue === 'auto' && !check_starttime.checked) {
+            alert("Vous devez activer l'heure de début pour passer en mode automatique !");
+
+            document.querySelector(`input[name="meteo-mode"][value="${lastValidMode}"]`).checked = true;
+        } else {
+            lastValidMode = selectedValue;
+            toggleMeteoSection(selectedValue);
+        }
+    });
+});
+
+function toggleMeteoSection(mode) {
+    if (mode === 'auto') {
+        meteoManuelSection.classList.add('hidden');
+    } else {
+        meteoManuelSection.classList.remove('hidden');
+    }
 }

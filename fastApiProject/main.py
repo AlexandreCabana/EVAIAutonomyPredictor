@@ -11,6 +11,7 @@ from starlette import status
 from starlette.responses import RedirectResponse, JSONResponse
 from starlette.staticfiles import StaticFiles
 from sympy import Float
+import uvicorn
 
 
 app = FastAPI()
@@ -151,3 +152,6 @@ async def get_route(data: RouteRequest):
         data.end_lat,
         data.end_lng
     ))
+
+if __name__=="__main__":
+    uvicorn.run("main:app", reload=True)
