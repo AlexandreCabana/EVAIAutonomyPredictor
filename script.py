@@ -8,9 +8,8 @@ import math
 import matplotlib.pyplot as plt
 import time
 from scipy.interpolate import interp1d
-
 lossLastXUpdate = 5
-
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NUMBEROFPOINTPERGRAPH = 200
 NUMBEROFGRAPHPERROW = 2
 startTime = time.time()
