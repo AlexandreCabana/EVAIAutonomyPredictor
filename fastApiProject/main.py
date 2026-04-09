@@ -59,8 +59,102 @@ def calcul_distance(lat_i,lon_i,lat_f,lon_f):
     return {
             "route": route_coords,
             "distance": distance,
-            "duration": duration
+            "duration": duration,
+            "base_duration": duration,
+            "traffic_duration": None,
+            "traffic_delay": None,
+            "provider": "osrm"
         }
+
+
+def calcul_traffic_route(lat_i, lon_i, lat_f, lon_f):
+    api_key = "SQek2X8NbQiiz0wNdweCaLPoHuw0QCEy"
+    if not api_key:
+        raise Warning("No API key provided")
+        return calcul_distance(lat_i, lon_i, lat_f, lon_f)
+
+    locations = f"{lat_i},{lon_i}:{lat_f},{lon_f}"
+    url = f"https://api.tomtom.com/routing/1/calculateRoute/{locations}/json"
+    params = {
+        "key": api_key,
+        "traffic": "true",
+        "travelMode": "car",
+        "routeType": "fastest",
+        "routeRepresentation": "polyline",
+        "computeTravelTimeFor": "all",
+    }
+
+    try:
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        route = data["routes"][0]
+        summary = route["summary"]
+        points = route.get("legs", [])[0].get("points", [])
+        route_coords = [[point["latitude"], point["longitude"]] for point in points]
+        print(summary)
+        travel_time_s = summary.get("travelTimeInSeconds")
+        no_traffic_s = summary.get("noTrafficTravelTimeInSeconds")
+        traffic_delay_s = summary.get("trafficDelayInSeconds")
+
+        return {
+            "route": route_coords,
+            "distance": summary.get("lengthInMeters", 0) / 1000,
+            "duration": travel_time_s / 60 if travel_time_s is not None else None,
+            "base_duration": no_traffic_s / 60 if no_traffic_s is not None else None,
+            "traffic_duration": travel_time_s / 60 if travel_time_s is not None else None,
+            "traffic_delay": traffic_delay_s / 60 if traffic_delay_s is not None else None,
+            "provider": "tomtom",
+        }
+    except requests.RequestException:
+        return calcul_distance(lat_i, lon_i, lat_f, lon_f)
+
+
+def get_meteo(lat, lon):
+    url = "https://api.open-meteo.com/v1/forecast"
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "current": [
+            "temperature_2m",
+            "apparent_temperature",
+            "weather_code",
+            "cloud_cover",
+            "precipitation",
+            "wind_speed_10m",
+            "is_day",
+        ],
+        "timezone": "auto",
+    }
+
+    response = requests.get(url, params=params, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+
+    current = data.get("current", {})
+    weather_code = current.get("weather_code")
+
+    if weather_code == 0:
+        meteo = "soleil"
+    elif weather_code in {1, 2, 3, 45, 48}:
+        meteo = "nuageux"
+    elif weather_code in {71, 73, 75, 77, 85, 86}:
+        meteo = "neige"
+    else:
+        meteo = "pluie"
+
+    return {
+        "latitude": data.get("latitude"),
+        "longitude": data.get("longitude"),
+        "timezone": data.get("timezone"),
+        "time": current.get("time"),
+        "temperature": current.get("temperature_2m"),
+        "meteo": meteo,
+        "cloud_cover": current.get("cloud_cover"),
+        "precipitation": current.get("precipitation"),
+    }
+
+
 
 # Form struct
 class CarInfo:
@@ -89,9 +183,14 @@ class User:
 
 class RouteRequest(BaseModel):
     start_lat: float
-    start_lng: float
+    start_lon: float
     end_lat: float
-    end_lng: float
+    end_lon: float
+
+
+class MeteoRequest(BaseModel):
+    lat: float
+    lon: float
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -145,9 +244,15 @@ def page_resultat(request: Request, battery: float, distance: float | None = Non
     )
 @app.post("/route")
 async def get_route(data: RouteRequest):
-    return JSONResponse(content=calcul_distance(
+    print("get route called")
+    return JSONResponse(content=calcul_traffic_route(
         data.start_lat,
-        data.start_lng,
+        data.start_lon,
         data.end_lat,
-        data.end_lng
+        data.end_lon
     ))
+
+
+@app.post("/meteo")
+async def meteo(data: MeteoRequest):
+    return JSONResponse(content=get_meteo(data.lat, data.lon))
