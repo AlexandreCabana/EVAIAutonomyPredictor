@@ -2,14 +2,14 @@ import pandas as pd
 import numpy as np
 import torch
 from torch import optim
-from torch.utils.data import Dataset, DataLoader
 import torch.nn as nn
-from torch.nn import Linear, MSELoss, functional as F
 import random
 import math
 import matplotlib.pyplot as plt
 import time
 from scipy.interpolate import interp1d
+
+lossLastXUpdate = 5
 
 NUMBEROFPOINTPERGRAPH = 200
 NUMBEROFGRAPHPERROW = 2
@@ -30,6 +30,9 @@ class modelLineaire(nn.Module):
 
     def __str__(self):
         return f"linear function with a: {self.weights.item()}, b: {self.bias.item()}"
+
+    def appliedOnColumn(self, dfColumns):
+        return dfColumns*self.weights.item() + self.bias.item()
 
 
 class modelQuad(nn.Module):
@@ -54,6 +57,9 @@ class modelQuad(nn.Module):
 
     def __str__(self):
         return f"Quad function with a: {self.weights1.item()}, b: {self.weights2.item()}, c: {self.bias1.item()}"
+
+    def appliedOnColumn(self, dfColumns):
+        return dfColumns*dfColumns*self.weights1.item() + dfColumns*self.weights2.item() + self.bias1.item()
 
 class modelCube(nn.Module):
     def __init__(self):
@@ -80,6 +86,8 @@ class modelCube(nn.Module):
     def __str__(self):
         return f"cubic function with a: {self.weights1.item()}, b: {self.weights2.item()}, c: {self.weights3.item()}, d: {self.bias1.item()}"
 
+    def appliedOnColumn(self, dfColumns):
+        return dfColumns*dfColumns*dfColumns*self.weights2.item() + dfColumns*dfColumns*self.weights2.item() + dfColumns*self.weights3.item() + self.bias1.item()
 def mse(y, y_hat):
     return ((y - y_hat) ** 2).mean()
 
@@ -88,37 +96,46 @@ def createFig(fig, point, pointPredBaseOnA, realValue, realValueMinusOtherPredic
     currentFig = fig.add_subplot(nbRow, nbCol, index)
     currentFig.set_title(f"y based on {letter}")
     currentFig.plot(point, pointPredBaseOnA, label="Prediction")
-    currentFig.scatter(realValue, realValueMinusOtherPrediction, label="Data", color="red")
+    currentFig.scatter(realValue, realValueMinusOtherPrediction, label="trainData", color="red")
     currentFig.legend()
 
 class Param:
-    def __init__(self, letter, model, data):
+    def __init__(self, letter, model, trainData):
         self.letter = letter
         self.model = model
-        self.pandasData = data[letter]
-        self.tensorData = torch.tensor(self.pandasData.values, dtype=torch.float32).view(-1, 1)
-        self.lineSpace = np.linspace(min(self.pandasData), max(self.pandasData), NUMBEROFPOINTPERGRAPH)
+        self.pandastrainData = trainData[letter]
+        self.tensortrainData = torch.tensor(self.pandastrainData.values, dtype=torch.float32).view(-1, 1)
+        self.lineSpace = np.linspace(min(self.pandastrainData), max(self.pandastrainData), NUMBEROFPOINTPERGRAPH)
     def reCalculateLineSpace(self):
-        self.lineSpace = np.linspace(min(self.pandasData), max(self.pandasData), NUMBEROFPOINTPERGRAPH)
+        self.lineSpace = np.linspace(min(self.pandastrainData), max(self.pandastrainData), NUMBEROFPOINTPERGRAPH)
 
     def __str__(self):
         return f"{self.letter} with {self.model}"
+
+    def appliedOnColumn(self, validationData):
+        return self.model.appliedOnColumn(validationData[self.letter])
 
 def normalized(x, mean, std):
     return (x - mean) / std
 
 
-def plotEvolution(x, y):
+def plotEvolution(x, y, y_valid, tilte="loss evolution"):
     x=pd.Series(x)
     y=pd.Series(y)
+    y_valid = pd.Series(y_valid)
     fig = plt.figure()
     currentFig = fig.add_subplot(1, 1, 1)
     x_new = np.linspace(x.min(), x.max(), 500)
     f = interp1d(x, y, kind='quadratic')
     y_smooth = f(x_new)
-    currentFig.plot(x_new, y_smooth)
-    currentFig.scatter(x, y)
-    fig.suptitle("loss evolution")
+    f_valid = interp1d(x, y_valid, kind='quadratic')
+    y_valid_smooth = f_valid(x_new)
+    currentFig.plot(x_new, y_smooth, label="Training data")
+    currentFig.plot(x_new, y_valid_smooth, label="Validation data")
+    currentFig.scatter(x, y, label="Training data")
+    currentFig.scatter(x, y_valid, label="Validation data")
+    currentFig.legend()
+    fig.suptitle(tilte)
     plt.show()
 
 def train():
@@ -128,14 +145,15 @@ def train():
         params.extend(model.model.parameters())
     opt = optim.Adam(params, lr=0.00005)  # lr = learning rate
     lastLoss = math.inf
-    TARGETMAXLOSS = 10
+    TARGETMAXLOSS = 1
 
     iteration = []
     lossHistory = []
+    validationLossHistory = []
     while lastLoss> TARGETMAXLOSS:
         yPredict = 0
         for model in listModel:
-            yPredict += model.model(model.tensorData)
+            yPredict += model.model(model.tensortrainData)
         loss = mse(y, yPredict)
         loss.backward()
         opt.step()
@@ -144,14 +162,16 @@ def train():
         if i % 10000 == 0 or loss < TARGETMAXLOSS:
             iteration.append(i)
             lossHistory.append(loss.data)
-            print(f"iter {i}, Loss = {loss.data}, deltaLoss = {lastLoss-loss.data}, elapseTime = {time.time()-startTime}")
+            validationError = calculateErrorOnValidationData()
+            validationLossHistory.append(validationError)
+            print(f"iter {i}, Loss = {loss.data}, deltaLoss = {lastLoss-loss.data}, elapseTime = {time.time()-startTime}, validationError = {validationError}")
             lastLoss = loss.data
 
             for model in listModel:
                 print(model)
             print()
             for model in listModel:
-                data["new"+model.letter] = model.pandasData.apply(model.model).apply(lambda x : x.item())
+                trainData["new"+model.letter] = model.pandastrainData.apply(model.model).apply(lambda x : x.item())
             #predict function
 
             fig = plt.figure()
@@ -159,30 +179,39 @@ def train():
             for model in listModel:
                 index += 1
                 yPredBaseOnModel = model.model.calculatePointForGraph(model.lineSpace)
-                excludeData = 0
+                excludetrainData = 0
                 for othermodel in listModel:
                     if othermodel.letter != model.letter:
-                        excludeData+=data["new"+othermodel.letter]
-                createFig(fig, model.lineSpace, yPredBaseOnModel, model.pandasData.values,
-                          (comparedColumn-excludeData).values,
+                        excludetrainData+=trainData["new"+othermodel.letter]
+                createFig(fig, model.lineSpace, yPredBaseOnModel, model.pandastrainData.values,
+                          (comparedColumn-excludetrainData).values,
                           model.letter, NUMBEROFGRAPHPERROW ,numberOfColumnForGraph, index)
             fig.suptitle(f"iter {i}, Loss = {loss.data}, elapseTime = {round(time.time()-startTime)}")
             plt.legend()
             plt.show()
             if len(iteration)>=3:
-                plotEvolution(iteration, lossHistory)
+                plotEvolution(iteration, lossHistory, validationLossHistory)
+                if (len(iteration)>= lossLastXUpdate):
+                    plotEvolution(iteration[-lossLastXUpdate:], lossHistory[-lossLastXUpdate:], validationLossHistory[-lossLastXUpdate:], f"loss of evolution of last {lossLastXUpdate} update")
+def calculateErrorOnValidationData():
+    data["prediction"] = sum([model.appliedOnColumn(validationData) for model in listModel])
+    data["squarreError"] = (data["prediction"] - data["Energy_Consumption_kWh"])**2
+    return data["squarreError"].mean()
 
 if __name__ == "__main__":
-    # generate dataset
+    # generate trainDataset
     NUMBEROFPOINTFORAI = 1000
     data = pd.read_csv("DB/Kagle/EV_Energy_Consumption_Dataset.csv")
-    data["consumption_KWH_per_KM"] = data["Energy_Consumption_kWh"] / data["Distance_Travelled_km"]
-    comparedColumn = data["consumption_KWH_per_KM"]
-
+    data["consumption_KWH_per_KM"] = data["Energy_Consumption_kWh"]
+    trainData = data.iloc[:int(len(data) * 0.6)]
+    validationData = data.iloc[int(len(data) * 0.6):]
+    comparedColumn = trainData[("consumption_KWH"
+                                "_per_KM")]
     y = torch.tensor(comparedColumn.values, dtype=torch.float32).view(-1, 1)
 
-    listModel: list[Param] = [Param("Speed_kmh", modelQuad(), data),
-                              Param("Acceleration_ms2", modelLineaire(), data),
-                              Param("Slope_%", modelCube(), data),
-                              Param("Temperature_C", modelQuad(), data)]
+    listModel: list[Param] = [Param("Speed_kmh", modelQuad(), trainData),
+                              Param("Acceleration_ms2", modelLineaire(), trainData),
+                              Param("Slope_%", modelCube(), trainData),
+                              Param("Temperature_C", modelQuad(), trainData)]
     numberOfColumnForGraph = len(listModel) // NUMBEROFGRAPHPERROW + (len(listModel) % NUMBEROFGRAPHPERROW > 0)
+    train()
