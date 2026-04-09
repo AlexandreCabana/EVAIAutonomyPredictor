@@ -1,0 +1,33 @@
+import numpy as np
+import FindingAltitude
+import pandas as pd
+
+
+from geopy.distance import geodesic
+
+
+VICOM_df = pd.read_csv("Vicomtech_all_ELECTRIC.csv")
+
+
+VICOM_df["prev_long"] = VICOM_df.groupby("route_id")["longitude"].shift()
+VICOM_df["prev_lat"] = VICOM_df.groupby("route_id")["latitude"].shift()
+
+def calculer_distance(row):
+    if pd.isna(row["prev_long"]):
+        return 0
+    return geodesic((row["prev_lat"], row["prev_long"]), (row["latitude"], row["longitude"])).meters
+
+VICOM_df["distance[m]"]= VICOM_df.apply(calculer_distance,axis=1)
+
+output = VICOM_df.groupby("route_id").agg(total_distance=("distance[m]","sum"), timestamp = ("end_timestamp","last"), longitude_min = ("longitude","min"), latitude_min = ("latitude","min"), longitude_max = ("longitude","max"), latitude_max = ("latitude","max"), start_lat = ("latitude","first"), end_lat=("latitude","last"), start_long = ("longitude","first"), end_long = ("longitude","last"))
+
+output["start_altitude"] = output.apply(lambda row: FindingAltitude.get_elevation_data(row["start_lat"], row["start_long"]), axis=1)
+output["end_altitude"] = output.apply(lambda row: FindingAltitude.get_elevation_data(row["end_lat"], row["end_long"]), axis=1)
+
+output.to_csv("Vicom_trip_all_data.csv")
+
+
+
+
+
+
