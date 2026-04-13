@@ -41,30 +41,26 @@
                             <label for="conduiteChoix2">Normal</label>
 
                             <input type="radio" id="conduiteChoix3" name="conduite" value="agressif">
-                            <label for="conduiteChoix3">Aggressif</label>
+                            <label for="conduiteChoix3">Sportif</label>
 
-                            <input type="radio" id="conduiteChoix4" name="conduite" value="singe">
-                            <label for="conduiteChoix4">Singe</label>
                         </div>
-                        <p>Utilisation de la climatisation</p>
-                        <label class="switch">
-                            <input type="checkbox" id="climatisation-toggle" name="is_ac_used" value="True">
-                        </label>
-                        <p>Utilisation du chauffage</p>
-                        <!-- toggle button-->
-                        <div class="options">
-                            <input type="radio" id="chauffageChoix1" name="chauffage" value="non" checked>
-                            <label for="chauffageChoix1">Non</label>
+                        <p>Utilisation du chauffage/climatisation</p>
 
-                            <input type="radio" id="chauffageChoix2" name="chauffage" value="low">
-                            <label for="chauffageChoix2">Low</label>
-
-                            <input type="radio" id="chauffageChoix3" name="chauffage" value="mid">
-                            <label for="chauffageChoix3">Moyen</label>
-
-                            <input type="radio" id="chauffageChoix4" name="chauffage" value="high">
-                            <label for="chauffageChoix4">Confort maximal</label>
+                       <div id="climatisation-temperature-section">
+                        <label for="ac_target_temperature">Temperature cible AC/Chauffage: <span id="ac-target-temperature-value"></span>°C</label>
+                        <div class="slidecontainer">
+                            <input
+                                type="range"
+                                id="ac_target_temperature"
+                                name="ac_target_temperature"
+                                min="15"
+                                max="35"
+                                value="22"
+                                class="slider">
                         </div>
+                    </div>
+
+
                     </div>
                 </div>
             </div>
@@ -172,6 +168,7 @@
 
 </body>
 
-<script src="../static/script.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<script src="../static/script.js"></script>
+
 </html>

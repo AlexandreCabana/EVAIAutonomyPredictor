@@ -157,9 +157,11 @@ async function displayRoute() {
         const baseDuration = data.base_duration !== null && data.base_duration !== undefined
             ? data.base_duration.toFixed(2)
             : duration;
-        const trafficDelay = data.traffic_delay !== null && data.traffic_delay !== undefined
-            ? data.traffic_delay.toFixed(2)
-            : "0";
+        const computedTrafficDelay =
+            data.traffic_delay !== null && data.traffic_delay !== undefined
+                ? data.traffic_delay
+                : ((data.duration ?? 0) - (data.base_duration ?? 0));
+        const trafficDelay = computedTrafficDelay.toFixed(2);
         const provider = data.provider || "osrm";
 
         document.getElementById("route-distance").textContent = distance;
@@ -195,9 +197,6 @@ function getBrands(data) {
     });
     return brandsSet;
 }
-
-
-
 
 async function test() {
     const data = await fetchCarInfo();
@@ -235,8 +234,6 @@ async function test() {
     });
 }
 
-test();
-
 const x = document.getElementById("demo");
 
 function getLocation() {
@@ -259,21 +256,27 @@ function error() {
     alert("Sorry, no position available.");
 }
 
+// Slider - runs first before anything can crash it
+const slider = document.getElementById('ac_target_temperature');
+const display = document.getElementById('ac-target-temperature-value');
+display.textContent = slider.value;
+slider.addEventListener('input', () => display.textContent = slider.value);
+
+// Meteo toggles
 const check_starttime = document.getElementById('start-time-check');
-const startTimeSection = document.getElementById('start-time-div');
 const radioButtonName = document.getElementsByName('meteo-mode');
 const meteoManuelSection = document.getElementById('meteo-manuelle-section');
 
 let lastValidMode = "manuel";
 
-check_starttime.addEventListener('change', (event) => {
-    startTimeSection.classList.toggle('hidden', !event.target.checked);
-    if(!event.target.checked){
-        toggleMeteoSection('manuel');
-        document.querySelector(`input[name="meteo-mode"][value="manuel"]`).checked = true;
-        lastValidMode = "manuel"
+function toggleMeteoSection(mode) {
+    if (!meteoManuelSection) return;
+    if (mode === 'auto') {
+        meteoManuelSection.classList.add('hidden');
+    } else {
+        meteoManuelSection.classList.remove('hidden');
     }
-});
+}
 
 radioButtonName.forEach(radio => {
     radio.addEventListener("change", (event) => {
@@ -281,7 +284,6 @@ radioButtonName.forEach(radio => {
 
         if (selectedValue === 'auto' && !check_starttime.checked) {
             alert("Vous devez activer l'heure de début pour passer en mode automatique !");
-
             document.querySelector(`input[name="meteo-mode"][value="${lastValidMode}"]`).checked = true;
         } else {
             lastValidMode = selectedValue;
@@ -290,10 +292,9 @@ radioButtonName.forEach(radio => {
     });
 });
 
-function toggleMeteoSection(mode) {
-    if (mode === 'auto') {
-        meteoManuelSection.classList.add('hidden');
-    } else {
-        meteoManuelSection.classList.remove('hidden');
-    }
+// Load car info after everything else
+if (typeof Papa !== 'undefined') {
+    test();
+} else {
+    window.addEventListener('load', test);
 }
