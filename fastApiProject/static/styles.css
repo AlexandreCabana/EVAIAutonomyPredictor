@@ -39,12 +39,10 @@ button:hover{
 }
 
 .div-sections-parametres {
-    display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: row;
     text-align: center;
-    gap: 75px;
+    width: 100%;
 }
 
 .page h1 {
@@ -70,7 +68,7 @@ button:hover{
     border-radius: 30px;
     padding: 20px;
     border: solid var(--panel-border-color) 2px;
-    width: 100%;
+    width: 800px;
 }
 
 .icon-wrapper {
@@ -149,7 +147,6 @@ button:hover{
     height: 50px;
 
     display: flex;
-    flex-direction: row;
     align-items: center;
     justify-content: center;
     background-color: rgb(255, 255, 255);
@@ -181,7 +178,6 @@ label {
 
 .btn-manuel-auto-choix{
     display:flex;
-    flex-direction: row;
     gap: 20px;
 }
 
@@ -193,6 +189,12 @@ label {
    display: none;
 }
 
+.disabled {
+    pointer-events: none;
+    user-select:none;
+    opacity: 0.7;
+}
+
 
 /* RESULTATS */
 .battery_title{
@@ -201,12 +203,7 @@ label {
 }
 
 @media (max-width: 1000px) {
-    .div-sections-parametres {
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .panel {
-        width: 100%;
+    .section-parametres {
+        width:500px;
     }
 }

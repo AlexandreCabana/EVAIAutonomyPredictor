@@ -278,22 +278,14 @@ check_starttime.addEventListener('change', (event) => {
 radioButtonName.forEach(radio => {
     radio.addEventListener("change", (event) => {
         const selectedValue = event.target.value;
-
-        if (selectedValue === 'auto' && !check_starttime.checked) {
-            alert("Vous devez activer l'heure de début pour passer en mode automatique !");
-
-            document.querySelector(`input[name="meteo-mode"][value="${lastValidMode}"]`).checked = true;
-        } else {
-            lastValidMode = selectedValue;
-            toggleMeteoSection(selectedValue);
-        }
+        toggleMeteoSection(selectedValue);
     });
 });
 
 function toggleMeteoSection(mode) {
     if (mode === 'auto') {
-        meteoManuelSection.classList.add('hidden');
+        meteoManuelSection.classList.add('disabled');
     } else {
-        meteoManuelSection.classList.remove('hidden');
+        meteoManuelSection.classList.remove('disabled');
     }
 }
