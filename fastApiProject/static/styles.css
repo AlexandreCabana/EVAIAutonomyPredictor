@@ -45,6 +45,11 @@ button:hover{
     width: 100%;
 }
 
+.start-time-div button{
+    width: auto;
+    font-size: 0.8em;
+}
+
 .page h1 {
     font-weight: lighter;
     font-family: 'Arial', sans-serif;

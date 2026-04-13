@@ -4,6 +4,7 @@ let start = null;
 let end = null;
 let currentPolyline = null;
 let geocoderControl = null;
+let currentMeteoMode = "manuel";
 
 function openMap() {
     const container = document.getElementById("map-container");
@@ -68,10 +69,12 @@ function confirmMap() {
     document.getElementById("end_lng").value = end.lng;
 
     fetchMeteoForPoint(start.lat, start.lng);
+    updateMeteoInfo();
+
     displayRoute();
 }
-
-async function fetchMeteoForPoint(lat, lon) {
+let meteoData = null;
+async function fetchMeteoForPoint(lat, lon, date = null, hour = null) {
     try {
         const response = await fetch("http://127.0.0.1:8000/meteo", {
             method: "POST",
@@ -89,23 +92,26 @@ async function fetchMeteoForPoint(lat, lon) {
             return;
         }
 
-        const data = await response.json();
-        console.log("Donnees meteo recues:", data);
-
-        const temperatureInput = document.getElementById("temperature");
-        if (temperatureInput && data.temperature !== undefined && data.temperature !== null) {
-            temperatureInput.value = data.temperature;
-        }
-
-        if (data.meteo) {
-            const meteoRadio = document.querySelector(`input[name="meteo"][value="${data.meteo}"]`);
-            if (meteoRadio) {
-                meteoRadio.checked = true;
-            }
-        }
+        meteoData = await response.json();
+        console.log("Donnees meteo recues:", meteoData);
     } catch (error) {
         console.error("Erreur lors de la recuperation de la meteo:", error);
     }
+}
+function updateMeteoInfo(){
+        const temperatureInput = document.getElementById("temperature");
+        if(currentMeteoMode === "auto"){
+            if (temperatureInput && meteoData.temperature !== undefined && meteoData.temperature !== null) {
+                temperatureInput.value = meteoData.temperature;
+            }
+
+            if (meteoData.meteo) {
+                const meteoRadio = document.querySelector(`input[name="meteo"][value="${data.meteo}"]`);
+                if (meteoRadio) {
+                    meteoRadio.checked = true;
+                }
+            }
+        }
 }
 
 async function displayRoute() {
@@ -196,10 +202,7 @@ function getBrands(data) {
     return brandsSet;
 }
 
-
-
-
-async function test() {
+async function init() {
     const data = await fetchCarInfo();
     const brandSet = getBrands(data);
     const brandList = document.getElementById("marque-list");
@@ -235,7 +238,7 @@ async function test() {
     });
 }
 
-test();
+init();
 
 const x = document.getElementById("demo");
 
@@ -247,6 +250,7 @@ function getLocation() {
     }
 }
 
+//pour utiliser la localisation de l'utilisateur
 function success(position) {
     if (x) {
         x.innerHTML = "Latitude: " + position.coords.latitude +
@@ -285,7 +289,24 @@ radioButtonName.forEach(radio => {
 function toggleMeteoSection(mode) {
     if (mode === 'auto') {
         meteoManuelSection.classList.add('disabled');
+        currentMeteoMode = "auto";
     } else {
         meteoManuelSection.classList.remove('disabled');
+        currentMeteoMode = "manuel";
     }
+}
+
+// change TIME AND DATE for departure time + fetch and update the meteo information
+
+const start_date_field = document.getElementById('start_date');
+const start_time_field = document.getElementById('start_time');
+
+function updateMeteo(){
+    console.log(start_date_field.value);
+    console.log(start_time_field.value);
+
+    start_lat = document.getElementById("start_lat").value;
+    start_lng = document.getElementById("start_lng").value;
+    fetchMeteoForPoint(start_lat, start_lng, start_date_field.value,0)
+    updateMeteoInfo();
 }

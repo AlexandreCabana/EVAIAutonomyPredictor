@@ -111,14 +111,14 @@ def calcul_traffic_route(lat_i, lon_i, lat_f, lon_f):
         return calcul_distance(lat_i, lon_i, lat_f, lon_f)
 
 
-def get_meteo(lat, lon):
+def get_meteo(lat, lon, date=None, hour=None):
     url = "https://api.open-meteo.com/v1/forecast"
+    mode = "hourly" if date is not None and hour is not None else "current"
     params = {
         "latitude": lat,
         "longitude": lon,
-        "current": [
+        mode: [
             "temperature_2m",
-            "apparent_temperature",
             "weather_code",
             "cloud_cover",
             "precipitation",
@@ -126,15 +126,45 @@ def get_meteo(lat, lon):
             "is_day",
         ],
         "timezone": "auto",
+        "start_date": date,
+        "end_date": date
     }
 
     response = requests.get(url, params=params, timeout=10)
     response.raise_for_status()
     data = response.json()
 
-    current = data.get("current", {})
-    weather_code = current.get("weather_code")
+    if date is not None and hour is not None:
+        hourly = data.get("current", {})
+        weather_code = hourly.get("weather_code")[hour]
+        meteo = weather_code_to_meteo(weather_code)
+        return {
+            "latitude": data.get("latitude")[hour],
+            "longitude": data.get("longitude")[hour],
+            "timezone": data.get("timezone")[hour],
+            "time": hourly.get("time")[hour],
+            "temperature": hourly.get("temperature_2m")[hour],
+            "meteo": meteo[hour],
+            "cloud_cover": hourly.get("cloud_cover")[hour],
+            "precipitation": hourly.get("precipitation")[hour],
+        }
+    else:
+        current = data.get("current", {})
+        weather_code = current.get("weather_code")
+        meteo = weather_code
+        return {
+            "latitude": data.get("latitude"),
+            "longitude": data.get("longitude"),
+            "timezone": data.get("timezone"),
+            "time": current.get("time"),
+            "temperature": current.get("temperature_2m"),
+            "meteo": meteo,
+            "cloud_cover": current.get("cloud_cover"),
+            "precipitation": current.get("precipitation"),
+            "overall_forecast": data
+        }
 
+def weather_code_to_meteo(weather_code):
     if weather_code == 0:
         meteo = "soleil"
     elif weather_code in {1, 2, 3, 45, 48}:
@@ -143,18 +173,7 @@ def get_meteo(lat, lon):
         meteo = "neige"
     else:
         meteo = "pluie"
-
-    return {
-        "latitude": data.get("latitude"),
-        "longitude": data.get("longitude"),
-        "timezone": data.get("timezone"),
-        "time": current.get("time"),
-        "temperature": current.get("temperature_2m"),
-        "meteo": meteo,
-        "cloud_cover": current.get("cloud_cover"),
-        "precipitation": current.get("precipitation"),
-    }
-
+    return meteo
 
 
 # Form struct
@@ -253,10 +272,12 @@ async def get_route(data: RouteRequest):
         data.end_lon
     ))
 
-
 @app.post("/meteo")
-async def meteo(data: MeteoRequest):
-    return JSONResponse(content=get_meteo(data.lat, data.lon))
+async def meteo(data: MeteoRequest, date=None, hour= None):
+    if date is not None and hour is not None:
+        return JSONResponse(content=get_meteo(data.lat, data.lon, date, hour))
+    else:
+        return JSONResponse(content=get_meteo(data.lat, data.lon))
 
 if __name__=="__main__":
     uvicorn.run("main:app", reload=True)
