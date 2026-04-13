@@ -99,11 +99,13 @@ async function fetchMeteoForPoint(lat, lon, date = null, hour = null) {
     }
 }
 function updateMeteoInfo(){
+    try{
         const temperatureInput = document.getElementById("temperature");
         if(currentMeteoMode === "auto"){
             if (temperatureInput && meteoData.temperature !== undefined && meteoData.temperature !== null) {
                 temperatureInput.value = meteoData.temperature;
             }
+        }
 
         if (data.meteo) {
             const meteoRadio = document.querySelector(`input[name="meteo"][value="${data.meteo}"]`);
