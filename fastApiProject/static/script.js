@@ -264,6 +264,7 @@ slider.addEventListener('input', () => display.textContent = slider.value);
 
 // Meteo toggles
 const check_starttime = document.getElementById('start-time-check');
+const startTimeSection = document.getElementById('start-time-div');
 const radioButtonName = document.getElementsByName('meteo-mode');
 const meteoManuelSection = document.getElementById('meteo-manuelle-section');
 
@@ -281,14 +282,7 @@ function toggleMeteoSection(mode) {
 radioButtonName.forEach(radio => {
     radio.addEventListener("change", (event) => {
         const selectedValue = event.target.value;
-
-        if (selectedValue === 'auto' && !check_starttime.checked) {
-            alert("Vous devez activer l'heure de début pour passer en mode automatique !");
-            document.querySelector(`input[name="meteo-mode"][value="${lastValidMode}"]`).checked = true;
-        } else {
-            lastValidMode = selectedValue;
-            toggleMeteoSection(selectedValue);
-        }
+        toggleMeteoSection(selectedValue);
     });
 });
 
@@ -297,4 +291,10 @@ if (typeof Papa !== 'undefined') {
     test();
 } else {
     window.addEventListener('load', test);
+function toggleMeteoSection(mode) {
+    if (mode === 'auto') {
+        meteoManuelSection.classList.add('disabled');
+    } else {
+        meteoManuelSection.classList.remove('disabled');
+    }
 }
