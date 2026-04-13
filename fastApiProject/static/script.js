@@ -298,3 +298,4 @@ function toggleMeteoSection(mode) {
         meteoManuelSection.classList.remove('disabled');
     }
 }
+}
