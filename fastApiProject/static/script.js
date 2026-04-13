@@ -7,7 +7,7 @@ let geocoderControl = null;
 
 function openMap() {
     const container = document.getElementById("map-container");
-    container.style.display = "block";
+    container.style.display = "inline";
 
     if (!map) {
         map = L.map("map").setView([45.5, -73.56], 10);
@@ -256,7 +256,7 @@ function error() {
     alert("Sorry, no position available.");
 }
 
-// Slider - runs first before anything can crash it
+// Slider
 const slider = document.getElementById('ac_target_temperature');
 const display = document.getElementById('ac-target-temperature-value');
 display.textContent = slider.value;
@@ -287,15 +287,5 @@ radioButtonName.forEach(radio => {
 });
 
 // Load car info after everything else
-if (typeof Papa !== 'undefined') {
-    test();
-} else {
-    window.addEventListener('load', test);
-function toggleMeteoSection(mode) {
-    if (mode === 'auto') {
-        meteoManuelSection.classList.add('disabled');
-    } else {
-        meteoManuelSection.classList.remove('disabled');
-    }
-}
-}
+
+test();
