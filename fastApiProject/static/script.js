@@ -8,7 +8,7 @@ let currentMeteoMode = "manuel";
 
 function openMap() {
     const container = document.getElementById("map-container");
-    container.style.display = "block";
+    container.style.display = "inline";
 
     if (!map) {
         map = L.map("map").setView([45.5, -73.56], 10);
