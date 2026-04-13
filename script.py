@@ -194,23 +194,20 @@ def train():
                     plotEvolution(iteration[-lossLastXUpdate:], lossHistory[-lossLastXUpdate:], validationLossHistory[-lossLastXUpdate:], f"loss of evolution of last {lossLastXUpdate} update")
 def calculateErrorOnValidationData():
     data["prediction"] = sum([model.appliedOnColumn(validationData) for model in listModel])
-    data["squarreError"] = (data["prediction"] - data["Energy_Consumption_kWh"])**2
+    data["squarreError"] = (data["prediction"] - data["consumedElectric"])**2
     return data["squarreError"].mean()
 
 if __name__ == "__main__":
     # generate trainDataset
     NUMBEROFPOINTFORAI = 1000
-    data = pd.read_csv("DB/Kagle/EV_Energy_Consumption_Dataset.csv")
-    data["consumption_KWH_per_KM"] = data["Energy_Consumption_kWh"]
-    trainData = data.iloc[:int(len(data) * 0.6)]
-    validationData = data.iloc[int(len(data) * 0.6):]
-    comparedColumn = trainData[("consumption_KWH"
-                                "_per_KM")]
+    data = pd.read_csv("transform/VED_trip_distance.csv")
+    trainData = data.iloc[:int(len(data) * 0.8)]
+    validationData = data.iloc[int(len(data) * 0.8):]
+    comparedColumn = trainData[("consumedElectric")]
     y = torch.tensor(comparedColumn.values, dtype=torch.float32).view(-1, 1)
 
-    listModel: list[Param] = [Param("Speed_kmh", modelQuad(), trainData),
-                              Param("Acceleration_ms2", modelLineaire(), trainData),
-                              Param("Slope_%", modelCube(), trainData),
-                              Param("Temperature_C", modelQuad(), trainData)]
+    listModel: list[Param] = [Param("speed", modelQuad(), trainData),
+                              Param("slope", modelCube(), trainData),
+                              Param("temperature", modelQuad(), trainData)]
     numberOfColumnForGraph = len(listModel) // NUMBEROFGRAPHPERROW + (len(listModel) % NUMBEROFGRAPHPERROW > 0)
     train()
