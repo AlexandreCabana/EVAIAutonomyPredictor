@@ -91,12 +91,14 @@
 
             <hr>
 
-            <input type="checkbox" id="start-time-check" >
+            <input type="checkbox" id="start-time-check">
             <label for="start-time-check">Spécifier une date et une heure de départ</label>
             <div class="start-time-div hidden" id="start-time-div">
                 <p>Heure et date de départ</p>
                 <label for="start_date"></label><input type="date" id="start_date">
                 <label for="start_time"></label><input type="time" id="start_time">
+                <button type="button" onclick="updateMeteo()">Update meteo</button>
+
             </div>
 
             <div class="manuel-auto-choix-section">
@@ -106,8 +108,7 @@
                             <label for="meteo-manuelle">Météo manuelle</label>
 
                             <input type="radio" id="meteo-auto" name="meteo-mode" value="auto">
-                            <label for="meteo-auto">Météo automatique</label>
-                    </div>
+                            <label for="meteo-auto">Météo automatique</label></div>
                 </div>
                 <div class="panel" id="meteo-manuelle-section">
                     <div class="section-parametres">
