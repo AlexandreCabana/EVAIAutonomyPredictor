@@ -96,7 +96,11 @@ def calcul_traffic_route(lat_i, lon_i, lat_f, lon_f):
         print(summary)
         travel_time_s = summary.get("travelTimeInSeconds")
         no_traffic_s = summary.get("noTrafficTravelTimeInSeconds")
-        traffic_delay_s = summary.get("trafficDelayInSeconds")
+        traffic_delay_s = None
+        if travel_time_s is not None and no_traffic_s is not None:
+            traffic_delay_s = travel_time_s - no_traffic_s
+        else:
+            traffic_delay_s = summary.get("trafficDelayInSeconds")
 
         return {
             "route": route_coords,
@@ -178,12 +182,11 @@ def weather_code_to_meteo(weather_code):
 
 # Form struct
 class CarInfo:
-    def __init__(self, brand: str, model:str, driving_style: str, is_ac_used: bool):
+    def __init__(self, brand: str, model: str, driving_style: str, ac_target_temperature: int):
         self.brand = brand
         self.model = model
         self.driving_style = driving_style
-        self.is_ac_used = is_ac_used
-
+        self.ac_target_temperature = ac_target_temperature
 class EnvironmentInfo:
     def __init__(self, temperature: str, meteo:str, chaussee: int, rougness: int):
         self.temp = temperature
@@ -223,31 +226,26 @@ async def main_page(request: Request):
 async def submit(
         marque: str = Form(...),
         modele: str = Form(...),
-        is_ac_used: bool = Form(False),
+        ac_target_temperature: int = Form(22),
         conduite: str = Form(...),
-
         temperature: str = Form(...),
         meteo: str = Form(...),
         slide_range: int = Form(...),
         roughness_range: int = Form(...),
-        
         start_lat: float = Form(...),
         start_lng: float = Form(...),
         end_lat: float = Form(...),
         end_lng: float = Form(...)
 ):
     route_data = calcul_distance(start_lat, start_lng, end_lat, end_lng)
-
     distance = route_data["distance"]
     duration = route_data["duration"]
 
-    car_info = CarInfo(marque, modele, conduite, is_ac_used)
+    car_info = CarInfo(marque, modele, conduite, ac_target_temperature)
     env_info = EnvironmentInfo(temperature, meteo, slide_range, roughness_range)
     print(car_info, env_info)
-    result =randint(0,1000)/10
-    # return FormInfo(car_info, env_info)
-    return RedirectResponse(url=f"/result?battery={result}",
-                                status_code=status.HTTP_303_SEE_OTHER)
+    result = randint(0, 1000) / 10
+    return RedirectResponse(url=f"/result?battery={result}", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.get("/result")
 def page_resultat(request: Request, battery: float, distance: float | None = None,

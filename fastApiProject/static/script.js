@@ -105,13 +105,15 @@ function updateMeteoInfo(){
                 temperatureInput.value = meteoData.temperature;
             }
 
-            if (meteoData.meteo) {
-                const meteoRadio = document.querySelector(`input[name="meteo"][value="${data.meteo}"]`);
-                if (meteoRadio) {
-                    meteoRadio.checked = true;
-                }
+        if (data.meteo) {
+            const meteoRadio = document.querySelector(`input[name="meteo"][value="${data.meteo}"]`);
+            if (meteoRadio) {
+                meteoRadio.checked = true;
             }
         }
+    } catch (error) {
+        console.error("Erreur lors de la recuperation de la meteo:", error);
+    }
 }
 
 async function displayRoute() {
@@ -163,9 +165,11 @@ async function displayRoute() {
         const baseDuration = data.base_duration !== null && data.base_duration !== undefined
             ? data.base_duration.toFixed(2)
             : duration;
-        const trafficDelay = data.traffic_delay !== null && data.traffic_delay !== undefined
-            ? data.traffic_delay.toFixed(2)
-            : "0";
+        const computedTrafficDelay =
+            data.traffic_delay !== null && data.traffic_delay !== undefined
+                ? data.traffic_delay
+                : ((data.duration ?? 0) - (data.base_duration ?? 0));
+        const trafficDelay = computedTrafficDelay.toFixed(2);
         const provider = data.provider || "osrm";
 
         document.getElementById("route-distance").textContent = distance;
@@ -263,6 +267,13 @@ function error() {
     alert("Sorry, no position available.");
 }
 
+// Slider - runs first before anything can crash it
+const slider = document.getElementById('ac_target_temperature');
+const display = document.getElementById('ac-target-temperature-value');
+display.textContent = slider.value;
+slider.addEventListener('input', () => display.textContent = slider.value);
+
+// Meteo toggles
 const check_starttime = document.getElementById('start-time-check');
 const startTimeSection = document.getElementById('start-time-div');
 const radioButtonName = document.getElementsByName('meteo-mode');
@@ -286,6 +297,11 @@ radioButtonName.forEach(radio => {
     });
 });
 
+// Load car info after everything else
+if (typeof Papa !== 'undefined') {
+    test();
+} else {
+    window.addEventListener('load', test);
 function toggleMeteoSection(mode) {
     if (mode === 'auto') {
         meteoManuelSection.classList.add('disabled');

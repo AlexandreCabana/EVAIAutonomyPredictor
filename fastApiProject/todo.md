@@ -1,1 +1,0 @@
-se secouer le bagaille
