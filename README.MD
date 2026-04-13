@@ -2,10 +2,10 @@
 
 ## Source de donnée et transformation
 Tous les fichiers de cette section sont dans le répertoire transformation de donnée
-###Kagle
-###VicomTech
-###VEDElectrique
-###Calcul de la pente lorsque l'info est manquante
+### Kagle
+### VicomTech
+### VEDElectrique
+### Calcul de la pente lorsque l'info est manquante
 ## AI
 Tous les fichiers de cette section sont dans le répertoire AI
 ### Requis
@@ -33,16 +33,16 @@ Pour modéliser la fonction multivariable, nous ne pouvons pas faire de graphiqu
 traditional, car le corp humain peut voir au maximum une fonction à 2 paramètres. Ainsi, il faut être ingénieux
 pour représenter une fonctione à plus de variable avec des graphiques. 
 
-En ayant une fonction de type
-$$f(x,y,z)= f_1(x) + f_2(x) +  f_3(x)$$
-Avec la formule suivante, on peut avoir l'effet du paramètre a sur la fonction
-$$f(x,y,z) - f_2(x)- f_3(x) = f_1(x)$$
-Avec la formule suivante, on peut avoir l'effet du paramètre b sur la fonction
-$$f(x,y,z) - f_1(x) - f_3(x) = f_2(x)$$
-Avec la formule suivante, on peut avoir l'effet du paramètre c sur la fonction
-$$f(x,y,z) - f_1(x) - f_2(x) = f_3(x)$$
-On peut ainsi généraliser ceci pour une fonction multivariable.
-$$f(n_1,n_2, ..., n_n) - \sum_{i=1}^{n} f_n(n_n) + f_a(n_a) = f_a(n_a)$$ où a est le paramètre à évaluer
+En ayant une fonction de type  
+$$f(x,y,z)= f_1(x) + f_2(x) +  f_3(x)$$\
+Avec la formule suivante, on peut avoir l'effet du paramètre a sur la fonction\
+$$f(x,y,z) - f_2(x)- f_3(x) = f_1(x)$$\
+Avec la formule suivante, on peut avoir l'effet du paramètre b sur la fonction\
+$$f(x,y,z) - f_1(x) - f_3(x) = f_2(x)$$\
+Avec la formule suivante, on peut avoir l'effet du paramètre c sur la fonction\
+$$f(x,y,z) - f_1(x) - f_2(x) = f_3(x)$$\
+On peut ainsi généraliser ceci pour une fonction multivariable.\
+$$f(n_1,n_2, ..., n_n) - \sum_{i=1}^{n} f_n(n_n) + f_a(n_a) = f_a(n_a)$$ où a est le paramètre à évaluer\
 
 Ainsi, on peut représenter l'effet d'un paramètre sur la fontion globale.
 L'inconvénient de cette technique est que les graphiques générés lorsque l'IA
@@ -51,8 +51,8 @@ Cependant, une fois entrainé, cette technique marche parfaitement et les graphi
 ### Graphique de l'erreur en fonction du nombre d'iteration
 #### Calcul de l'erreur
 L'erreur est calculé avec la technique de l'erreur quadratique moyenne, soit
-$$MSE = \sum_{i=1}^{n} \frac{x_n-\overline x}{\sigma}$$
-$$\overline x = \frac{\sum_{i=1}^{n} x_n}{n}$$
+$$MSE = \sum_{i=1}^{n} \frac{x_n-\overline x}{\sigma}$$\
+$$\overline x = \frac{\sum_{i=1}^{n} x_n}{n}$$\
 $$\sigma = \sqrt\frac{\sum_{i=1}^{n}(x_n - \overline x)^2}{n}$$
 #### Optimisation et ligne continue
 Afin d'accélérer le programme, le programme ne calcul pas l'erreur à chaque itération. Il y a une constante
