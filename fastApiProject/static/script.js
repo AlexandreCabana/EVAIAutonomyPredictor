@@ -244,8 +244,6 @@ async function init() {
     });
 }
 
-init();
-
 const x = document.getElementById("demo");
 
 function getLocation() {
@@ -301,9 +299,10 @@ radioButtonName.forEach(radio => {
 
 // Load car info after everything else
 if (typeof Papa !== 'undefined') {
-    test();
+    init();
 } else {
-    window.addEventListener('load', test);
+    window.addEventListener('load', init);
+}
 function toggleMeteoSection(mode) {
     if (mode === 'auto') {
         meteoManuelSection.classList.add('disabled');
@@ -319,12 +318,12 @@ function toggleMeteoSection(mode) {
 const start_date_field = document.getElementById('start_date');
 const start_time_field = document.getElementById('start_time');
 
-function updateMeteo(){
+async function updateMeteo(){
     console.log(start_date_field.value);
     console.log(start_time_field.value);
 
     start_lat = document.getElementById("start_lat").value;
     start_lng = document.getElementById("start_lng").value;
-    fetchMeteoForPoint(start_lat, start_lng, start_date_field.value,0)
+    await fetchMeteoForPoint(start_lat, start_lng, start_date_field.value,0);
     updateMeteoInfo();
 }
