@@ -67,9 +67,7 @@ $$
 $$
 \overline x = \frac{\sum_{i=1}^{n} x_n}{n}
 $$
-$$
-\sigma = \sqrt\frac{\sum_{i=1}^{n}(x_n - \overline x)^2}{n}
-$$
+$$\sigma = \sqrt\frac{\sum_{i=1}^{n}(x_n - \overline x)^2}{n}$$
 #### Optimisation et ligne continue
 Afin d'accélérer le programme, le programme ne calcul pas l'erreur à chaque itération. Il y a une constante
 au début du script python qui indique à quel intervalle faire le graphique. Lorsque le graphique ce fait,
