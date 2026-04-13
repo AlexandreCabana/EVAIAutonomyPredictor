@@ -115,9 +115,10 @@ def calcul_traffic_route(lat_i, lon_i, lat_f, lon_f):
         return calcul_distance(lat_i, lon_i, lat_f, lon_f)
 
 
-def get_meteo(lat, lon, date=None, hour=None):
+def get_meteo(lat, lon, date = None, heure = None):
+
     url = "https://api.open-meteo.com/v1/forecast"
-    mode = "hourly" if date is not None and hour is not None else "current"
+    mode = "hourly" if date is not None and heure is not None else "current"
     params = {
         "latitude": lat,
         "longitude": lon,
@@ -138,24 +139,24 @@ def get_meteo(lat, lon, date=None, hour=None):
     response.raise_for_status()
     data = response.json()
 
-    if date is not None and hour is not None:
-        hourly = data.get("current", {})
-        weather_code = hourly.get("weather_code")[hour]
+    if date is not None and heure is not None:
+        hourly = data.get("hourly", {})
+        weather_code = hourly.get("weather_code")[heure]
         meteo = weather_code_to_meteo(weather_code)
         return {
-            "latitude": data.get("latitude")[hour],
-            "longitude": data.get("longitude")[hour],
-            "timezone": data.get("timezone")[hour],
-            "time": hourly.get("time")[hour],
-            "temperature": hourly.get("temperature_2m")[hour],
-            "meteo": meteo[hour],
-            "cloud_cover": hourly.get("cloud_cover")[hour],
-            "precipitation": hourly.get("precipitation")[hour],
+            "latitude": data.get("latitude")[heure],
+            "longitude": data.get("longitude")[heure],
+            "timezone": data.get("timezone")[heure],
+            "time": hourly.get("time")[heure],
+            "temperature": hourly.get("temperature_2m")[heure],
+            "meteo": meteo[heure],
+            "cloud_cover": hourly.get("cloud_cover")[heure],
+            "precipitation": hourly.get("precipitation")[heure],
         }
     else:
         current = data.get("current", {})
         weather_code = current.get("weather_code")
-        meteo = weather_code
+        meteo = weather_code_to_meteo(weather_code)
         return {
             "latitude": data.get("latitude"),
             "longitude": data.get("longitude"),
@@ -214,6 +215,8 @@ class RouteRequest(BaseModel):
 class MeteoRequest(BaseModel):
     lat: float
     lon: float
+    date: str | None = None
+    heure: int | None = None
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -271,9 +274,9 @@ async def get_route(data: RouteRequest):
     ))
 
 @app.post("/meteo")
-async def meteo(data: MeteoRequest, date=None, hour= None):
-    if date is not None and hour is not None:
-        return JSONResponse(content=get_meteo(data.lat, data.lon, date, hour))
+async def meteo(data: MeteoRequest):
+    if data.date is not None and data.heure is not None:
+        return JSONResponse(content=get_meteo(data.lat, data.lon, data.date, data.heure))
     else:
         return JSONResponse(content=get_meteo(data.lat, data.lon))
 

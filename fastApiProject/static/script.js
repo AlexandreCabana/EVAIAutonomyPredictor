@@ -74,7 +74,7 @@ function confirmMap() {
     displayRoute();
 }
 let meteoData = null;
-async function fetchMeteoForPoint(lat, lon, date = null, hour = null) {
+async function fetchMeteoForPoint(lat, lon, date = null, heure = null) {
     try {
         const response = await fetch("http://127.0.0.1:8000/meteo", {
             method: "POST",
@@ -83,7 +83,9 @@ async function fetchMeteoForPoint(lat, lon, date = null, hour = null) {
             },
             body: JSON.stringify({
                 lat: lat,
-                lon: lon
+                lon: lon,
+                date: date,
+                heure: heure
             })
         });
 
@@ -107,8 +109,8 @@ function updateMeteoInfo(){
             }
         }
 
-        if (data.meteo) {
-            const meteoRadio = document.querySelector(`input[name="meteo"][value="${data.meteo}"]`);
+        if (meteoData.meteo) {
+            const meteoRadio = document.querySelector(`input[name="meteo"][value="${meteoData.meteo}"]`);
             if (meteoRadio) {
                 meteoRadio.checked = true;
             }
@@ -322,8 +324,15 @@ async function updateMeteo(){
     console.log(start_date_field.value);
     console.log(start_time_field.value);
 
+
     start_lat = document.getElementById("start_lat").value;
     start_lng = document.getElementById("start_lng").value;
-    await fetchMeteoForPoint(start_lat, start_lng, start_date_field.value,0);
+    if(start_lat != "" && start_lng != ""){
+        await fetchMeteoForPoint(start_lat, start_lng, start_date_field.value,0);
+    }else{
+        alert("Vous devez spécifier un trajet avantt")
+    }
+/*
     updateMeteoInfo();
+*/
 }
