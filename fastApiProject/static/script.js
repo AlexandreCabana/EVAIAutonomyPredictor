@@ -5,24 +5,28 @@ let end = null;
 let currentPolyline = null;
 let geocoderControl = null;
 let currentMeteoMode = "manuel";
+let meteoData = null;
 
 function openMap() {
     const container = document.getElementById("map-container");
     container.style.display = "inline";
 
     if (!map) {
+        //centered to mtl
         map = L.map("map").setView([45.5, -73.56], 10);
-
+        //creates map
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: "© OpenStreetMap"
         }).addTo(map);
 
+        //Search bar
         if (L.Control.Geocoder) {
             geocoderControl = L.Control.geocoder({
                 collapsed: false,
                 defaultMarkGeocode: false,
                 placeholder: "Search an address"
             })
+                //creates and displays searched marker
                 .on("markgeocode", (e) => {
                     const center = e.geocode.center;
                     map.fitBounds(e.geocode.bbox);
@@ -31,7 +35,7 @@ function openMap() {
                 .addTo(map);
         }
 
-        map.on("click", (e) => addPoint(e.latlng));
+        map.on("click", (e) => addPoint(e.latlng)); //adds marker on click
     }
 }
 
@@ -73,7 +77,7 @@ function confirmMap() {
 
     displayRoute();
 }
-let meteoData = null;
+
 async function fetchMeteoForPoint(lat, lon, date = null, heure = null) {
     try {
         const response = await fetch("http://127.0.0.1:8000/meteo", {
@@ -110,6 +114,7 @@ function updateMeteoInfo(){
         }
 
         if (meteoData.meteo) {
+            //va chercher le type de meteo
             const meteoRadio = document.querySelector(`input[name="meteo"][value="${meteoData.meteo}"]`);
             if (meteoRadio) {
                 meteoRadio.checked = true;
@@ -149,32 +154,33 @@ async function displayRoute() {
             return;
         }
 
-        const data = await response.json();
-        console.log("Donnees recues:", data);
+        const route_data = await response.json();
+        console.log("Donnees recues:", route_data);
 
-        const routeCoords = data.route.map((coord) => [coord[0], coord[1]]);
+        const routeCoords = route_data.route;
 
         if (currentPolyline) {
             map.removeLayer(currentPolyline);
         }
 
+        //trace une ligne à travers tous les points
         currentPolyline = L.polyline(routeCoords, {
             color: "blue",
             weight: 4,
             opacity: 0.7
         }).addTo(map);
 
-        const distance = data.distance.toFixed(2);
-        const duration = data.duration !== null && data.duration !== undefined ? data.duration.toFixed(2) : "0";
-        const baseDuration = data.base_duration !== null && data.base_duration !== undefined
-            ? data.base_duration.toFixed(2)
+        const distance = route_data.distance.toFixed(2);
+        const duration = route_data.duration !== null && route_data.duration !== undefined ? route_data.duration.toFixed(2) : "0";
+        const baseDuration = route_data.base_duration !== null && route_data.base_duration !== undefined
+            ? route_data.base_duration.toFixed(2)
             : duration;
         const computedTrafficDelay =
-            data.traffic_delay !== null && data.traffic_delay !== undefined
-                ? data.traffic_delay
-                : ((data.duration ?? 0) - (data.base_duration ?? 0));
+            route_data.traffic_delay !== null && route_data.traffic_delay !== undefined
+                ? route_data.traffic_delay
+                : ((route_data.duration ?? 0) - (route_data.base_duration ?? 0));
         const trafficDelay = computedTrafficDelay.toFixed(2);
-        const provider = data.provider || "osrm";
+        const provider = route_data.provider || "osrm";
 
         document.getElementById("route-distance").textContent = distance;
         document.getElementById("route-duration").textContent = duration;

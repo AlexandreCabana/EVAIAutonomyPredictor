@@ -115,6 +115,16 @@ def calcul_traffic_route(lat_i, lon_i, lat_f, lon_f):
         return calcul_distance(lat_i, lon_i, lat_f, lon_f)
 
 
+def weather_code_to_meteo(weather_code):
+    if weather_code == 0:
+        return "soleil"
+    if weather_code in {1, 2, 3, 45, 48}:
+        return "nuageux"
+    if weather_code in {71, 73, 75, 77, 85, 86}:
+        return "neige"
+    return "pluie"
+
+
 def get_meteo(lat, lon, date = None, heure :int = None):
     url = "https://api.open-meteo.com/v1/forecast"
     mode = "hourly" if date is not None and heure is not None else "current"
