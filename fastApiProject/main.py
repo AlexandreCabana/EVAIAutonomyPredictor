@@ -12,6 +12,7 @@ from starlette.responses import RedirectResponse, JSONResponse
 from starlette.staticfiles import StaticFiles
 from sympy import Float
 import uvicorn
+import json
 
 
 app = FastAPI()
@@ -37,6 +38,33 @@ class Item(BaseModel):
     description: str | None = None
     price: float
     tax: float | None = None
+
+# get elevation data
+import requests
+import numpy as np
+import time
+
+def get_elevation_data(latitude, longitude):
+    url = "https://api.open-meteo.com/v1/elevation"
+    params = {
+        "latitude": latitude,
+        "longitude": longitude
+    }
+
+    try:
+        time.sleep(0.1)
+        result = requests.get(url, params=params, timeout=10)
+        result.raise_for_status()
+
+        data = result.json()
+
+        if "elevation" in data and len(data["elevation"]) > 0:
+            return data["elevation"][0]
+
+        return np.nan
+
+    except (requests.exceptions.RequestException, ValueError, KeyError, IndexError):
+        return np.nan
 
 def calcul_distance(lat_i,lon_i,lat_f,lon_f):
 #OpenStreetMap
@@ -243,12 +271,36 @@ async def submit(
     route_data = calcul_distance(start_lat, start_lng, end_lat, end_lng)
     distance = route_data["distance"]
     duration = route_data["duration"]
+    altitude_start = get_elevation_data(start_lat, start_lng)
+    altitude_end = get_elevation_data(end_lat, end_lng)
+    delta_elevation = altitude_end-altitude_start
+    slope = delta_elevation/(distance*1000)
 
     car_info = CarInfo(marque, modele, conduite, ac_target_temperature)
     env_info = EnvironmentInfo(temperature, meteo, slide_range, roughness_range)
+
+    with open("model.json", 'r') as file:
+        data = json.load(file)
+        current_settings = data["2000"]["functions"]
+        params_names = ["speedAvg", "slope", "temperature", "total_distance"]
+        params_values = [distance/(duration/60), slope, float(temperature), distance]
+        somme = 0
+        for i, param_name in enumerate(params_names):
+            current_values = current_settings[param_name]
+            current_param_value = params_values[i]
+            somme += calculate_param(current_values, current_param_value)
+        print(somme)
+
     print(car_info, env_info)
     result = randint(0, 1000) / 10
     return RedirectResponse(url=f"/result?battery={result}", status_code=status.HTTP_303_SEE_OTHER)
+
+def calculate_param(param_value : dict,value):
+    somme = 0
+    for i, param in enumerate(reversed(list(param_value[list(param_value.keys())[0]].values()))):
+        somme += param*value**i
+    return somme
+
 
 @app.get("/result")
 def page_resultat(request: Request, battery: float, distance: float | None = None,
