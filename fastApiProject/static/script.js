@@ -335,22 +335,25 @@ function toggleMeteoSection(mode) {
 const start_date_field = document.getElementById('start_date');
 const start_time_field = document.getElementById('start_time');
 
+
 async function updateMeteo(){
     if (!start_date_field || !start_time_field) {
         return;
     }
     console.log(start_date_field.value);
     console.log(start_time_field.value);
-
+    //parse time
+    const [start_time_hrsStr,start_time_minStr] = start_time_field.value.split(":");
+    const start_hrs = parseInt(start_time_hrsStr,10);
+    const start_min = parseInt(start_time_minStr,10);
+    const start_hours_rounded = Math.round(start_hrs + start_min/60);
 
     start_lat = document.getElementById("start_lat").value;
     start_lng = document.getElementById("start_lng").value;
     if(start_lat != "" && start_lng != ""){
-        await fetchMeteoForPoint(start_lat, start_lng, start_date_field.value,0);
+        await fetchMeteoForPoint(start_lat, start_lng, start_date_field.value,start_hours_rounded);
     }else{
         alert("Vous devez spécifier un trajet avantt")
     }
-/*
     updateMeteoInfo();
-*/
 }

@@ -25,30 +25,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Get the directory of the current file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
-
+# Base Model exemple
 class Item(BaseModel):
     name: str
     description: str | None = None
     price: float
     tax: float | None = None
 
-
-def calcul_distance(lat_i, lon_i, lat_f, lon_f):
+def calcul_distance(lat_i,lon_i,lat_f,lon_f):
+#OpenStreetMap
     url = f"http://router.project-osrm.org/route/v1/driving/{lon_i},{lat_i};{lon_f},{lat_f}?overview=full&geometries=geojson"
 
     response = requests.get(url, timeout=10)
     data = response.json()
+
     route = data["routes"][0]
 
-    distance = route["distance"] / 1000
-    duration = route["duration"] / 60
+    distance = route["distance"]/1000
+    duration = route["duration"] /60
+
     geometry = route["geometry"]["coordinates"]
+
+    # Convert [lng, lat] → [lat, lng]
     route_coords = [[coord[1], coord[0]] for coord in geometry]
+
+
 
     return {
         "route": route_coords,
@@ -108,17 +115,7 @@ def calcul_traffic_route(lat_i, lon_i, lat_f, lon_f):
         return calcul_distance(lat_i, lon_i, lat_f, lon_f)
 
 
-def weather_code_to_meteo(weather_code):
-    if weather_code == 0:
-        return "soleil"
-    if weather_code in {1, 2, 3, 45, 48}:
-        return "nuageux"
-    if weather_code in {71, 73, 75, 77, 85, 86}:
-        return "neige"
-    return "pluie"
-
-
-def get_meteo(lat, lon, date=None, heure=None):
+def get_meteo(lat, lon, date = None, heure :int = None):
     url = "https://api.open-meteo.com/v1/forecast"
     mode = "hourly" if date is not None and heure is not None else "current"
     params = {
@@ -142,32 +139,35 @@ def get_meteo(lat, lon, date=None, heure=None):
     data = response.json()
 
     if date is not None and heure is not None:
+
         hourly = data.get("hourly", {})
         weather_code = hourly.get("weather_code")[heure]
+        meteo = weather_code_to_meteo(weather_code)
         return {
             "latitude": data.get("latitude"),
             "longitude": data.get("longitude"),
             "timezone": data.get("timezone"),
             "time": hourly.get("time")[heure],
             "temperature": hourly.get("temperature_2m")[heure],
-            "meteo": weather_code_to_meteo(weather_code),
+            "meteo": meteo,
             "cloud_cover": hourly.get("cloud_cover")[heure],
             "precipitation": hourly.get("precipitation")[heure],
         }
-
-    current = data.get("current", {})
-    weather_code = current.get("weather_code")
-    return {
-        "latitude": data.get("latitude"),
-        "longitude": data.get("longitude"),
-        "timezone": data.get("timezone"),
-        "time": current.get("time"),
-        "temperature": current.get("temperature_2m"),
-        "meteo": weather_code_to_meteo(weather_code),
-        "cloud_cover": current.get("cloud_cover"),
-        "precipitation": current.get("precipitation"),
-        "overall_forecast": data,
-    }
+    else:
+        current = data.get("current", {})
+        weather_code = current.get("weather_code")
+        meteo = weather_code_to_meteo(weather_code)
+        return {
+            "latitude": data.get("latitude"),
+            "longitude": data.get("longitude"),
+            "timezone": data.get("timezone"),
+            "time": current.get("time"),
+            "temperature": current.get("temperature_2m"),
+            "meteo": meteo,
+            "cloud_cover": current.get("cloud_cover"),
+            "precipitation": current.get("precipitation"),
+            "overall_forecast": data
+        }
 
 
 CAR_INFO_CSV = Path(__file__).parent / "static" / "car_info.csv"
