@@ -115,8 +115,7 @@ def calcul_traffic_route(lat_i, lon_i, lat_f, lon_f):
         return calcul_distance(lat_i, lon_i, lat_f, lon_f)
 
 
-def get_meteo(lat, lon, date = None, heure = None):
-
+def get_meteo(lat, lon, date = None, heure :int = None):
     url = "https://api.open-meteo.com/v1/forecast"
     mode = "hourly" if date is not None and heure is not None else "current"
     params = {
@@ -140,16 +139,17 @@ def get_meteo(lat, lon, date = None, heure = None):
     data = response.json()
 
     if date is not None and heure is not None:
+
         hourly = data.get("hourly", {})
         weather_code = hourly.get("weather_code")[heure]
         meteo = weather_code_to_meteo(weather_code)
         return {
-            "latitude": data.get("latitude")[heure],
-            "longitude": data.get("longitude")[heure],
-            "timezone": data.get("timezone")[heure],
+            "latitude": data.get("latitude"),
+            "longitude": data.get("longitude"),
+            "timezone": data.get("timezone"),
             "time": hourly.get("time")[heure],
             "temperature": hourly.get("temperature_2m")[heure],
-            "meteo": meteo[heure],
+            "meteo": meteo,
             "cloud_cover": hourly.get("cloud_cover")[heure],
             "precipitation": hourly.get("precipitation")[heure],
         }
