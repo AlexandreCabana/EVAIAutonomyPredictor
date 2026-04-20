@@ -181,6 +181,7 @@ async function displayRoute() {
         document.getElementById("route-base-duration").textContent = baseDuration;
         document.getElementById("route-traffic-delay").textContent = trafficDelay;
         document.getElementById("route-provider").textContent = provider;
+        document.getElementById("duration").value = duration;
         document.getElementById("route-info").style.display = "block";
 
         const group = new L.featureGroup([currentPolyline]);
@@ -212,8 +213,13 @@ function getBrands(data) {
 
 async function init() {
     const data = await fetchCarInfo();
-    const brandSet = getBrands(data);
     const brandList = document.getElementById("marque-list");
+    const modelList = document.getElementById("modele-list");
+    if (!brandList || !modelList || !data) {
+        return;
+    }
+
+    const brandSet = getBrands(data);
 
     let selectedModel = null;
 
@@ -222,7 +228,6 @@ async function init() {
         brandList.add(newOption);
     });
 
-    const modelList = document.getElementById("modele-list");
     brandList.addEventListener("change", (event) => {
         const selectedBrand = event.target.value;
         modelList.innerHTML = "";
@@ -272,8 +277,10 @@ function error() {
 // Slider - runs first before anything can crash it
 const slider = document.getElementById('ac_target_temperature');
 const display = document.getElementById('ac-target-temperature-value');
-display.textContent = slider.value;
-slider.addEventListener('input', () => display.textContent = slider.value);
+if (slider && display) {
+    display.textContent = slider.value;
+    slider.addEventListener('input', () => display.textContent = slider.value);
+}
 
 // Meteo toggles
 const check_starttime = document.getElementById('start-time-check');
@@ -283,14 +290,19 @@ const meteoManuelSection = document.getElementById('meteo-manuelle-section');
 
 let lastValidMode = "manuel";
 
-check_starttime.addEventListener('change', (event) => {
-    startTimeSection.classList.toggle('hidden', !event.target.checked);
-    if(!event.target.checked){
-        toggleMeteoSection('manuel');
-        document.querySelector(`input[name="meteo-mode"][value="manuel"]`).checked = true;
-        lastValidMode = "manuel"
-    }
-});
+if (check_starttime && startTimeSection) {
+    check_starttime.addEventListener('change', (event) => {
+        startTimeSection.classList.toggle('hidden', !event.target.checked);
+        if(!event.target.checked){
+            toggleMeteoSection('manuel');
+            const manuelRadio = document.querySelector(`input[name="meteo-mode"][value="manuel"]`);
+            if (manuelRadio) {
+                manuelRadio.checked = true;
+            }
+            lastValidMode = "manuel"
+        }
+    });
+}
 
 radioButtonName.forEach(radio => {
     radio.addEventListener("change", (event) => {
@@ -306,6 +318,9 @@ if (typeof Papa !== 'undefined') {
     window.addEventListener('load', init);
 }
 function toggleMeteoSection(mode) {
+    if (!meteoManuelSection) {
+        return;
+    }
     if (mode === 'auto') {
         meteoManuelSection.classList.add('disabled');
         currentMeteoMode = "auto";
@@ -322,6 +337,9 @@ const start_time_field = document.getElementById('start_time');
 
 
 async function updateMeteo(){
+    if (!start_date_field || !start_time_field) {
+        return;
+    }
     console.log(start_date_field.value);
     console.log(start_time_field.value);
     //parse time
