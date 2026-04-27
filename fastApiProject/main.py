@@ -16,6 +16,7 @@ from starlette.staticfiles import StaticFiles
 from sympy import Float
 import uvicorn
 import json
+import csv
 
 
 app = FastAPI()
@@ -274,7 +275,7 @@ async def submit(
     print("CALCUL DES PARAMETRES")
     with open("model.json", 'r') as file:
         data = json.load(file)
-        current_settings = data["90087"]["functions"]
+        current_settings = data["88965"]["functions"]
         params_names = ["speedAvg", "slope", "temperature"]
         params_values = [speedAvg, slope, float(temperature)]
         somme = 0
@@ -285,7 +286,13 @@ async def submit(
             current_param_value = params_values[i]
             somme += calculate_param(current_values, current_param_value)
         # somme : W/km
-        print(somme*distance)
+        consommation_en_watts = round(somme*distance,3)
+        print(consommation_en_watts)
+
+    # trouver la capaité de la batterie
+    batteryCapacity = float(fetch_ev_batteryCapacity(modele))*1000
+    pourcentage_used = round(consommation_en_watts/batteryCapacity*100,2)
+
 
     atm_pressure = 101.34
     gas_constant = 8.314
@@ -337,7 +344,15 @@ async def submit(
     )
 
     result = randint(0, 1000) / 10
-    return RedirectResponse(url=f"/result?range={result}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/result?range={result}&pourcentage_used={pourcentage_used}&watt_used={consommation_en_watts}", status_code=status.HTTP_303_SEE_OTHER)
+
+def fetch_ev_batteryCapacity(car_model):
+    with open("static/car_info.csv", 'r') as file:
+        csvFile = csv.reader(file)
+        for line in csvFile:
+            if car_model in line:
+                return line[3]
+        return None
 
 
 def calculate_param(param_value : dict,value):
@@ -348,7 +363,7 @@ def calculate_param(param_value : dict,value):
 
 
 @app.get("/result")
-def page_resultat(request: Request, range: float, distance: float | None = None, duration: float | None = None):
+def page_resultat(request: Request, range: float, pourcentage_used: float, watt_used:float, distance: float | None = None, duration: float | None = None):
     print(range)
     return templates.TemplateResponse(
         request=request,
@@ -357,6 +372,8 @@ def page_resultat(request: Request, range: float, distance: float | None = None,
             "range": range,
             "distance": distance,
             "duration": duration,
+            "pourcentage_used": pourcentage_used,
+            "watt_used": watt_used
         },
     )
 

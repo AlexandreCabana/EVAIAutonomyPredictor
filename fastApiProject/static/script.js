@@ -39,6 +39,7 @@ function openMap() {
     }
 }
 
+
 function addPoint(latlng) {
     if (markers.length >= 2) {
         markers.forEach((m) => map.removeLayer(m));
@@ -274,7 +275,6 @@ function success(position) {
         x.innerHTML = "Latitude: " + position.coords.latitude +
             "<br>Longitude: " + position.coords.longitude;
     }
-    fetchMeteoForPoint(position.coords.latitude, position.coords.longitude);
 }
 
 function error() {
