@@ -123,6 +123,7 @@ function updateMeteoInfo(){
     } catch (error) {
         console.error("Erreur lors de la recuperation de la meteo:", error);
     }
+    console.log("update meteo info");
 }
 
 async function displayRoute() {

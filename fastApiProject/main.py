@@ -274,9 +274,9 @@ async def submit(
     print("CALCUL DES PARAMETRES")
     with open("model.json", 'r') as file:
         data = json.load(file)
-        current_settings = data["2000"]["functions"]
-        params_names = ["speedAvg", "slope", "temperature", "total_distance"]
-        params_values = [speedAvg, slope, float(temperature), distance]
+        current_settings = data["90087"]["functions"]
+        params_names = ["speedAvg", "slope", "temperature"]
+        params_values = [speedAvg, slope, float(temperature)]
         somme = 0
         for i, param_name in enumerate(params_names):
             print(param_name, i)
@@ -284,7 +284,8 @@ async def submit(
             print(current_settings)
             current_param_value = params_values[i]
             somme += calculate_param(current_values, current_param_value)
-        print(somme)
+        # somme : W/km
+        print(somme*distance)
 
     atm_pressure = 101.34
     gas_constant = 8.314
