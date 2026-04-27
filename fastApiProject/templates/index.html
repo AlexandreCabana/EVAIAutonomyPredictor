@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="">
 
 <head>
     <meta charset="UTF-8">
@@ -70,15 +70,16 @@
             <input type="hidden" name="end_lat" id="end_lat">
             <input type="hidden" name="end_lng" id="end_lng">
             <input type="hidden" name="duration" id="duration">
-            <button type="button" onclick="openMap()">Sélectionner sa localisation</button>
-
-            <button type="button" id="location-btn" onclick="getLocation()">Utiliser ma localisation</button>
-            <p id="demo"></p>
+            <button type="button" onclick="openMap()">Sélectionner un trajet</button>
 
             <div id="map-container" style="display:none; margin-top:20px;">
+            <div id="map-shell">
             <div id="map" style="height:400px;"></div>
+            <button type="button" id="location-btn" onclick="getLocation()">Mettre un point sur ma localisation</button>
+            </div>
+             <p id="demo"></p>
              <p id="coords"></p>
-            <button type="button" onclick="confirmMap()">Confirmer la position</button>
+            <button type="button" onclick="confirmMap()">Confirmer le trajet</button>
             <div id="route-info"
                     style="margin-top:15px; padding:10px; background-color:#f0f0f0; border-radius:5px; display:none;">
                     <h3>Informations du trajet</h3>
@@ -172,5 +173,6 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 <script src="../static/script.js"></script>
+<script src="../static/trajet.js"></script>
 
 </html>
