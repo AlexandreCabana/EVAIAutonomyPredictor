@@ -1,9 +1,3 @@
-let map;
-let markers = [];
-let start = null;
-let end = null;
-let currentPolyline = null;
-let geocoderControl = null;
 let currentMeteoMode = "manuel";
 let meteoData = null;
 
