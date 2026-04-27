@@ -16,6 +16,7 @@ from starlette.staticfiles import StaticFiles
 from sympy import Float
 import uvicorn
 import json
+import csv
 
 
 app = FastAPI()
@@ -153,6 +154,7 @@ def weather_code_to_meteo(weather_code):
 
 
 def get_meteo(lat, lon, date = None, heure :int = None):
+    # obtient la météo avec openMeteo selon localisation et date
     url = "https://api.open-meteo.com/v1/forecast"
     mode = "hourly" if date is not None and heure is not None else "current"
     params = {
@@ -363,35 +365,44 @@ async def submit(
     delta_elevation = altitude_end-altitude_start
     slope = delta_elevation/(distance*1000)
     speedAvg = distance/(duration/60)
-    print(f"speedAvg: {speedAvg}, temperature: {temperature}, slope: {slope}, total_distance: {distance}")
 
     ac_power = get_ac_power(marque, modele, temperature, duration, ac_target_temperature)
 
     car_info = CarInfo(marque, modele, conduite, ac_target_temperature)
     env_info = EnvironmentInfo(temperature, meteo, slide_range, roughness_range)
 
-    print("CALCUL DES PARAMETRES")
     with open("model.json", 'r') as file:
         data = json.load(file)
-        current_settings = data["90087"]["functions"]
+        current_settings = data["88965"]["functions"]
         params_names = ["speedAvg", "slope", "temperature"]
         params_values = [speedAvg, slope, float(temperature)]
         somme = 0
         for i, param_name in enumerate(params_names):
-            print(param_name, i)
             current_values = current_settings[param_name]
-            print(current_settings)
             current_param_value = params_values[i]
             somme += calculate_param(current_values, current_param_value)
         # somme : W/km
-        print(somme*distance)
+        energy_consumption = round(somme*distance,3)
+
+    # trouver la capacité de la batterie
+    batteryCapacity = float(fetch_ev_batteryCapacity(modele))*1000
+    pourcentage_used = round(energy_consumption/batteryCapacity*100,2)
+
 
 
 
 
 
     result = randint(0, 1000) / 10
-    return RedirectResponse(url=f"/result?range={result}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/result?range={result}&pourcentage_used={pourcentage_used}&energy_consumption={energy_consumption}", status_code=status.HTTP_303_SEE_OTHER)
+
+def fetch_ev_batteryCapacity(car_model):
+    with open("static/car_info.csv", 'r') as file:
+        csvFile = csv.reader(file)
+        for line in csvFile:
+            if car_model in line:
+                return line[3]
+        return None
 
 
 def calculate_param(param_value : dict,value):
@@ -402,7 +413,7 @@ def calculate_param(param_value : dict,value):
 
 
 @app.get("/result")
-def page_resultat(request: Request, range: float, distance: float | None = None, duration: float | None = None):
+def page_resultat(request: Request, range: float, pourcentage_used: float, energy_consumption:float, distance: float | None = None, duration: float | None = None):
     print(range)
     return templates.TemplateResponse(
         request=request,
@@ -411,6 +422,8 @@ def page_resultat(request: Request, range: float, distance: float | None = None,
             "range": range,
             "distance": distance,
             "duration": duration,
+            "pourcentage_used": pourcentage_used,
+            "energy_consumption": energy_consumption
         },
     )
 
