@@ -239,7 +239,6 @@ def get_ac_power(marque: str, modele: str, temperature: str, duration:float, ac_
             status_code=400,
             detail=f"Donnees invalides pour le vehicule '{marque} {modele}'.",
         ) from exc
-
     car_volume = ((length_mm * width_mm * height_mm) / 1_000_000) * car_volume_percentage  # L
     car_air_quantity = (atm_pressure * car_volume) / (gas_constant * (ambient_temperature + kelvins_offset))  # mol avec loi des gaz parfaits
     car_air_mass = car_air_quantity * molar_mass_air / 1000  # kg
@@ -263,9 +262,37 @@ def get_ac_power(marque: str, modele: str, temperature: str, duration:float, ac_
 
 
 
-
 CAR_INFO_CSV = Path(__file__).parent / "static" / "car_info.csv"
 df_cars = pd.read_csv(CAR_INFO_CSV, encoding="utf-8-sig")
+
+# Form struct
+class CarInfo:
+    def __init__(self, brand: str, model: str, driving_style: str, ac_target_temperature: int):
+        self.brand = brand
+        self.model = model
+        self.driving_style = driving_style
+        self.ac_target_temperature = ac_target_temperature
+
+
+class EnvironmentInfo:
+    def __init__(self, temperature: str, meteo: str, chaussee: int, roughness: int):
+        self.temp = temperature
+        self.meteo = meteo
+        self.chaussee = chaussee
+        self.roughness = roughness
+
+
+class FormInfo:
+    def __init__(self, car_info: CarInfo, environment_info: EnvironmentInfo):
+        self.carInfo = car_info
+        self.environmentInfo = environment_info
+
+
+class User:
+    def __init__(self, name, last_name, driving_style):
+        self.name = name
+        self.last_name = last_name
+        self.driving_style = driving_style
 
 class RouteRequest(BaseModel):
     start_lat: float
