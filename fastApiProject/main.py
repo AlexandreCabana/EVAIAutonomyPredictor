@@ -267,37 +267,6 @@ def get_ac_power(marque: str, modele: str, temperature: str, duration:float, ac_
 CAR_INFO_CSV = Path(__file__).parent / "static" / "car_info.csv"
 df_cars = pd.read_csv(CAR_INFO_CSV, encoding="utf-8-sig")
 
-
-# Form struct
-class CarInfo:
-    def __init__(self, brand: str, model: str, driving_style: str, ac_target_temperature: int):
-        self.brand = brand
-        self.model = model
-        self.driving_style = driving_style
-        self.ac_target_temperature = ac_target_temperature
-
-
-class EnvironmentInfo:
-    def __init__(self, temperature: str, meteo: str, chaussee: int, roughness: int):
-        self.temp = temperature
-        self.meteo = meteo
-        self.chaussee = chaussee
-        self.roughness = roughness
-
-
-class FormInfo:
-    def __init__(self, car_info: CarInfo, environment_info: EnvironmentInfo):
-        self.carInfo = car_info
-        self.environmentInfo = environment_info
-
-
-class User:
-    def __init__(self, name, last_name, driving_style):
-        self.name = name
-        self.last_name = last_name
-        self.driving_style = driving_style
-
-
 class RouteRequest(BaseModel):
     start_lat: float
     start_lon: float
@@ -316,6 +285,12 @@ class MeteoRequest(BaseModel):
 async def main_page(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
 
+def get_vehicle_data(marque: str, modele: str):
+    result = df_cars[
+        (df_cars["-- brand --"].astype(str).str.strip().str.lower() == marque.strip().lower())
+        & (df_cars["model"].astype(str).str.strip().str.lower() == modele.strip().lower())
+    ]
+    return None if result.empty else result.iloc[0].to_dict()
 
 
 
@@ -351,25 +326,29 @@ async def submit(
     altitude_end = get_elevation_data(end_lat, end_lng)
     delta_elevation = altitude_end-altitude_start
     slope = delta_elevation/(distance*1000)
+    speedAvg = distance/(duration/60)
+    print(f"speedAvg: {speedAvg}, temperature: {temperature}, slope: {slope}, total_distance: {distance}")
 
     ac_power = get_ac_power(marque, modele, temperature, duration, ac_target_temperature)
 
     car_info = CarInfo(marque, modele, conduite, ac_target_temperature)
     env_info = EnvironmentInfo(temperature, meteo, slide_range, roughness_range)
 
+    print("CALCUL DES PARAMETRES")
     with open("model.json", 'r') as file:
         data = json.load(file)
-        current_settings = data["2000"]["functions"]
-        params_names = ["speedAvg", "slope", "temperature", "total_distance"]
-        params_values = [distance/(duration/60), slope, float(temperature), distance]
+        current_settings = data["90087"]["functions"]
+        params_names = ["speedAvg", "slope", "temperature"]
+        params_values = [speedAvg, slope, float(temperature)]
         somme = 0
         for i, param_name in enumerate(params_names):
+            print(param_name, i)
             current_values = current_settings[param_name]
+            print(current_settings)
             current_param_value = params_values[i]
             somme += calculate_param(current_values, current_param_value)
-        print(somme)
-
-    print(car_info, env_info)
+        # somme : W/km
+        print(somme*distance)
 
 
 
