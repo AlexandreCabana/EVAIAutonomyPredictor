@@ -156,10 +156,84 @@ input[type="time"] {
 }
 
 select {
+    select {
+    padding: 10px 14px;
+    border-radius: var(--radius-input);
+    border: 1px solid var(--input-border);
+    background-color: var(--input-bg);
+    font-size: 0.95rem;
+    font-family: inherit;
+    width: 100%;
+    color: var(--text-color);
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    /* ─── SUPPRESSION DU CARRÉ / FLÈCHE PAR DÉFAUT ─── */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    /* ─── TA FLÈCHE PERSONNALISÉE ─── */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300d4c8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
-    padding-right: 38px;
+    padding-right: 38px; /* Pour ne pas que le texte touche la flèche */
+}
+
+/* Pour Internet Explorer (au cas où) */
+select::-ms-expand {
+    display: none;
+}
+}
+/* ─── STYLE MODERNE POUR LES SELECTEURS ─── */
+
+/* Cible spécifiquement les listes de marque et modèle */
+#marque-list,
+#modele-list {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    background-color: var(--input-bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300d4c8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 18px center;
+    background-size: 12px;
+
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-input);
+    color: var(--text-color);
+    padding: 14px 45px 14px 16px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 15px; /* Espace entre marque et modèle */
+}
+
+/* État au survol */
+#marque-list:hover,
+#modele-list:hover {
+    border-color: var(--card-border-hover);
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* État focus (quand on clique dessus) */
+#marque-list:focus,
+#modele-list:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* Style des options (Le menu qui s'ouvre) */
+/* Note: Le style des balises <option> est limité par les navigateurs,
+   mais on peut au moins définir le fond pour certains */
+#marque-list option,
+#modele-list option {
+    background-color: var(--bg-surface);
+    color: var(--text-color);
+    padding: 10px;
 }
 
 input[type="number"] {
@@ -226,77 +300,217 @@ button[type="submit"] {
     width: 100%;
     border-radius: 12px;
 }
+/* ─── HARMONISATION INFOS TRAJET ─── */
 
-/* La liste des suggestions */
+#route-info {
+    display: none; /* Affiché via JS après calcul */
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: var(--radius-card);
+    padding: 24px;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow-card);
+    width: 100%;
+    max-width: 800px;
+    text-align: left;
+    margin-top: 10px;
+}
+
+#route-info h3 {
+    margin: 0 0 16px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 10px;
+}
+
+#route-info p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 12px 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* Style des valeurs (Chiffres) */
+#route-info b,
+#route-info span {
+    font-family: 'DM Mono', monospace;
+    color: var(--text-color);
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+/* Mise en évidence spécifique pour le fournisseur ou les délais */
+#route-provider {
+    font-size: 0.75rem !important;
+    text-transform: uppercase;
+    background: var(--accent-selected-bg);
+    color: var(--accent) !important;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--accent-selected-border);
+}
+
+/* Petit ajustement pour que le conteneur parent ne décale pas tout */
+#selectionForm {
+    gap: 16px;
+}
+/* ─── STYLE DES BOUTONS DE ZOOM ─── */
+
+/* Conteneur principal (+ et -) */
+.leaflet-bar {
+    border: 1px solid var(--card-border) !important;
+    box-shadow: var(--shadow-card) !important;
+    border-radius: var(--radius-input) !important;
+    overflow: hidden;
+}
+
+/* Boutons individuels */
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+    background-color: var(--bg-surface) !important;
+    color: var(--accent) !important; /* Symbole turquoise */
+    border-bottom: 1px solid var(--card-border) !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-weight: bold !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Suppression de la bordure sur le dernier bouton */
+.leaflet-control-zoom-out {
+    border-bottom: none !important;
+}
+
+/* Effet au survol (Hover) */
+.leaflet-control-zoom-in:hover,
+.leaflet-control-zoom-out:hover {
+    background-color: var(--accent-selected-bg) !important;
+    color: var(--text-color) !important;
+    filter: brightness(1.2);
+}
+
+/* État désactivé (quand on est au zoom max/min) */
+.leaflet-disabled {
+    background-color: var(--bg-color) !important;
+    color: var(--text-muted) !important;
+    opacity: 0.5;
+}
+/* ─── STYLE DU MENU DE RECHERCHE D'ADRESSES ─── */
+
+/* Le conteneur principal des suggestions */
 .leaflet-control-geocoder-alternatives {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--accent-selected-border) !important;
+    border-radius: var(--radius-input) !important;
+    box-shadow: var(--shadow-card) !important;
     margin-top: 8px !important;
-    padding: 4px !important;
-    list-style: none !important;
-    background: rgba(9, 14, 26, 0.98) !important;
-    border: 1px solid rgba(0, 212, 200, 0.35) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.5) !important;
+    padding: 5px 0 !important;
+    overflow: hidden;
     width: 100% !important;
-    min-width: 300px !important;
-    max-height: 300px;
-    overflow-y: auto;
 }
 
+/* Chaque ligne d'adresse */
 .leaflet-control-geocoder-alternatives li {
-    margin: 2px 0 !important;
-    padding: 0 !important;
-    display: block !important;
-    width: 100% !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
-/* L'élément cliquable doit prendre TOUTE la ligne */
-.leaflet-control-geocoder-alternatives li a {
+.leaflet-control-geocoder-alternatives li:last-child {
+    border-bottom: none !important;
+}
+
+/* Le lien/contenu de l'adresse */
+.leaflet-control-geocoder-alternatives a {
     display: block !important;
-    width: 100% !important;
-    padding: 10px 14px !important;
+    padding: 10px 15px !important;
     color: var(--text-color) !important;
     text-decoration: none !important;
-    border-radius: 8px !important;
-    transition: background 0.2s ease;
-    cursor: pointer !important;
-    border: none !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 0.9rem !important;
+    transition: all 0.2s ease !important;
 }
 
+/* EFFET HOVER : Quand on passe la souris sur une adresse */
 .leaflet-control-geocoder-alternatives li:hover a {
-    background: rgba(0, 212, 200, 0.15) !important;
-}
-
-/* Détail (Nom principal) */
-.leaflet-control-geocoder-address-detail {
-    display: block !important;
-    font-weight: 600 !important;
-    color: var(--text-color) !important;
-    font-size: 0.88rem !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    width: 100%;
-}
-
-/* Contexte (Infos supplémentaires cachées par défaut) */
-.leaflet-control-geocoder-address-context {
-    display: none !important; /* Cache pour éviter le bug de saut de ligne */
-    margin-top: 4px !important;
-    color: var(--text-muted) !important;
-    font-size: 0.75rem !important;
-    line-height: 1.3 !important;
-    white-space: normal !important;
-}
-
-/* AFFICHAGE AU SURVOL */
-.leaflet-control-geocoder-alternatives li:hover .leaflet-control-geocoder-address-context {
-    display: block !important;
-}
-
-.leaflet-control-geocoder-alternatives li:hover .leaflet-control-geocoder-address-detail {
-    white-space: normal !important; /* Montre le nom complet si besoin */
+    background: var(--accent-selected-bg) !important;
     color: var(--accent) !important;
 }
+
+/* Style pour le texte principal (nom du lieu) */
+.leaflet-control-geocoder-address-detail {
+    font-weight: 600 !important;
+    display: block;
+}
+
+/* Style pour le contexte (ville, pays) - On le rend plus discret par défaut */
+.leaflet-control-geocoder-address-context {
+    font-size: 0.75rem !important;
+    color: var(--text-muted) !important;
+    display: block;
+    margin-top: 2px;
+}
+
+/* On change la couleur du contexte au survol aussi */
+.leaflet-control-geocoder-alternatives li:hover .leaflet-control-geocoder-address-context {
+    color: rgba(0, 212, 200, 0.7) !important;
+}
+
+/* Personnalisation de la barre de recherche elle-même */
+.leaflet-control-geocoder-form input {
+    background-color: var(--input-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--input-border) !important;
+    border-radius: var(--radius-input) !important;
+    padding: 8px 12px !important;
+    font-family: inherit !important;
+}
+
+
+/* ─── CORRECTION BARRE DE RECHERCHE ─── */
+
+/* 1. L'icône de la loupe (plus vive) */
+.leaflet-control-geocoder-icon {
+    background-color: var(--accent) !important; /* Utilise ton turquoise brillant */
+    border-radius: var(--radius-input) !important;
+    filter: brightness(0) saturate(100%) invert(100%); /* Force l'icône interne en blanc pour trancher sur le turquoise */
+    opacity: 1 !important;
+}
+
+/* 2. Le champ de texte (input) */
+.leaflet-control-geocoder-form input {
+    background-color: var(--input-bg) !important;
+    color: var(--text-color) !important; /* Ton blanc #e8edf5 */
+    border: 1px solid var(--input-border) !important;
+    padding: 10px 14px !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 0.95rem !important;
+    outline: none !important;
+}
+
+/* 3. Placeholder (le texte "Search an address") */
+.leaflet-control-geocoder-form input::placeholder {
+    color: var(--text-muted) !important; /* Un gris bleuté pour ne pas confondre avec le texte saisi */
+    opacity: 0.8;
+}
+
+/* 4. Focus sur la barre de recherche */
+.leaflet-control-geocoder-form input:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-glow) !important;
+}
+
+/* 5. Ajustement du bouton si la barre est repliée */
+.leaflet-control-geocoder-expanded {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--radius-input) !important;
+}
+
 
 /* ─── RADIO PILLS & SLIDERS (Reste du code) ─── */
 

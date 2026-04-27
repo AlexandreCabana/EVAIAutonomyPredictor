@@ -5,7 +5,7 @@ let end = null;
 let currentPolyline = null;
 let geocoderControl = null;
 
-function openMap() {
+
     const container = document.getElementById("map-container");
     container.style.display = "inline";
 
@@ -35,7 +35,7 @@ function openMap() {
 
         map.on("click", (e) => addPoint(e.latlng)); //adds marker on click
     }
-}
+
 
 function addPoint(latlng) {
     if (currentPolyline) {

@@ -323,6 +323,7 @@ def get_vehicle_data(marque: str, modele: str):
 
 @app.post("/submit")
 async def submit(
+    request: Request,
     marque: str = Form(...),
     modele: str = Form(...),
     ac_target_temperature: int = Form(21),
@@ -337,12 +338,20 @@ async def submit(
     end_lng: float | None = Form(None),
     duration: float | None = Form(None),
 ):
-    if None in {start_lat, start_lng, end_lat, end_lng}:
-        raise HTTPException(
-            status_code=400,
-            detail="Les coordonnees du trajet sont manquantes. Confirme le trajet sur la carte avant d'envoyer le formulaire.",
-        )
+    # Vérification des champs
 
+    params = [marque, modele, ac_target_temperature, conduite, temperature, meteo, slide_range, roughness_range,
+              start_lat, start_lng, end_lat, end_lng, duration]  # Liste tes champs critiques
+    if any(v is None or v == "" for v in params):
+        # On recharge la page index.html avec un message d'erreur
+        # Utilise cette syntaxe pour éviter l'erreur "unhashable type: dict"
+        return templates.TemplateResponse(
+            request=request,  # L'argument request est obligatoire
+            name="index.html",
+            context={
+                "error_msg": "Certains paramètres ont mal été définis ou aucun trajet n'a été sélectionné"
+            }
+        )
     route_data = calcul_distance(start_lat, start_lng, end_lat, end_lng)
 
     if duration is None:
