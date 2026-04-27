@@ -86,8 +86,6 @@ def calcul_distance(lat_i,lon_i,lat_f,lon_f):
     # Convert [lng, lat] → [lat, lng]
     route_coords = [[coord[1], coord[0]] for coord in geometry]
 
-
-
     return {
         "route": route_coords,
         "distance": distance,
@@ -100,7 +98,7 @@ def calcul_distance(lat_i,lon_i,lat_f,lon_f):
 
 
 def calcul_traffic_route(lat_i, lon_i, lat_f, lon_f):
-    api_key = "SQek2X8NbQiiz0wNdweCaLPoHuw0QCEy"
+    api_key = "SQek2X8NbQiiz0wNdweCaLPoHuw0QCEy" #S'il vous plait garder cette clée privée
     if not api_key:
         raise Warning("No API key provided")
 
@@ -208,10 +206,94 @@ def get_meteo(lat, lon, date = None, heure :int = None):
             "precipitation": current.get("precipitation"),
             "overall_forecast": data
         }
+def get_vehicle_data(marque: str, modele: str):
+    result = df_cars[
+        (df_cars["-- brand --"].astype(str).str.strip().str.lower() == marque.strip().lower())
+        & (df_cars["model"].astype(str).str.strip().str.lower() == modele.strip().lower())
+    ]
+    return None if result.empty else result.iloc[0].to_dict()
+
+def get_ac_power(marque: str, modele: str, temperature: str, duration:float, ac_target_temperature:float):
+    atm_pressure = 101.34 #kPa
+    gas_constant = 8.314
+    molar_mass_air = 28.96 #mol
+    specific_heat_air = 1.012 #kJ/(kg*K)
+    kelvins_offset = 273.15
+
+    car_data = get_vehicle_data(marque, modele)
+    if car_data is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Vehicule introuvable pour marque='{marque}' et modele='{modele}'.",
+        )
+
+    try:
+        length_mm = float(car_data["length_mm"])
+        width_mm = float(car_data["width_mm"])
+        height_mm = float(car_data["height_mm"])
+        car_volume_percentage = 0.2  # valeur moyenne arbitraire
+        ambient_temperature = float(temperature)
+        duration_sec = duration * 60
+        heat_loss_coefficient = 120  # W/K, rough first estimate for a car
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Donnees invalides pour le vehicule '{marque} {modele}'.",
+        ) from exc
+    car_volume = ((length_mm * width_mm * height_mm) / 1_000_000) * car_volume_percentage  # L
+    car_air_quantity = (atm_pressure * car_volume) / (gas_constant * (ambient_temperature + kelvins_offset))  # mol avec loi des gaz parfaits
+    car_air_mass = car_air_quantity * molar_mass_air / 1000  # kg
+    delta_temperature = abs(ac_target_temperature - ambient_temperature)
+    ac_energy = car_air_mass * specific_heat_air * delta_temperature  # kJ avec Q=m*c*deltaT
+    ac_power = ac_energy / duration_sec  # kW
+
+    ac_loss = (heat_loss_coefficient * delta_temperature) / 1000  # kW
+    ac_power += ac_loss
+
+    print(
+        {
+            "duration_sec": duration_sec,
+            "car_volume_l": car_volume,
+            "car_air_mass": car_air_mass,
+            "ac_energy": ac_energy,
+            "ac_power": ac_power,
+        })
+
+    return ac_power
+
 
 
 CAR_INFO_CSV = Path(__file__).parent / "static" / "car_info.csv"
 df_cars = pd.read_csv(CAR_INFO_CSV, encoding="utf-8-sig")
+
+# Form struct
+class CarInfo:
+    def __init__(self, brand: str, model: str, driving_style: str, ac_target_temperature: int):
+        self.brand = brand
+        self.model = model
+        self.driving_style = driving_style
+        self.ac_target_temperature = ac_target_temperature
+
+
+class EnvironmentInfo:
+    def __init__(self, temperature: str, meteo: str, chaussee: int, roughness: int):
+        self.temp = temperature
+        self.meteo = meteo
+        self.chaussee = chaussee
+        self.roughness = roughness
+
+
+class FormInfo:
+    def __init__(self, car_info: CarInfo, environment_info: EnvironmentInfo):
+        self.carInfo = car_info
+        self.environmentInfo = environment_info
+
+
+class User:
+    def __init__(self, name, last_name, driving_style):
+        self.name = name
+        self.last_name = last_name
+        self.driving_style = driving_style
 
 class RouteRequest(BaseModel):
     start_lat: float
@@ -238,6 +320,8 @@ def get_vehicle_data(marque: str, modele: str):
     ]
     return None if result.empty else result.iloc[0].to_dict()
 
+
+
 @app.post("/submit")
 async def submit(
     marque: str = Form(...),
@@ -261,6 +345,7 @@ async def submit(
         )
 
     route_data = calcul_distance(start_lat, start_lng, end_lat, end_lng)
+
     if duration is None:
         duration = route_data["duration"]
     distance = route_data["distance"]
@@ -271,6 +356,11 @@ async def submit(
     slope = delta_elevation/(distance*1000)
     speedAvg = distance/(duration/60)
     print(f"speedAvg: {speedAvg}, temperature: {temperature}, slope: {slope}, total_distance: {distance}")
+
+    ac_power = get_ac_power(marque, modele, temperature, duration, ac_target_temperature)
+
+    car_info = CarInfo(marque, modele, conduite, ac_target_temperature)
+    env_info = EnvironmentInfo(temperature, meteo, slide_range, roughness_range)
 
     print("CALCUL DES PARAMETRES")
     with open("model.json", 'r') as file:
@@ -294,54 +384,9 @@ async def submit(
     pourcentage_used = round(consommation_en_watts/batteryCapacity*100,2)
 
 
-    atm_pressure = 101.34
-    gas_constant = 8.314
-    molar_mass_air = 28.96
-    specific_heat_air = 1.012
-    kelvins_offset = 273.15
-
-    car_data = get_vehicle_data(marque, modele)
-    if car_data is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Vehicule introuvable pour marque='{marque}' et modele='{modele}'.",
-        )
-
-    try:
-        length_mm = float(car_data["length_mm"])
-        width_mm = float(car_data["width_mm"])
-        height_mm = float(car_data["height_mm"])
-        car_volume_percentage = 0.2 # valeur moyenne arbitraire
-        ambient_temperature = float(temperature)
-        duration_sec = duration * 60
-        heat_loss_coefficient = 120 #W/K, rough first estimate for a car
-    except (TypeError, ValueError) as exc:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Donnees invalides pour le vehicule '{marque} {modele}'.",
-        ) from exc
-
-    car_volume = ((length_mm * width_mm * height_mm) / 1_000_000) * car_volume_percentage #L
-    car_air_quantity = (atm_pressure * car_volume) / (gas_constant * (ambient_temperature + kelvins_offset)) #mol
-    car_air_mass = car_air_quantity * molar_mass_air / 1000 # kg
-    delta_temp = abs(ac_target_temperature - ambient_temperature)
-    ac_energy = car_air_mass * specific_heat_air * delta_temp #kJ
-    ac_power = ac_energy/duration_sec #kW
-
-    ac_loss = (heat_loss_coefficient * delta_temp) / 1000 #kW
-
-    ac_power+=ac_loss
 
 
-    print(
-        {
-            "duration_sec": duration_sec,
-            "car_volume_l": car_volume,
-            "car_air_mass": car_air_mass,
-            "ac_energy": ac_energy,
-            "ac_power": ac_power,
-        }
-    )
+
 
     result = randint(0, 1000) / 10
     return RedirectResponse(url=f"/result?range={result}&pourcentage_used={pourcentage_used}&watt_used={consommation_en_watts}", status_code=status.HTTP_303_SEE_OTHER)
