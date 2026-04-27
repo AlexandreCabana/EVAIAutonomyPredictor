@@ -10,14 +10,15 @@ import time
 from scipy.interpolate import interp1d
 import json
 
-lossLastXUpdate = 5
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NUMBEROFPOINTPERGRAPH = 200
 NUMBEROFGRAPHPERROW = 2
-CALCULATELOSSEVERYXUPDATE = 1000
-GENERATEGRAPHEVERYXUPDATE = 10 * CALCULATELOSSEVERYXUPDATE
+CALCULATELOSSEVERYXUPDATE = 500
+GENERATEGRAPHEVERYXUPDATE = 2 * CALCULATELOSSEVERYXUPDATE
 QUALITYPERCENTDATA = 0.2
 QUALITYLOSSWEIGHT = 0.4
+LOSSLASTXUPDATE = 5
 COMPARECOLUMNNAME = "energy_consumption_per_km"
 startTime = time.time()
 functionParamSaved = {}
@@ -157,7 +158,8 @@ def plotEvolution(x, y, y_valid, bestI, bestLoss, tilte="loss evolution"):
     currentFig.scatter(x, y, label="Training data")
     currentFig.scatter(x, y_valid, label="Validation data")
     currentFig.scatter(x, yGlobal, label="Global data")
-    currentFig.scatter(bestI, bestLoss, marker='x', color='red', s=100, label="Best loss")
+    if min(x)<=bestI<=max(x):
+        currentFig.scatter(bestI, bestLoss, marker='x', color='red', s=100, label="Best loss")
     currentFig.legend()
     fig.suptitle(tilte)
     plt.show()
@@ -195,7 +197,7 @@ def train():
             lossHistory.append(loss.data)
             validationLossHistory.append(validationError)
             saveModel(i, int(loss.data), int(validationError))
-            print(f"iter {i}, Loss = {loss.data}, deltaLoss = {lastLoss-loss.data}, validationError = {validationError},globalError ={bestGlobalLoss}, bestI = {bestI}, elapseTime = {time.time() - startTime}")
+            print(f"Iter {i}, Loss = {loss.data}, deltaLoss = {lastLoss-loss.data}, validationError = {validationError},globalError = {bestGlobalLoss}, bestI = {bestI}, elapseTime = {time.time() - startTime}")
             lastLoss = loss.data
             if i % GENERATEGRAPHEVERYXUPDATE == 0:
                 for model in listModel:
@@ -219,8 +221,8 @@ def train():
                 plt.show()
                 if len(iteration)>=3:
                     plotEvolution(iteration, lossHistory, validationLossHistory, bestI, bestGlobalLoss)
-                    if (len(iteration)>= lossLastXUpdate*CALCULATELOSSEVERYXUPDATE):
-                        plotEvolution(iteration[-lossLastXUpdate*CALCULATELOSSEVERYXUPDATE:], lossHistory[-lossLastXUpdate*CALCULATELOSSEVERYXUPDATE:], validationLossHistory[-lossLastXUpdate*CALCULATELOSSEVERYXUPDATE:], bestI, bestGlobalLoss, f"loss of evolution of last {lossLastXUpdate} update")
+                    if len(iteration)>= LOSSLASTXUPDATE:
+                        plotEvolution(iteration[-LOSSLASTXUPDATE:], lossHistory[-LOSSLASTXUPDATE:], validationLossHistory[-LOSSLASTXUPDATE:], bestI, bestGlobalLoss, f"loss of evolution of last {LOSSLASTXUPDATE} update")
 def calculateErrorOnValidationData():
     data["prediction"] = sum([model.appliedOnColumn(validationData) for model in listModel])
     data["squarreError"] = (data["prediction"] - data[COMPARECOLUMNNAME])**2
@@ -245,6 +247,7 @@ if __name__ == "__main__":
     data["temperature"] = data["temperature"].fillna(data["temperature"].dropna().mean())
     data["total_distance"]=data["total_distance"]/1000
     data["energy_consumption_per_km"] = data["energy_consumption"]/data["total_distance"]
+    data["temperatureOverSpeed"] = data["temperature"]/data["speedAvg"] #speed = delta x/ delta t
     trainData = data.sample(frac=1-QUALITYPERCENTDATA)
     validationData = data.iloc[~data.index.isin(trainData.index)]
     comparedColumn = trainData[COMPARECOLUMNNAME]
@@ -252,6 +255,7 @@ if __name__ == "__main__":
 
     listModel: list[Param] = [Param("speedAvg", modelQuad(), trainData),
                               Param("slope", modelCube(), trainData),
-                              Param("temperature", modelQuad(), trainData)]
+                              Param("temperature", modelQuad(), trainData),
+                              Param("temperatureOverSpeed", modelCube(), trainData)]
     numberOfColumnForGraph = len(listModel) // NUMBEROFGRAPHPERROW + (len(listModel) % NUMBEROFGRAPHPERROW > 0)
     train()
