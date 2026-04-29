@@ -1,4 +1,4 @@
-let currentMeteoMode = "manuel";
+let currentMeteoMode = "auto";
 let meteoData = null;
 
 
@@ -131,7 +131,6 @@ function success(position) {
         x.innerHTML = "Latitude: " + position.coords.latitude +
             "<br>Longitude: " + position.coords.longitude;
     }
-    openMap();
 
     const userLatLng = L.latLng(position.coords.latitude, position.coords.longitude);
     if (map) {
@@ -146,13 +145,22 @@ function error() {
     alert("Sorry, no position available.");
 }
 
-// Slider - runs first before anything can crash it
-const slider = document.getElementById('ac_target_temperature');
-const display = document.getElementById('ac-target-temperature-value');
-if (slider && display) {
+function bindSliderValue(sliderId, displayId) {
+    const slider = document.getElementById(sliderId);
+    const display = document.getElementById(displayId);
+    if (!slider || !display) {
+        return;
+    }
+
     display.textContent = slider.value;
-    slider.addEventListener('input', () => display.textContent = slider.value);
+    slider.addEventListener('input', () => {
+        display.textContent = slider.value;
+    });
 }
+
+// Slider - runs first before anything can crash it
+bindSliderValue('ac_target_temperature', 'ac-target-temperature-value');
+bindSliderValue('current_charge_percentage', 'current-charge-value');
 
 // Meteo toggles
 const check_starttime = document.getElementById('start-time-check');
@@ -160,19 +168,11 @@ const startTimeSection = document.getElementById('start-time-div');
 const radioButtonName = document.getElementsByName('meteo-mode');
 const meteoManuelSection = document.getElementById('meteo-manuelle-section');
 
-let lastValidMode = "manuel";
+let lastValidMode = "auto";
 
 if (check_starttime && startTimeSection) {
     check_starttime.addEventListener('change', (event) => {
         startTimeSection.classList.toggle('hidden', !event.target.checked);
-        if(!event.target.checked){
-            toggleMeteoSection('manuel');
-            const manuelRadio = document.querySelector(`input[name="meteo-mode"][value="manuel"]`);
-            if (manuelRadio) {
-                manuelRadio.checked = true;
-            }
-            lastValidMode = "manuel"
-        }
     });
 }
 
@@ -200,6 +200,11 @@ function toggleMeteoSection(mode) {
         meteoManuelSection.classList.remove('disabled');
         currentMeteoMode = "manuel";
     }
+}
+
+const checkedMeteoMode = document.querySelector('input[name="meteo-mode"]:checked');
+if (checkedMeteoMode) {
+    toggleMeteoSection(checkedMeteoMode.value);
 }
 
 // change TIME AND DATE for departure time + fetch and update the meteo information

@@ -14,7 +14,7 @@
 
 <body>
     <div class="page">
-        <h1>Prediction de l'<b>autonomie</b> d'une <b><br>VOITURE ELECTRIQUE</b></h1>
+        <h1>Prédiction de l'<b>autonomie</b> d'une <b><br>VOITURE ÉLECTRIQUE</b></h1>
 
         {% if error_msg %}
 <div style="background: rgba(255, 0, 0, 0.2); border: 1px solid red; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
@@ -26,14 +26,31 @@
             <div class="div-sections-parametres">
                 <div class="panel">
                     <div class="section-parametres">
-                        <h2>Information du vehicule</h2>
+                        <h2>Information du véhicule</h2>
                         <label for="marque-list">Marque:</label>
                         <select name="marque" id="marque-list"></select>
                         <br>
-                        <label for="modele-list">Modele:</label>
+                        <label for="modele-list">Modèle:</label>
                         <select name="modele" id="modele-list">
-                            <option value="-- modele --">-- modele --</option>
+                            <option value="-- modele --">-- modèle --</option>
                         </select>
+                    </div>
+
+                    <div class="section-parametres">
+                        <h2>Charge actuelle</h2>
+                        <div id="current-charge-section">
+                            <label for="current_charge_percentage">Charge actuelle du véhicule: <span id="current-charge-value"></span>%</label>
+                            <div class="slidecontainer">
+                                <input
+                                    type="range"
+                                    id="current_charge_percentage"
+                                    name="current_charge_percentage"
+                                    min="0"
+                                    max="100"
+                                    value="100"
+                                    class="slider">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="section-parametres">
@@ -41,7 +58,7 @@
                         <p>Style de conduite</p>
                         <div class="options">
                             <input type="radio" id="conduiteChoix1" name="conduite" value="eco">
-                            <label for="conduiteChoix1">Eco-conduite</label>
+                            <label for="conduiteChoix1">Éco-conduite</label>
 
                             <input type="radio" id="conduiteChoix2" name="conduite" value="normal" checked>
                             <label for="conduiteChoix2">Normal</label>
@@ -50,23 +67,6 @@
                             <label for="conduiteChoix3">Sportif</label>
 
                         </div>
-                        <p>Utilisation du chauffage/climatisation</p>
-
-                       <div id="climatisation-temperature-section">
-                        <label for="ac_target_temperature">Temperature cible AC/Chauffage: <span id="ac-target-temperature-value"></span>°C</label>
-                        <div class="slidecontainer">
-                            <input
-                                type="range"
-                                id="ac_target_temperature"
-                                name="ac_target_temperature"
-                                min="15"
-                                max="35"
-                                value="22"
-                                class="slider">
-                        </div>
-                    </div>
-
-
                     </div>
                 </div>
             </div>
@@ -76,13 +76,16 @@
             <input type="hidden" name="end_lat" id="end_lat">
             <input type="hidden" name="end_lng" id="end_lng">
             <input type="hidden" name="duration" id="duration">
-            <div class="section-parametres">
+            <div class="section-parametres section-gap">
     <h2>Sélection du trajet</h2>
 
     <div id="map-container" style="margin-top:10px; width: 100%;">
         <div id="map-shell">
 
             <div id="map" style="height:400px; border-radius: 12px;"></div>
+            <button type="button" id="map-location-button" onclick="getLocation()">
+                Mettre un marqueur sur ma position
+            </button>
 
         </div>
         <p id="demo"></p>
@@ -95,18 +98,17 @@
         <div id="route-info" style="display:none; margin-top: 15px;">
             <h3>Informations du trajet</h3>
             <p><strong>Distance:</strong> <span id="route-distance">0</span> km</p>
-            <p><strong>Duree avec trafic:</strong> <span id="route-duration">0</span> minutes</p>
-            <p><strong>Duree sans trafic:</strong> <span id="route-base-duration">0</span> minutes</p>
+            <p><strong>Durée avec trafic:</strong> <span id="route-duration">0</span> minutes</p>
+            <p><strong>Durée sans trafic:</strong> <span id="route-base-duration">0</span> minutes</p>
             <p><strong>Retard trafic:</strong> <span id="route-traffic-delay">0</span> minutes</p>
             <p><strong>Source:</strong> <span id="route-provider">osrm</span></p>
         </div>
     </div>
 </div>
-
-
-
+            <div class="start-time-toggle">
             <input type="checkbox" id="start-time-check">
             <label for="start-time-check">Spécifier une date et une heure de départ</label>
+            </div>
             <div class="start-time-div hidden" id="start-time-div">
                 <p>Heure et date de départ</p>
                 <label for="start_date"></label><input type="date" id="start_date">
@@ -117,19 +119,17 @@
 
             <div class="manuel-auto-choix-section">
                 <div class="btn-manuel-auto-choix">
-                    <div class="">
-                            <input type="radio" id="meteo-manuelle" name="meteo-mode" value="manuel" checked>
-                            <label for="meteo-manuelle">Météo manuelle</label>
+                    <div class="meteo-mode-toggle">
+                            <input type="radio" id="meteo-auto" name="meteo-mode" value="auto" checked onclick="updateMeteoInfo()">
+                            <label for="meteo-auto">Meteo automatique</label>
 
-                            <input type="radio" id="meteo-auto" name="meteo-mode" value="auto" onclick="updateMeteoInfo()">
-                            <label for="meteo-auto">Météo automatique</label></div>
+                            <input type="radio" id="meteo-manuelle" name="meteo-mode" value="manuel">
+                            <label for="meteo-manuelle">Meteo manuelle</label></div>
                 </div>
                 <div class="panel" id="meteo-manuelle-section">
                     <div class="section-parametres">
                         <h2>Conditions extérieures</h2>
 
-<!--                        <button type="button" id="location-btn" onclick="getLocation()">Utiliser ma localisation</button>-->
-<!--                        <p id="demo"></p>-->
 
                         <br>
                         <label for="temperature">Température (°C):</label>
@@ -152,7 +152,7 @@
                             <label for="meteoChoix4">Neige</label>
                         </div>
 
-                        <p>Type de chaussé</p>
+                        <p>Type de chaussée</p>
                         <div class="chausse-parametres">
                             <div class="parametre-slider-wrapper">
                                 <p>Pas glissant</p>
@@ -175,6 +175,23 @@
                     </div>
                 </div>
 
+            </div>
+            <div class="section-parametres section-gap">
+                <h2>Climatisation</h2>
+                <p>Utilisation du chauffage/climatisation</p>
+                <div id="climatisation-temperature-section">
+                    <label for="ac_target_temperature">Température cible AC/Chauffage: <span id="ac-target-temperature-value"></span>&deg;C</label>
+                    <div class="slidecontainer">
+                        <input
+                            type="range"
+                            id="ac_target_temperature"
+                            name="ac_target_temperature"
+                            min="15"
+                            max="35"
+                            value="22"
+                            class="slider">
+                    </div>
+                </div>
             </div>
             <button type="submit">Envoyer</button>
         </form>

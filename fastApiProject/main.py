@@ -17,6 +17,11 @@ from sympy import Float
 import uvicorn
 import json
 import csv
+# get elevation data
+import requests
+import numpy as np
+import time
+
 
 
 app = FastAPI()
@@ -30,22 +35,13 @@ app.add_middleware(
 )
 
 # Get the directory of the current file
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_JSON_PATH = BASE_DIR / "model.json"
+CAR_INFO_CSV = BASE_DIR / "static" / "car_info.csv"
 
-app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
-templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
-# Base Model exemple
-class Item(BaseModel):
-    name: str
-    description: str | None = None
-    price: float
-    tax: float | None = None
-
-# get elevation data
-import requests
-import numpy as np
-import time
 
 def get_elevation_data(latitude, longitude):
     url = "https://api.open-meteo.com/v1/elevation"
@@ -79,7 +75,7 @@ def calcul_distance(lat_i,lon_i,lat_f,lon_f):
     route = data["routes"][0]
 
     distance = route["distance"]/1000
-    duration = route["duration"] /60
+    duration = route["duration"] /60 #sans traffic
 
     geometry = route["geometry"]["coordinates"]
 
@@ -222,30 +218,19 @@ def get_ac_power(marque: str, modele: str, temperature: str, duration:float, ac_
     kelvins_offset = 273.15
 
     car_data = get_vehicle_data(marque, modele)
-    if car_data is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Vehicule introuvable pour marque='{marque}' et modele='{modele}'.",
-        )
+    length_mm = float(car_data["length_mm"])
+    width_mm = float(car_data["width_mm"])
+    height_mm = float(car_data["height_mm"])
+    car_volume_percentage = 0.2  # rough first estimate for a car
+    ambient_temperature = float(temperature)
+    duration_sec = duration * 60
+    heat_loss_coefficient = 120  # W/K, rough first estimate for a car
 
-    try:
-        length_mm = float(car_data["length_mm"])
-        width_mm = float(car_data["width_mm"])
-        height_mm = float(car_data["height_mm"])
-        car_volume_percentage = 0.2  # valeur moyenne arbitraire
-        ambient_temperature = float(temperature)
-        duration_sec = duration * 60
-        heat_loss_coefficient = 120  # W/K, rough first estimate for a car
-    except (TypeError, ValueError) as exc:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Donnees invalides pour le vehicule '{marque} {modele}'.",
-        ) from exc
     car_volume = ((length_mm * width_mm * height_mm) / 1_000_000) * car_volume_percentage  # L
-    car_air_quantity = (atm_pressure * car_volume) / (gas_constant * (ambient_temperature + kelvins_offset))  # mol avec loi des gaz parfaits
+    car_air_quantity = (atm_pressure * car_volume) / (gas_constant * (ambient_temperature + kelvins_offset))  # mol, loi des gaz parfaits
     car_air_mass = car_air_quantity * molar_mass_air / 1000  # kg
     delta_temperature = abs(ac_target_temperature - ambient_temperature)
-    ac_energy = car_air_mass * specific_heat_air * delta_temperature  # kJ avec Q=m*c*deltaT
+    ac_energy = car_air_mass * specific_heat_air * delta_temperature  # kJ, Q=m*c*deltaT
     ac_power = ac_energy / duration_sec  # kW
 
     ac_loss = (heat_loss_coefficient * delta_temperature) / 1000  # kW
@@ -264,7 +249,6 @@ def get_ac_power(marque: str, modele: str, temperature: str, duration:float, ac_
 
 
 
-CAR_INFO_CSV = Path(__file__).parent / "static" / "car_info.csv"
 df_cars = pd.read_csv(CAR_INFO_CSV, encoding="utf-8-sig")
 
 # Form struct
@@ -329,6 +313,7 @@ async def submit(
     marque: str = Form(...),
     modele: str = Form(...),
     ac_target_temperature: int = Form(21),
+    current_charge_percentage: float = Form(100),
     conduite: str = Form(...),
     temperature: str = Form(...),
     meteo: str = Form(...),
@@ -342,7 +327,7 @@ async def submit(
 ):
     # Vérification des champs
 
-    params = [marque, modele, ac_target_temperature, conduite, temperature, meteo, slide_range, roughness_range,
+    params = [marque, modele, ac_target_temperature, current_charge_percentage, conduite, temperature, meteo, slide_range, roughness_range,
               start_lat, start_lng, end_lat, end_lng, duration]  # Liste tes champs critiques
     if any(v is None or v == "" for v in params):
         # On recharge la page index.html avec un message d'erreur
@@ -352,6 +337,14 @@ async def submit(
             name="index.html",
             context={
                 "error_msg": "Certains paramètres ont mal été définis ou aucun trajet n'a été sélectionné"
+            }
+        )
+    if current_charge_percentage < 0 or current_charge_percentage > 100:
+        return templates.TemplateResponse(
+            request=request,
+            name="index.html",
+            context={
+                "error_msg": "La charge actuelle du vehicule doit etre comprise entre 0 et 100%."
             }
         )
     route_data = calcul_distance(start_lat, start_lng, end_lat, end_lng)
@@ -371,7 +364,7 @@ async def submit(
     car_info = CarInfo(marque, modele, conduite, ac_target_temperature)
     env_info = EnvironmentInfo(temperature, meteo, slide_range, roughness_range)
 
-    with open("model.json", 'r') as file:
+    with MODEL_JSON_PATH.open("r", encoding="utf-8") as file:
         data = json.load(file)
         current_settings = data["88965"]["functions"]
         params_names = ["speedAvg", "slope", "temperature"]
@@ -385,19 +378,22 @@ async def submit(
         energy_consumption = round(somme*distance,3)
 
     # trouver la capacité de la batterie
-    batteryCapacity = float(fetch_ev_batteryCapacity(modele))*1000
-    pourcentage_used = round(energy_consumption/batteryCapacity*100,2)
+    total_battery_capacity = float(fetch_ev_batteryCapacity(modele)) * 1000
+    battery_capacity = total_battery_capacity * (current_charge_percentage / 100)
+    pourcentage_used = round(energy_consumption / total_battery_capacity * 100, 2)
 
-
-
-
-
-
-    result = randint(0, 1000) / 10
-    return RedirectResponse(url=f"/result?range={result}&pourcentage_used={pourcentage_used}&energy_consumption={energy_consumption}", status_code=status.HTTP_303_SEE_OTHER)
+    predicted_range = int(battery_capacity / energy_consumption) if energy_consumption > 0 else 0
+    return RedirectResponse(
+        url=(
+            f"/result?range={predicted_range}"
+            f"&pourcentage_used={pourcentage_used}"
+            f"&energy_consumption={energy_consumption}"
+        ),
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
 
 def fetch_ev_batteryCapacity(car_model):
-    with open("static/car_info.csv", 'r') as file:
+    with CAR_INFO_CSV.open("r", encoding="utf-8-sig", newline="") as file:
         csvFile = csv.reader(file)
         for line in csvFile:
             if car_model in line:
@@ -413,6 +409,7 @@ def calculate_param(param_value : dict,value):
 
 
 @app.get("/result")
+@app.get("/range")
 def page_resultat(request: Request, range: float, pourcentage_used: float, energy_consumption:float, distance: float | None = None, duration: float | None = None):
     print(range)
     return templates.TemplateResponse(
