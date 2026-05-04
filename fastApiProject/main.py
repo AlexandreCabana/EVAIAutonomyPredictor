@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from starlette import status
 from starlette.responses import JSONResponse, RedirectResponse
 from starlette.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from sympy import Float
 import uvicorn
 import json
@@ -21,9 +22,15 @@ import requests
 import numpy as np
 import time
 
-
-
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Get the directory of the current file
 BASE_DIR = Path(__file__).resolve().parent
