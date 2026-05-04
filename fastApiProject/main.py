@@ -259,11 +259,9 @@ class CarInfo:
 
 
 class EnvironmentInfo:
-    def __init__(self, temperature: str, meteo: str, chaussee: int, roughness: int):
+    def __init__(self, temperature: str, meteo: str):
         self.temp = temperature
         self.meteo = meteo
-        self.chaussee = chaussee
-        self.roughness = roughness
 
 
 class FormInfo:
@@ -315,8 +313,6 @@ async def submit(
     conduite: str = Form(...),
     temperature: str = Form(...),
     meteo: str = Form(...),
-    slide_range: int = Form(...),
-    roughness_range: int = Form(...),
     start_lat: float | None = Form(None),
     start_lng: float | None = Form(None),
     end_lat: float | None = Form(None),
@@ -325,7 +321,7 @@ async def submit(
 ):
     # Vérification des champs
 
-    params = [marque, modele, ac_target_temperature, current_charge_percentage, conduite, temperature, meteo, slide_range, roughness_range,
+    params = [marque, modele, ac_target_temperature, current_charge_percentage, conduite, temperature, meteo,
               start_lat, start_lng, end_lat, end_lng, duration]  # Liste tes champs critiques
     if any(v is None or v == "" for v in params):
         # On recharge la page index.html avec un message d'erreur
@@ -360,7 +356,7 @@ async def submit(
     ac_power = get_ac_power(marque, modele, temperature, duration, ac_target_temperature)
 
     car_info = CarInfo(marque, modele, conduite, ac_target_temperature)
-    env_info = EnvironmentInfo(temperature, meteo, slide_range, roughness_range)
+    env_info = EnvironmentInfo(temperature, meteo)
 
     with MODEL_JSON_PATH.open("r", encoding="utf-8") as file:
         data = json.load(file)
