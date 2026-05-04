@@ -6,13 +6,13 @@ import pandas as pd
 import requests
 import uvicorn
 from fastapi import FastAPI, Form, HTTPException, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from starlette import status
 from starlette.responses import JSONResponse, RedirectResponse
 from starlette.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from sympy import Float
 import uvicorn
 import json
@@ -21,8 +21,6 @@ import csv
 import requests
 import numpy as np
 import time
-
-
 
 app = FastAPI()
 
