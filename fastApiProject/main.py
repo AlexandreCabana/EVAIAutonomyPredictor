@@ -42,7 +42,7 @@ CAR_INFO_CSV = BASE_DIR / "static" / "car_info.csv"
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
-
+#Récupère l'altitude à une coordonnée
 def get_elevation_data(latitude, longitude):
     url = "https://api.open-meteo.com/v1/elevation"
     params = {
@@ -65,6 +65,7 @@ def get_elevation_data(latitude, longitude):
     except (requests.exceptions.RequestException, ValueError, KeyError, IndexError):
         return np.nan
 
+#Calcul la distance et le temps sans traffic du trajet
 def calcul_distance(lat_i,lon_i,lat_f,lon_f):
 #OpenStreetMap
     url = f"http://router.project-osrm.org/route/v1/driving/{lon_i},{lat_i};{lon_f},{lat_f}?overview=full&geometries=geojson"
@@ -92,7 +93,7 @@ def calcul_distance(lat_i,lon_i,lat_f,lon_f):
         "provider": "osrm",
     }
 
-
+#Calcul la durée avec traffic
 def calcul_traffic_route(lat_i, lon_i, lat_f, lon_f):
     api_key = "SQek2X8NbQiiz0wNdweCaLPoHuw0QCEy" #S'il vous plait garder cette clée privée
     if not api_key:
@@ -138,7 +139,7 @@ def calcul_traffic_route(lat_i, lon_i, lat_f, lon_f):
     except requests.RequestException:
         return calcul_distance(lat_i, lon_i, lat_f, lon_f)
 
-
+#défini le type de météo
 def weather_code_to_meteo(weather_code):
     if weather_code == 0:
         return "soleil"
@@ -148,7 +149,7 @@ def weather_code_to_meteo(weather_code):
         return "neige"
     return "pluie"
 
-
+#Récupère les données météos
 def get_meteo(lat, lon, date = None, heure :int = None):
     # obtient la météo avec openMeteo selon localisation et date
     url = "https://api.open-meteo.com/v1/forecast"
@@ -203,13 +204,8 @@ def get_meteo(lat, lon, date = None, heure :int = None):
             "precipitation": current.get("precipitation"),
             "overall_forecast": data
         }
-def get_vehicle_data(marque: str, modele: str):
-    result = df_cars[
-        (df_cars["-- brand --"].astype(str).str.strip().str.lower() == marque.strip().lower())
-        & (df_cars["model"].astype(str).str.strip().str.lower() == modele.strip().lower())
-    ]
-    return None if result.empty else result.iloc[0].to_dict()
 
+#Estime la puissance utilisée par la climatisation et le chauffage
 def get_ac_power(marque: str, modele: str, temperature: str, duration:float, ac_target_temperature:float):
     atm_pressure = 101.34 #kPa
     gas_constant = 8.314
@@ -247,6 +243,27 @@ def get_ac_power(marque: str, modele: str, temperature: str, duration:float, ac_
 
     return ac_power
 
+def get_vehicle_data(marque: str, modele: str):
+    result = df_cars[
+        (df_cars["-- brand --"].astype(str).str.strip().str.lower() == marque.strip().lower())
+        & (df_cars["model"].astype(str).str.strip().str.lower() == modele.strip().lower())
+    ]
+    return None if result.empty else result.iloc[0].to_dict()
+
+def fetch_ev_batteryCapacity(car_model):
+    with CAR_INFO_CSV.open("r", encoding="utf-8-sig", newline="") as file:
+        csvFile = csv.reader(file)
+        for line in csvFile:
+            if car_model in line:
+                return line[3]
+        return None
+
+
+def calculate_param(param_value : dict,value):
+    somme = 0
+    for i, param in enumerate(reversed(list(param_value[list(param_value.keys())[0]].values()))):
+        somme += param*value**i
+    return somme
 
 
 df_cars = pd.read_csv(CAR_INFO_CSV, encoding="utf-8-sig")
@@ -293,20 +310,12 @@ class MeteoRequest(BaseModel):
     date: str | None = None
     heure: int | None = None
 
-
+#Ouvre la page d'accueil
 @app.get("/", response_class=HTMLResponse)
 async def main_page(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
 
-def get_vehicle_data(marque: str, modele: str):
-    result = df_cars[
-        (df_cars["-- brand --"].astype(str).str.strip().str.lower() == marque.strip().lower())
-        & (df_cars["model"].astype(str).str.strip().str.lower() == modele.strip().lower())
-    ]
-    return None if result.empty else result.iloc[0].to_dict()
-
-
-
+#Récupère les données utilisateurs
 @app.post("/submit")
 async def submit(
     request: Request,
@@ -326,49 +335,43 @@ async def submit(
     duration: float | None = Form(None),
 ):
     # Vérification des champs
-
     params = [marque, modele, ac_target_temperature, current_charge_percentage, conduite, temperature, meteo, slide_range, roughness_range,
               start_lat, start_lng, end_lat, end_lng, duration]  # Liste tes champs critiques
+
+    #Si une info est manquante
     if any(v is None or v == "" for v in params):
         # On recharge la page index.html avec un message d'erreur
-        # Utilise cette syntaxe pour éviter l'erreur "unhashable type: dict"
         return templates.TemplateResponse(
-            request=request,  # L'argument request est obligatoire
+            request=request,
             name="index.html",
             context={
                 "error_msg": "Certains paramètres ont mal été définis ou aucun trajet n'a été sélectionné"
             }
         )
-    if current_charge_percentage < 0 or current_charge_percentage > 100:
-        return templates.TemplateResponse(
-            request=request,
-            name="index.html",
-            context={
-                "error_msg": "La charge actuelle du vehicule doit etre comprise entre 0 et 100%."
-            }
-        )
+
     route_data = calcul_distance(start_lat, start_lng, end_lat, end_lng)
 
     if duration is None:
         duration = route_data["duration"]
-    distance = route_data["distance"]
-    duration = route_data["duration"]
+        distance = route_data["distance"]
+
     altitude_start = get_elevation_data(start_lat, start_lng)
     altitude_end = get_elevation_data(end_lat, end_lng)
     delta_elevation = altitude_end-altitude_start
     slope = delta_elevation/(distance*1000)
-    speedAvg = distance/(duration/60)
+    avg_speed = distance/(duration/60)
 
     ac_power = get_ac_power(marque, modele, temperature, duration, ac_target_temperature)
 
     car_info = CarInfo(marque, modele, conduite, ac_target_temperature)
     env_info = EnvironmentInfo(temperature, meteo, slide_range, roughness_range)
 
+    #calculs de l'énergie avec le modèle entrainé
     with MODEL_JSON_PATH.open("r", encoding="utf-8") as file:
         data = json.load(file)
         current_settings = data["88965"]["functions"]
-        params_names = ["speedAvg", "slope", "temperature"]
-        params_values = [speedAvg, slope, float(temperature)]
+        params_names = ["avg_speed", "slope", "temperature"]
+        params_values = [avg_speed, slope, float(temperature)]
         somme = 0
         for i, param_name in enumerate(params_names):
             current_values = current_settings[param_name]
@@ -383,6 +386,7 @@ async def submit(
     pourcentage_used = round(energy_consumption / total_battery_capacity * 100, 2)
 
     predicted_range = int(battery_capacity / energy_consumption) if energy_consumption > 0 else 0
+
     return RedirectResponse(
         url=(
             f"/result?range={predicted_range}"
@@ -392,22 +396,7 @@ async def submit(
         status_code=status.HTTP_303_SEE_OTHER,
     )
 
-def fetch_ev_batteryCapacity(car_model):
-    with CAR_INFO_CSV.open("r", encoding="utf-8-sig", newline="") as file:
-        csvFile = csv.reader(file)
-        for line in csvFile:
-            if car_model in line:
-                return line[3]
-        return None
-
-
-def calculate_param(param_value : dict,value):
-    somme = 0
-    for i, param in enumerate(reversed(list(param_value[list(param_value.keys())[0]].values()))):
-        somme += param*value**i
-    return somme
-
-
+#Load la page de résulats
 @app.get("/result")
 @app.get("/range")
 def page_resultat(request: Request, range: float, pourcentage_used: float, energy_consumption:float, distance: float | None = None, duration: float | None = None):
@@ -424,7 +413,7 @@ def page_resultat(request: Request, range: float, pourcentage_used: float, energ
         },
     )
 
-
+#Recevoir les données du trajet
 @app.post("/route")
 async def get_route(data: RouteRequest):
     print("get route called")
@@ -437,7 +426,7 @@ async def get_route(data: RouteRequest):
         )
     )
 
-
+#Recevoir les données de pour le calcul météo
 @app.post("/meteo")
 async def meteo(data: MeteoRequest):
     if data.date is not None and data.heure is not None:
