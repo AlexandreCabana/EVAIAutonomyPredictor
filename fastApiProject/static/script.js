@@ -1,10 +1,10 @@
 let currentMeteoMode = "auto";
 let meteoData = null;
 
-
+//récupère les données météos selon coordonnées
 async function fetchMeteoForPoint(lat, lon, date = null, heure = null) {
     try {
-        const response = await fetch("http://127.0.0.1:8000/meteo", {
+        const response = await fetch("/meteo", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -28,20 +28,23 @@ async function fetchMeteoForPoint(lat, lon, date = null, heure = null) {
         console.error("Erreur lors de la recuperation de la meteo:", error);
     }
 }
+
+//mets à jour le siteweb si
 function updateMeteoInfo(){
     try{
         const temperatureInput = document.getElementById("temperature");
         if (!meteoData) {
             return;
         }
+        //affiche la température automatique sur le site
         if(currentMeteoMode === "auto"){
             if (temperatureInput && meteoData.temperature !== undefined && meteoData.temperature !== null) {
                 temperatureInput.value = meteoData.temperature;
             }
         }
 
+        //Coche le bon mode de météo (pluie, soleil, nuageux,...)
         if (meteoData.meteo) {
-            //va chercher le type de meteo
             const meteoRadio = document.querySelector(`input[name="meteo"][value="${meteoData.meteo}"]`);
             if (meteoRadio) {
                 meteoRadio.checked = true;
@@ -54,7 +57,7 @@ function updateMeteoInfo(){
 }
 
 
-
+//récupère la liste de véhicules
 async function fetchCarInfo() {
     try {
         const response = await fetch("static/car_info.csv");
@@ -65,7 +68,7 @@ async function fetchCarInfo() {
         console.error("Erreur de fetch:", error);
     }
 }
-
+//récupère les marques
 function getBrands(data) {
     const brandsSet = new Set();
     data.forEach((model) => {
@@ -75,6 +78,7 @@ function getBrands(data) {
     return brandsSet;
 }
 
+//liste de marques et de modèles
 async function init() {
     const data = await fetchCarInfo();
     const brandList = document.getElementById("marque-list");
@@ -87,11 +91,13 @@ async function init() {
 
     let selectedModel = null;
 
+
     brandSet.forEach((brandName) => {
         const newOption = new Option(brandName, brandName);
         brandList.add(newOption);
     });
 
+    //met à jour marque
     brandList.addEventListener("change", (event) => {
         const selectedBrand = event.target.value;
         modelList.innerHTML = "";
@@ -104,6 +110,7 @@ async function init() {
         });
     });
 
+    //met a jour modèle
     modelList.addEventListener("change", (event) => {
         const selectedModelName = event.target.value;
         data.forEach((model) => {
@@ -115,24 +122,15 @@ async function init() {
     });
 }
 
-const x = document.getElementById("demo");
-
+//pour utiliser la localisation de l'utilisateur
 function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(success, error);
-    } else if (x) {
-        x.innerHTML = "Geolocation is not supported by this browser.";
-    }
-}
 
-//pour utiliser la localisation de l'utilisateur
+}}
+//condition succès
 function success(position) {
-    if (x) {
-        x.innerHTML = "Latitude: " + position.coords.latitude +
-            "<br>Longitude: " + position.coords.longitude;
-    }
-
-    const userLatLng = L.latLng(position.coords.latitude, position.coords.longitude);
+     const userLatLng = L.latLng(position.coords.latitude, position.coords.longitude);
     if (map) {
         map.setView(userLatLng, 13);
         addPoint(userLatLng);
@@ -141,10 +139,12 @@ function success(position) {
     fetchMeteoForPoint(position.coords.latitude, position.coords.longitude);
 }
 
+//condition erreur
 function error() {
     alert("Sorry, no position available.");
 }
 
+// Slider logic
 function bindSliderValue(sliderId, displayId) {
     const slider = document.getElementById(sliderId);
     const display = document.getElementById(displayId);
@@ -153,12 +153,14 @@ function bindSliderValue(sliderId, displayId) {
     }
 
     display.textContent = slider.value;
+
+    //changer text quand on change la valeur du slider
     slider.addEventListener('input', () => {
         display.textContent = slider.value;
     });
 }
 
-// Slider - runs first before anything can crash it
+
 bindSliderValue('ac_target_temperature', 'ac-target-temperature-value');
 bindSliderValue('current_charge_percentage', 'current-charge-value');
 
@@ -176,6 +178,7 @@ if (check_starttime && startTimeSection) {
     });
 }
 
+//logique de changement de type de météo
 radioButtonName.forEach(radio => {
     radio.addEventListener("change", (event) => {
         const selectedValue = event.target.value;
@@ -189,6 +192,8 @@ if (typeof Papa !== 'undefined') {
 } else {
     window.addEventListener('load', init);
 }
+
+//sélectionner mode météo auto ou manuelle
 function toggleMeteoSection(mode) {
     if (!meteoManuelSection) {
         return;
@@ -212,7 +217,7 @@ if (checkedMeteoMode) {
 const start_date_field = document.getElementById('start_date');
 const start_time_field = document.getElementById('start_time');
 
-
+//calculs météos
 async function updateMeteo(){
     if (!start_date_field || !start_time_field) {
         return;
@@ -230,7 +235,7 @@ async function updateMeteo(){
     if(start_lat != "" && start_lng != ""){
         await fetchMeteoForPoint(start_lat, start_lng, start_date_field.value,start_hours_rounded);
     }else{
-        alert("Vous devez spécifier un trajet avantt")
+        alert("Vous devez spécifier un trajet avant")
     }
     updateMeteoInfo();
 }
