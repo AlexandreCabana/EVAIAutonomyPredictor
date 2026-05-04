@@ -6,7 +6,6 @@ import pandas as pd
 import requests
 import uvicorn
 from fastapi import FastAPI, Form, HTTPException, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -25,14 +24,6 @@ import time
 
 
 app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Get the directory of the current file
 BASE_DIR = Path(__file__).resolve().parent
