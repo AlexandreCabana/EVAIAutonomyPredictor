@@ -351,8 +351,8 @@ async def submit(
 
     if duration is None:
         duration = route_data["duration"]
-        distance = route_data["distance"]
 
+    distance = route_data["distance"]
     altitude_start = get_elevation_data(start_lat, start_lng)
     altitude_end = get_elevation_data(end_lat, end_lng)
     delta_elevation = altitude_end-altitude_start
@@ -368,10 +368,15 @@ async def submit(
     with MODEL_JSON_PATH.open("r", encoding="utf-8") as file:
         data = json.load(file)
         current_settings = data["88965"]["functions"]
-        params_names = ["avg_speed", "slope", "temperature"]
+        params_names = ["speedAvg", "slope", "temperature"]
         params_values = [avg_speed, slope, float(temperature)]
         somme = 0
         for i, param_name in enumerate(params_names):
+            if param_name not in current_settings:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Model settings are missing '{param_name}'",
+                )
             current_values = current_settings[param_name]
             current_param_value = params_values[i]
             somme += calculate_param(current_values, current_param_value)
