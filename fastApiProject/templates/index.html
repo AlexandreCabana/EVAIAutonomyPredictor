@@ -20,11 +20,12 @@
                         <h2>Information du véhicule</h2>
                         <label for="marque-list">Marque:</label>
                         <select name="marque" id="marque-list">
+                            <option value="marque">-- marque --</option>
                         </select>
                         <br>
                         <label for="modele-list">Modèle:</label>
                         <select name="modele" id="modele-list">
-                            <option value="-- modèle --">-- modèle --</option>
+                            <option value="modèle">-- modèle --</option>
                         </select>
                     </div>
 
@@ -140,7 +141,7 @@
             <label for="start_date"></label><input type="date" id="start_date">
             <label for="start_time"></label><input type="time" id="start_time">
 
-            <button type="submit">Envoyer</button>
+            <button type="submit" id="submit-button">Envoyer</button>
         </form>
 
     </div>

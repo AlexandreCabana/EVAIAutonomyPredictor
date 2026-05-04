@@ -129,13 +129,6 @@ async function displayRoute() {
 }
 
 
-
-
-    
-
-
-
-
 async function fetchCarInfo() {
     try {
         const response = await fetch('static/car_info.csv');
@@ -158,12 +151,12 @@ function getBrands(data){
     return brandsSet;
 }
 
-async function test() {
+async function init() {
     const data = await fetchCarInfo();
     console.log(data);
     brandSet = getBrands(data)
     const brandList = document.getElementById('marque-list');
-
+    brandList.innerHTML = "";
     let selectedModel = null;
 
     // Populate the brand list with options
@@ -201,7 +194,7 @@ async function test() {
 
     console.log("working");
 }
-test();
+init();
 
 // METEO PART
 // - get localisation
@@ -250,3 +243,5 @@ function fetchMeteo(position){
         console.error('There has been a problem with your fetch operation:', error);
       });
 }
+
+// --host 0.0.0.0 --port 8080
