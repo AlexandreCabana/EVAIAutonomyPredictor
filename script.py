@@ -18,8 +18,6 @@ class myDataset(Dataset):
     def __getitem__(self, idx):
         return self.data[idx]
 
-
-
 class modelQuad(nn.Module):
     def __init__(self):
         super().__init__()
