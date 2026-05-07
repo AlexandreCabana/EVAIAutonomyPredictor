@@ -370,15 +370,16 @@ async def submit(
             current_values = current_settings[param_name]
             current_param_value = params_values[i]
             somme += calculate_param(current_values, current_param_value)
-        # somme : W/km
-        energy_consumption = round(somme*distance,3)
+        # somme : Wh
+        energy_consumption = round(somme,3)
+        consomation_per_km = energy_consumption / distance
 
     # trouver la capacité de la batterie
     total_battery_capacity = float(fetch_ev_batteryCapacity(modele)) * 1000
     battery_capacity = total_battery_capacity * (current_charge_percentage / 100)
     pourcentage_used = round(energy_consumption / total_battery_capacity * 100, 2)
 
-    predicted_range = int(battery_capacity / energy_consumption) if energy_consumption > 0 else 0
+    predicted_range = int(battery_capacity / consomation_per_km) if energy_consumption > 0 else 0
 
     return RedirectResponse(
         url=(
