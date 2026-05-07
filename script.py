@@ -10,18 +10,20 @@ import time
 from scipy.interpolate import interp1d
 import json
 
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NUMBEROFPOINTPERGRAPH = 200
 NUMBEROFGRAPHPERROW = 2
 CALCULATELOSSEVERYXUPDATE = 500
 GENERATEGRAPHEVERYXUPDATE = 2 * CALCULATELOSSEVERYXUPDATE
-QUALITYPERCENTDATA = 0.2
-QUALITYLOSSWEIGHT = 0.4
-LOSSLASTXUPDATE = 5
-COMPARECOLUMNNAME = "energy_consumption_per_km"
+QUALITYPERCENTDATA = 0.05
+QUALITYLOSSWEIGHT = 0.1
+LOSSLASTXUPDATE = 10
+SAVEMODELEVERYXUPDATE = 5000
+COMPARECOLUMNNAME = "energy_consumption"#Énergie consommé en WH
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 startTime = time.time()
 functionParamSaved = {}
+
+
 class modelLineaire(nn.Module):
     def __init__(self):
         super().__init__()
@@ -39,9 +41,10 @@ class modelLineaire(nn.Module):
         return f"linear function with a: {self.weights.item()}, b: {self.bias.item()}"
 
     def appliedOnColumn(self, dfColumns):
-        return dfColumns*self.weights.item() + self.bias.item()
+        return dfColumns * self.weights.item() + self.bias.item()
+
     def to_json(self):
-        return {"lineaire":{"a":self.weights.item(),"b":self.bias.item()}}
+        return {"lineaire": {"a": self.weights.item(), "b": self.bias.item()}}
 
 
 class modelQuad(nn.Module):
@@ -60,18 +63,18 @@ class modelQuad(nn.Module):
 
     def calculatePointForGraph(self, lineSpace):
         return np.add(self.weights1.item() * np.multiply(lineSpace, lineSpace),
-               np.add(self.weights2.item() * lineSpace,
-                      self.bias1.item()))
-
+                      np.add(self.weights2.item() * lineSpace,
+                             self.bias1.item()))
 
     def __str__(self):
         return f"Quad function with a: {self.weights1.item()}, b: {self.weights2.item()}, c: {self.bias1.item()}"
 
     def appliedOnColumn(self, dfColumns):
-        return dfColumns*dfColumns*self.weights1.item() + dfColumns*self.weights2.item() + self.bias1.item()
+        return dfColumns * dfColumns * self.weights1.item() + dfColumns * self.weights2.item() + self.bias1.item()
 
     def to_json(self):
-        return {"quad": {"a": self.weights1.item(), "b": self.weights2.item(), "c":self.bias1.item()}}
+        return {"quad": {"a": self.weights1.item(), "b": self.weights2.item(), "c": self.bias1.item()}}
+
 
 class modelCube(nn.Module):
     def __init__(self):
@@ -91,21 +94,23 @@ class modelCube(nn.Module):
 
     def calculatePointForGraph(self, lineSpace):
         return np.add(self.weights1.item() * np.multiply(lineSpace, np.multiply(lineSpace, lineSpace)),
-            np.add(self.weights2.item() * np.multiply(lineSpace, lineSpace),
-               np.add(self.weights3.item() * lineSpace,
-                      self.bias1.item())))
+                      np.add(self.weights2.item() * np.multiply(lineSpace, lineSpace),
+                             np.add(self.weights3.item() * lineSpace,
+                                    self.bias1.item())))
 
     def __str__(self):
         return f"cubic function with a: {self.weights1.item()}, b: {self.weights2.item()}, c: {self.weights3.item()}, d: {self.bias1.item()}"
 
     def appliedOnColumn(self, dfColumns):
-        return dfColumns*dfColumns*dfColumns*self.weights2.item() + dfColumns*dfColumns*self.weights2.item() + dfColumns*self.weights3.item() + self.bias1.item()
+        return dfColumns * dfColumns * dfColumns * self.weights2.item() + dfColumns * dfColumns * self.weights2.item() + dfColumns * self.weights3.item() + self.bias1.item()
 
     def to_json(self):
-        return {"cubique": {"a": self.weights1.item(), "b": self.weights2.item(), "c":self.weights3.item(), "d":self.bias1.item()}}
+        return {"cubique": {"a": self.weights1.item(), "b": self.weights2.item(), "c": self.weights3.item(),
+                            "d": self.bias1.item()}}
 
-def mse(y, y_hat):
-    return ((y - y_hat) ** 2).mean()
+
+def errorMethod(y, y_hat):
+    return ((y - y_hat)**2).mean()
 
 
 def createFig(fig, point, pointPredBaseOnA, realValue, realValueMinusOtherPrediction, letter, nbRow, nbCol, index):
@@ -115,6 +120,30 @@ def createFig(fig, point, pointPredBaseOnA, realValue, realValueMinusOtherPredic
     currentFig.scatter(realValue, realValueMinusOtherPrediction, label="trainData", color="red")
     currentFig.legend()
 
+
+class multiplyModel(nn.Module):
+    def __init__(self, modelA, modelB):
+        super().__init__()
+        self.modelA = modelA
+        self.modelB = modelB
+
+    def forward(self, xb, yb):
+        return self.modelA * xb * self.modelB * yb
+
+    def calculatePointForGraph(self, lineSpaceA, lineSpaceB):
+        return self.modelA.calculatePointForGraph(lineSpaceA) * self.modelB.calculatePointForGraph(lineSpaceB)
+
+    def appliedOnColumn(self, dfColumnsA, dfColumnsB):
+        return self.modelA.appliedOnColumn(dfColumnsA) * self.modelB.appliedOnColumn(dfColumnsB)
+
+    def to_json(self):
+        return {"multiply":[self.modelA.to_json(), self.modelB.to_json()]}
+
+    def parameters(self):
+        return list(self.modelA.parameters()).extend(list(self.modelB.parameters()))
+
+
+
 class Param:
     def __init__(self, letter, model, trainData):
         self.letter = letter
@@ -122,6 +151,7 @@ class Param:
         self.pandastrainData = trainData[letter]
         self.tensortrainData = torch.tensor(self.pandastrainData.values, dtype=torch.float32).view(-1, 1)
         self.lineSpace = np.linspace(min(self.pandastrainData), max(self.pandastrainData), NUMBEROFPOINTPERGRAPH)
+
     def reCalculateLineSpace(self):
         self.lineSpace = np.linspace(min(self.pandastrainData), max(self.pandastrainData), NUMBEROFPOINTPERGRAPH)
 
@@ -129,20 +159,26 @@ class Param:
         return f"{self.letter} with {self.model}"
 
     def appliedOnColumn(self, validationData):
-        return self.model.appliedOnColumn(validationData[self.letter])
+        if isinstance(self.letter, str):
+            return self.model.appliedOnColumn(validationData[self.letter])
+        return self.model.appliedOnColumn(*[validationData[l] for l in self.letter])
 
     def to_json(self):
         return self.model.to_json()
+
+    def predict(self):
+        return self.model(self.tensortrainData)
+
 
 def normalized(x, mean, std):
     return (x - mean) / std
 
 
 def plotEvolution(x, y, y_valid, bestI, bestLoss, tilte="loss evolution"):
-    x=pd.Series(x)
-    y=pd.Series(y)
+    x = pd.Series(x)
+    y = pd.Series(y)
     y_valid = pd.Series(y_valid)
-    yGlobal = (1-QUALITYLOSSWEIGHT)*y + QUALITYLOSSWEIGHT*y_valid
+    yGlobal = (1 - QUALITYLOSSWEIGHT) * y + QUALITYLOSSWEIGHT * y_valid
     fig = plt.figure()
     currentFig = fig.add_subplot(1, 1, 1)
     x_new = np.linspace(x.min(), x.max(), 500)
@@ -158,36 +194,36 @@ def plotEvolution(x, y, y_valid, bestI, bestLoss, tilte="loss evolution"):
     currentFig.scatter(x, y, label="Training data")
     currentFig.scatter(x, y_valid, label="Validation data")
     currentFig.scatter(x, yGlobal, label="Global data")
-    if min(x)<=bestI<=max(x):
+    if min(x) <= bestI <= max(x):
         currentFig.scatter(bestI, bestLoss, marker='x', color='red', s=100, label="Best loss")
     currentFig.legend()
     fig.suptitle(tilte)
     plt.show()
 
 def train():
-    i=0
+    i = 0
     params = []
     for model in listModel:
         params.extend(model.model.parameters())
-    opt = optim.Adam(params, lr=0.00005)  # lr = learning rate
+    opt = optim.Adam(params, lr=0.001)  # lr = learning rate 0.00005
     lastLoss = math.inf
-    TARGETMAXLOSS = 1
+    TARGETMAXLOSS = 0
     bestGlobalLoss = math.inf
     bestI = math.inf
     iteration = []
     lossHistory = []
     validationLossHistory = []
-    while lastLoss> TARGETMAXLOSS:
+    while lastLoss > TARGETMAXLOSS:
         yPredict = 0
         for model in listModel:
-            yPredict += model.model(model.tensortrainData)
-        loss = mse(y, yPredict)
+            yPredict += model.predict()
+        loss = errorMethod(y, yPredict)
         loss.backward()
         opt.step()
         opt.zero_grad()
         i += 1
         validationError = calculateErrorOnValidationData()
-        globalError = (1-QUALITYLOSSWEIGHT)*int(loss.data) + QUALITYLOSSWEIGHT*validationError
+        globalError = (1 - QUALITYLOSSWEIGHT) * int(loss.data) + QUALITYLOSSWEIGHT * validationError
         if globalError < bestGlobalLoss:
             bestGlobalLoss = globalError
             bestI = i
@@ -196,13 +232,13 @@ def train():
             iteration.append(i)
             lossHistory.append(loss.data)
             validationLossHistory.append(validationError)
-            saveModel(i, int(loss.data), int(validationError))
-            print(f"Iter {i}, Loss = {loss.data}, deltaLoss = {lastLoss-loss.data}, validationError = {validationError},globalError = {bestGlobalLoss}, bestI = {bestI}, elapseTime = {time.time() - startTime}")
+            print(
+                f"Iter {i}, Loss = {loss.data}, deltaLoss = {lastLoss - loss.data}, validationError = {validationError},globalError = {bestGlobalLoss}, bestI = {bestI}, elapseTime = {time.time() - startTime}")
             lastLoss = loss.data
             if i % GENERATEGRAPHEVERYXUPDATE == 0:
                 for model in listModel:
-                    trainData["new"+model.letter] = model.pandastrainData.apply(model.model).apply(lambda x : x.item())
-                #predict function
+                    trainData["new" + model.letter] = model.pandastrainData.apply(model.model).apply(lambda x: x.item())
+                # predict function
 
                 fig = plt.figure()
                 index = 0
@@ -212,50 +248,64 @@ def train():
                     excludetrainData = 0
                     for othermodel in listModel:
                         if othermodel.letter != model.letter:
-                            excludetrainData+=trainData["new"+othermodel.letter]
+                            excludetrainData += trainData["new" + othermodel.letter]
                     createFig(fig, model.lineSpace, yPredBaseOnModel, model.pandastrainData.values,
-                              (comparedColumn-excludetrainData).values,
-                              model.letter, NUMBEROFGRAPHPERROW ,numberOfColumnForGraph, index)
-                fig.suptitle(f"iter {i}, Loss = {loss.data}, elapseTime = {round(time.time()-startTime)}")
+                              (comparedColumn - excludetrainData).values,
+                              model.letter, NUMBEROFGRAPHPERROW, numberOfColumnForGraph, index)
+                fig.suptitle(f"iter {i}, Loss = {loss.data}, elapseTime = {round(time.time() - startTime)}")
                 plt.legend()
                 plt.show()
-                if len(iteration)>=3:
+                if len(iteration) >= 3:
                     plotEvolution(iteration, lossHistory, validationLossHistory, bestI, bestGlobalLoss)
-                    if len(iteration)>= LOSSLASTXUPDATE:
-                        plotEvolution(iteration[-LOSSLASTXUPDATE:], lossHistory[-LOSSLASTXUPDATE:], validationLossHistory[-LOSSLASTXUPDATE:], bestI, bestGlobalLoss, f"loss of evolution of last {LOSSLASTXUPDATE} update")
+                    if len(iteration) >= LOSSLASTXUPDATE:
+                        plotEvolution(iteration[-LOSSLASTXUPDATE:], lossHistory[-LOSSLASTXUPDATE:],
+                                      validationLossHistory[-LOSSLASTXUPDATE:], bestI, bestGlobalLoss,
+                                      f"loss of evolution of last {LOSSLASTXUPDATE} update")
+        if i%SAVEMODELEVERYXUPDATE ==0:
+            saveModel(i, int(loss.data), int(validationError))
+
 def calculateErrorOnValidationData():
     data["prediction"] = sum([model.appliedOnColumn(validationData) for model in listModel])
-    data["squarreError"] = (data["prediction"] - data[COMPARECOLUMNNAME])**2
+    data["squarreError"] = (data["prediction"] - data[COMPARECOLUMNNAME]) ** 2
     return data["squarreError"].mean()
+
 
 def addModelToDict(currentIter, currentLoss, currentValidationLoss):
     functionParamSaved[currentIter] = {
         "functions": {model.letter: model.to_json() for model in listModel},
         "loss": currentLoss,
         "validationLoss": currentValidationLoss,
-        "globalError": (1-QUALITYLOSSWEIGHT)*currentLoss + QUALITYLOSSWEIGHT*currentValidationLoss,
+        "globalError": (1 - QUALITYLOSSWEIGHT) * currentLoss + QUALITYLOSSWEIGHT * currentValidationLoss,
     }
+
+
 def saveModel(currentIter, currentLoss, currentValidationLoss):
     addModelToDict(currentIter, currentLoss, currentValidationLoss)
     with open("model.json", "w+") as outfile:
         outfile.write(json.dumps(functionParamSaved, indent=4))
     return None
+
+
 if __name__ == "__main__":
     # generate trainDataset
     NUMBEROFPOINTFORAI = 1000
-    data = pd.read_csv("ALL_trip_data.csv")
-    data["temperature"] = data["temperature"].fillna(data["temperature"].dropna().mean())
-    data["total_distance"]=data["total_distance"]/1000
-    data["energy_consumption_per_km"] = data["energy_consumption"]/data["total_distance"]
-    data["temperatureOverSpeed"] = data["temperature"]/data["speedAvg"] #speed = delta x/ delta t
-    trainData = data.sample(frac=1-QUALITYPERCENTDATA)
+    data = pd.read_csv("ALL_trip_data2.csv")
+    data["temperature"] = data["temperature"].fillna(data["temperature"].dropna().mean()) + 273.15
+    data["total_distance"] = data["total_distance"] / 1000
+    data["distanceMultiplyBySpeedSquared"] = data["total_distance"] * data["speed_avg"]**2/1000
+    data["distanceMultiplyBySlopeCube"] = data["total_distance"] * data["slope"]**3/1000
+    data["distanceMultiplyByTemperature"] = data["total_distance"] * (data["temperature"])/1000
+    data["distanceMultiplyByTemperatureSquared"] = data["total_distance"] * (data["temperature"]) ** 2 / 1000
+
+    trainData = data.sample(frac=1 - QUALITYPERCENTDATA)
     validationData = data.iloc[~data.index.isin(trainData.index)]
     comparedColumn = trainData[COMPARECOLUMNNAME]
     y = torch.tensor(comparedColumn.values, dtype=torch.float32).view(-1, 1)
 
-    listModel: list[Param] = [Param("speedAvg", modelQuad(), trainData),
-                              Param("slope", modelCube(), trainData),
-                              Param("temperature", modelQuad(), trainData),
-                              Param("temperatureOverSpeed", modelCube(), trainData)]
+    listModel: list[Param] = [Param("distanceMultiplyBySpeedSquared", modelLineaire(),trainData),
+                              Param("distanceMultiplyBySlopeCube",modelLineaire(),trainData),
+                              Param("distanceMultiplyByTemperature", modelLineaire(),trainData),
+                              Param("distanceMultiplyByTemperatureSquared", modelLineaire(),trainData),
+                              Param("temperature", modelQuad(),trainData),]
     numberOfColumnForGraph = len(listModel) // NUMBEROFGRAPHPERROW + (len(listModel) % NUMBEROFGRAPHPERROW > 0)
     train()
