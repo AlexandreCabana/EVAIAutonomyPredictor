@@ -205,6 +205,8 @@ def get_ac_power(marque: str, modele: str, temperature: str, duration:float, ac_
     kelvins_offset = 273.15
 
     car_data = get_vehicle_data(marque, modele)
+    if car_data is None:
+        raise ValueError(f"Unknown vehicle selection: brand='{marque}', model='{modele}'")
     length_mm = float(car_data["length_mm"])
     width_mm = float(car_data["width_mm"])
     height_mm = float(car_data["height_mm"])
@@ -240,6 +242,20 @@ def get_vehicle_data(marque: str, modele: str):
         & (df_cars["model"].astype(str).str.strip().str.lower() == modele.strip().lower())
     ]
     return None if result.empty else result.iloc[0].to_dict()
+
+
+def is_invalid_form_value(value) -> bool:
+    if value is None:
+        return True
+    normalized_value = str(value).strip().lower()
+    return normalized_value in {
+        "",
+        "-- brand --",
+        "-- modele --",
+        "-- modèle --",
+        "select a brand",
+        "select a model",
+    }
 
 def fetch_ev_batteryCapacity(car_model):
     with CAR_INFO_CSV.open("r", encoding="utf-8-sig", newline="") as file:
@@ -323,11 +339,11 @@ async def submit(
 ):
     # Vérification des champs
 
-    params = [marque, modele, ac_target_temperature, current_charge_percentage, conduite, temperature, meteo,
-              start_lat, start_lng, end_lat, end_lng, duration]  # Liste tes champs critiques
+    params = [ac_target_temperature, current_charge_percentage, start_lat, start_lng, end_lat, end_lng]
+    text_params = [marque, modele, conduite, temperature, meteo]
 
     #Si une info est manquante
-    if any(v is None or v == "" for v in params):
+    if any(v is None for v in params) or any(is_invalid_form_value(v) for v in text_params):
         # On recharge la page index.html avec un message d'erreur
         return templates.TemplateResponse(
             request=request,
@@ -341,6 +357,16 @@ async def submit(
 
     if duration is None:
         duration = route_data["duration"]
+
+    car_data = get_vehicle_data(marque, modele)
+    if car_data is None:
+        return templates.TemplateResponse(
+            request=request,
+            name="index.html",
+            context={
+                "error_msg": "Le vehicule selectionne est introuvable. Merci de choisir une marque et un modele valides."
+            }
+        )
 
     distance = route_data["distance"]
     altitude_start = get_elevation_data(start_lat, start_lng)
@@ -375,9 +401,9 @@ async def submit(
         consomation_per_km = energy_consumption / distance
 
     # trouver la capacité de la batterie
-    total_battery_capacity = float(fetch_ev_batteryCapacity(modele)) * 1000
+    total_battery_capacity = float(car_data["battery_capacity_kWh"]) * 1000
     battery_capacity = total_battery_capacity * (current_charge_percentage / 100)
-    pourcentage_used = round(energy_consumption / total_battery_capacity * 100, 2)
+    pourcentage_used = round(consomation_per_km / total_battery_capacity * 100, 2)
 
     predicted_range = int(battery_capacity / consomation_per_km) if energy_consumption > 0 else 0
 
@@ -385,15 +411,14 @@ async def submit(
         url=(
             f"/result?range={predicted_range}"
             f"&pourcentage_used={pourcentage_used}"
-            f"&energy_consumption={energy_consumption}"
+            f"&consomation_per_km={consomation_per_km}"
         ),
         status_code=status.HTTP_303_SEE_OTHER,
     )
 
 #Load la page de résulats
 @app.get("/result")
-@app.get("/range")
-def page_resultat(request: Request, range: float, pourcentage_used: float, energy_consumption:float, distance: float | None = None, duration: float | None = None):
+def page_resultat(request: Request, range: float, pourcentage_used: float, consomation_per_km: float, distance: float | None = None, duration: float | None = None):
     print(range)
     return templates.TemplateResponse(
         request=request,
@@ -403,7 +428,7 @@ def page_resultat(request: Request, range: float, pourcentage_used: float, energ
             "distance": distance,
             "duration": duration,
             "pourcentage_used": pourcentage_used,
-            "energy_consumption": energy_consumption
+            "consomation_per_km": consomation_per_km
         },
     )
 
