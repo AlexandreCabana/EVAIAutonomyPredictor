@@ -15,6 +15,8 @@ import requests
 import numpy as np
 import time
 
+from sympy.physics.pring import energy
+
 app = FastAPI()
 
 app.add_middleware(
@@ -236,6 +238,7 @@ def get_ac_power(marque: str, modele: str, temperature: str, duration:float, ac_
 
     return ac_power
 
+df_cars = pd.read_csv(CAR_INFO_CSV, encoding="utf-8-sig")
 def get_vehicle_data(marque: str, modele: str):
     result = df_cars[
         (df_cars["-- brand --"].astype(str).str.strip().str.lower() == marque.strip().lower())
@@ -243,7 +246,7 @@ def get_vehicle_data(marque: str, modele: str):
     ]
     return None if result.empty else result.iloc[0].to_dict()
 
-
+#considère les valeurs inutiles comme invalides dans csv_info.csv
 def is_invalid_form_value(value) -> bool:
     if value is None:
         return True
@@ -272,48 +275,46 @@ def calculate_param(param_value : dict,value):
         somme += param*value**i
     return somme
 
+#Donne un estimé de l'impact du style de conduite sur la consommation énergétique
+def get_impact_conduite(conduite: str):
+    match conduite:
+        case "eco":
+            return -0.05
+        case "normal":
+            return 0.0
+        case "sport":
+            return 0.1
+        case _:
+            return 0.0
 
-df_cars = pd.read_csv(CAR_INFO_CSV, encoding="utf-8-sig")
+#Donne la consommation énergétique totale du trajet selon les paramètres du modèle
+def get_conso_total(avg_speed, slope, temperature):
+    # calculs de l'énergie avec le modèle entrainé
+    with MODEL_JSON_PATH.open("r", encoding="utf-8") as file:
+        data = json.load(file)
+        current_settings = data["88965"]["functions"]
+        params_names = ["speedAvg", "slope", "temperature"]
+        params_values = [avg_speed, slope, float(temperature)]
+        somme = 0
+        for i, param_name in enumerate(params_names):
+            if param_name not in current_settings:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Model settings are missing '{param_name}'",
+                )
+            current_values = current_settings[param_name]
+            current_param_value = params_values[i]
+            somme += calculate_param(current_values, current_param_value)
+        # somme : Wh
+        return round(somme, 3)
 
-# Form struct
-class CarInfo:
-    def __init__(self, brand: str, model: str, driving_style: str, ac_target_temperature: int):
-        self.brand = brand
-        self.model = model
-        self.driving_style = driving_style
-        self.ac_target_temperature = ac_target_temperature
+#Retourne le dénivelé moyen du trajet
+def get_slope(start_lat, start_lng, end_lat, end_lng, distance):
+    altitude_start = get_elevation_data(start_lat, start_lng)
+    altitude_end = get_elevation_data(end_lat, end_lng)
+    delta_elevation = altitude_end - altitude_start
+    return delta_elevation / (distance * 1000)
 
-
-class EnvironmentInfo:
-    def __init__(self, temperature: str, meteo: str):
-        self.temp = temperature
-        self.meteo = meteo
-
-
-class FormInfo:
-    def __init__(self, car_info: CarInfo, environment_info: EnvironmentInfo):
-        self.carInfo = car_info
-        self.environmentInfo = environment_info
-
-
-class User:
-    def __init__(self, name, last_name, driving_style):
-        self.name = name
-        self.last_name = last_name
-        self.driving_style = driving_style
-
-class RouteRequest(BaseModel):
-    start_lat: float
-    start_lon: float
-    end_lat: float
-    end_lon: float
-
-
-class MeteoRequest(BaseModel):
-    lat: float
-    lon: float
-    date: str | None = None
-    heure: int | None = None
 
 #Ouvre la page d'accueil
 @app.get("/", response_class=HTMLResponse)
@@ -339,7 +340,6 @@ async def submit(
     duration: float | None = Form(None),
 ):
     # Vérification des champs
-
     params = [ac_target_temperature, current_charge_percentage, start_lat, start_lng, end_lat, end_lng, distance]
     text_params = [marque, modele, conduite, temperature, meteo]
 
@@ -354,53 +354,34 @@ async def submit(
             }
         )
 
-
     car_data = get_vehicle_data(marque, modele)
     if car_data is None:
+        # On recharge la page index.html avec un message d'erreur
         return templates.TemplateResponse(
             request=request,
             name="index.html",
             context={
-                "error_msg": "Le vehicule selectionne est introuvable. Merci de choisir une marque et un modele valides."
+                "error_msg": "Erreur lors de la sélection de la marque ou du modèle du véhicule."
             }
         )
 
-    altitude_start = get_elevation_data(start_lat, start_lng)
-    altitude_end = get_elevation_data(end_lat, end_lng)
-    delta_elevation = altitude_end-altitude_start
-    slope = delta_elevation/(distance*1000)
+    slope = get_slope(start_lat, start_lng, end_lat, end_lng, distance)
     avg_speed = distance/(duration/60)
 
     ac_power = get_ac_power(marque, modele, temperature, duration, ac_target_temperature)
 
-    car_info = CarInfo(marque, modele, conduite, ac_target_temperature)
-    env_info = EnvironmentInfo(temperature, meteo)
+    energy_consumption = get_conso_total(avg_speed, slope, temperature)
+    energy_consumption += energy_consumption * get_impact_conduite(conduite)
 
-    #calculs de l'énergie avec le modèle entrainé
-    with MODEL_JSON_PATH.open("r", encoding="utf-8") as file:
-        data = json.load(file)
-        current_settings = data["88965"]["functions"]
-        params_names = ["speedAvg", "slope", "temperature"]
-        params_values = [avg_speed, slope, float(temperature)]
-        somme = 0
-        for i, param_name in enumerate(params_names):
-            if param_name not in current_settings:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"Model settings are missing '{param_name}'",
-                )
-            current_values = current_settings[param_name]
-            current_param_value = params_values[i]
-            somme += calculate_param(current_values, current_param_value)
-        # somme : Wh
-        energy_consumption = round(somme,3)
-        consomation_per_km = energy_consumption / distance
+    consomation_per_km = energy_consumption / distance
 
     # trouver la capacité de la batterie
     total_battery_capacity = float(car_data["battery_capacity_kWh"]) * 1000
     battery_capacity = total_battery_capacity * (current_charge_percentage / 100)
+    #% de la batterie utilisée par km
     pourcentage_used = round(consomation_per_km / total_battery_capacity * 100, 2)
 
+    #en km
     predicted_range = int(battery_capacity / consomation_per_km) if energy_consumption > 0 else 0
 
     return RedirectResponse(
@@ -412,7 +393,7 @@ async def submit(
         status_code=status.HTTP_303_SEE_OTHER,
     )
 
-#Load la page de résulats
+#Load la page de résulats avec les données calculées
 @app.get("/result")
 def page_resultat(request: Request, range: float, pourcentage_used: float, consomation_per_km: float, distance: float | None = None, duration: float | None = None):
     print(range)
@@ -427,11 +408,15 @@ def page_resultat(request: Request, range: float, pourcentage_used: float, conso
             "consomation_per_km": consomation_per_km
         },
     )
+class RouteRequest(BaseModel):
+    start_lat: float
+    start_lon: float
+    end_lat: float
+    end_lon: float
 
 #Recevoir les données du trajet
 @app.post("/route")
 async def get_route(data: RouteRequest):
-    print("get route called")
     return JSONResponse(
         content=calcul_traffic_route(
             data.start_lat,
@@ -440,6 +425,12 @@ async def get_route(data: RouteRequest):
             data.end_lon,
         )
     )
+
+class MeteoRequest(BaseModel):
+    lat: float
+    lon: float
+    date: str | None = None
+    heure: int | None = None
 
 #Recevoir les données de pour le calcul météo
 @app.post("/meteo")
