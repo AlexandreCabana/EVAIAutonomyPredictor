@@ -335,11 +335,12 @@ async def submit(
     start_lng: float | None = Form(None),
     end_lat: float | None = Form(None),
     end_lng: float | None = Form(None),
+    distance: float | None = Form(None),
     duration: float | None = Form(None),
 ):
     # Vérification des champs
 
-    params = [ac_target_temperature, current_charge_percentage, start_lat, start_lng, end_lat, end_lng]
+    params = [ac_target_temperature, current_charge_percentage, start_lat, start_lng, end_lat, end_lng, distance]
     text_params = [marque, modele, conduite, temperature, meteo]
 
     #Si une info est manquante
@@ -353,10 +354,6 @@ async def submit(
             }
         )
 
-    route_data = calcul_distance(start_lat, start_lng, end_lat, end_lng)
-
-    if duration is None:
-        duration = route_data["duration"]
 
     car_data = get_vehicle_data(marque, modele)
     if car_data is None:
@@ -368,7 +365,6 @@ async def submit(
             }
         )
 
-    distance = route_data["distance"]
     altitude_start = get_elevation_data(start_lat, start_lng)
     altitude_end = get_elevation_data(end_lat, end_lng)
     delta_elevation = altitude_end-altitude_start

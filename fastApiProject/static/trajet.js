@@ -157,6 +157,7 @@ async function displayRoute() {
         document.getElementById("route-base-duration").textContent = baseDuration;
         document.getElementById("route-traffic-delay").textContent = trafficDelay;
         document.getElementById("route-provider").textContent = provider;
+        document.getElementById("distance").value = distance;
         document.getElementById("duration").value = duration;
         document.getElementById("route-info").style.display = "block";//affiche après calculs
 
