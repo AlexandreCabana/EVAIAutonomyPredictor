@@ -63,7 +63,7 @@ async function fetchCarInfo() {
         const response = await fetch("static/car_info.csv");
         const csvString = await response.text();
         const result = Papa.parse(csvString);
-        return result.data;
+        return result.data.filter((row) => Array.isArray(row) && row[0] && row[1] && row[0] !== "-- brand --");
     } catch (error) {
         console.error("Erreur de fetch:", error);
     }
@@ -91,6 +91,10 @@ async function init() {
 
     let selectedModel = null;
 
+    brandList.innerHTML = "";
+    brandList.add(new Option("Select a brand", ""));
+    modelList.innerHTML = "";
+    modelList.add(new Option("Select a model", ""));
 
     brandSet.forEach((brandName) => {
         const newOption = new Option(brandName, brandName);
@@ -102,6 +106,10 @@ async function init() {
         const selectedBrand = event.target.value;
         modelList.innerHTML = "";
         modelList.add(new Option("Select a model", ""));
+        selectedModel = null;
+        if (!selectedBrand) {
+            return;
+        }
         data.forEach((model) => {
             if (selectedBrand === model[0]) {
                 const newOption = new Option(model[1], model[1]);
