@@ -287,8 +287,6 @@ def saveModel(currentIter, currentLoss, currentValidationLoss):
 
 
 if __name__ == "__main__":
-    # generate trainDataset
-    NUMBEROFPOINTFORAI = 1000
     data = pd.read_csv("../ALL_trip_data2.csv")
     data["temperature"] = abs(data["temperature"].fillna(data["temperature"].dropna().mean()) -15)
     data["total_distance"] = data["total_distance"] / 1000
