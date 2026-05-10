@@ -86,4 +86,4 @@ Tous les fichiers de cette section sont dans le répertoire website
 Pour accéder au site, exécutez runServer.py et dirigez-vous sur http://0.0.0.0:10000 dans votre navigateur
 
 
-Fait par Alexandre Cabana, Guillaume Lavertus, Luca Ferrandes, Thierry
+Fait par Alexandre Cabana, Guillaume Lavertus, Luca Ferrante Lalonde, Thierry
