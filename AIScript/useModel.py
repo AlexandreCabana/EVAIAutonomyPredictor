@@ -16,7 +16,7 @@ def computeDictParam(paramDict):
 
 def getFunctions(i):
     try:
-        with open('../model.json') as f:
+        with open('model.json') as f:
             return json.load(f)[str(i)]["functions"]
     except JSONDecodeError:
         time.sleep(.1)
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     TOPI = 450000
     VALUEFORPARAM = {"speed_avg": 95, "slope": 0, "temperature": 15, "total_distance": 130}
     VALUEFORPARAM2 = {"speed_avg": 60, "slope": 0, "temperature": 15, "total_distance": 30}
-    VALUEFORPARAM3 = {"speed_avg": 95, "slope": 0, "temperature": -15, "total_distance": 130}
+    VALUEFORPARAM3 = {"speed_avg": 69.19973604060914, "slope": 0.0003168933187445039, "temperature": 15, "total_distance": 113.60289999999999}
     completeDictParam = computeDictParam(VALUEFORPARAM)
     completeDictParam2 = computeDictParam(VALUEFORPARAM2)
     completeDictParam3 = computeDictParam(VALUEFORPARAM3)

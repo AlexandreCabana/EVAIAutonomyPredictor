@@ -14,7 +14,9 @@ import csv
 import requests
 import numpy as np
 import time
+from AIScript.useModel import getFunctions, estimate, computeDictParam
 
+IFORMODEL = 374633
 app = FastAPI()
 
 app.add_middleware(
@@ -379,26 +381,10 @@ async def submit(
 
     car_info = CarInfo(marque, modele, conduite, ac_target_temperature)
     env_info = EnvironmentInfo(temperature, meteo)
-
-    #calculs de l'énergie avec le modèle entrainé
-    with MODEL_JSON_PATH.open("r", encoding="utf-8") as file:
-        data = json.load(file)
-        current_settings = data["88965"]["functions"]
-        params_names = ["speedAvg", "slope", "temperature"]
-        params_values = [avg_speed, slope, float(temperature)]
-        somme = 0
-        for i, param_name in enumerate(params_names):
-            if param_name not in current_settings:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=f"Model settings are missing '{param_name}'",
-                )
-            current_values = current_settings[param_name]
-            current_param_value = params_values[i]
-            somme += calculate_param(current_values, current_param_value)
-        # somme : Wh
-        energy_consumption = round(somme,3)
-        consomation_per_km = energy_consumption / distance
+    param = {"speed_avg":float(avg_speed),"slope":float(slope), "temperature":float(temperature), "total_distance":float(distance)}
+    print(param)
+    energy_consumption = estimate(computeDictParam(param), getFunctions(IFORMODEL))
+    consomation_per_km = energy_consumption / distance
 
     # trouver la capacité de la batterie
     total_battery_capacity = float(car_data["battery_capacity_kWh"]) * 1000
