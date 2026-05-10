@@ -111,8 +111,13 @@ Notre IA optimise une fonction qui se définit par une somme de fonction polynom
 L'IA trouve les facteurs optimaux pour que la formule globale trouvée avant 
 suive le plus possible les données dans notre jeu de 
 donnée transformées. La library Pytorch est utilisé 
-pour facilement faire une descente de gradient avec l'optimiseur ADAM qui détermine le multiple optimal à la pente.
-
+pour facilement faire une descente de gradient avec l'optimiseur ADAM qui détermine le multiple optimal à la pente. La 
+descente de gradient est un principe d'optimisation. Pour ce faire, il faut définir une fonction qui calcul l'erreur en
+fonction des paramètres que le modèle prend. Ensuite, tu fais la dérivée partielle de chacun des paramètres par rapport
+à l'erreur. Ensuite, tu multiplies la dérivée par un facteur habituellement constant que tu soustrais à l'erreur. Ainsi,
+l'erreur va être réduite. Tu fais ça en boucle jusqu'à temp que l'erreur est minimal. Dans notre cas, on utilise 
+l'optimiseur ADAM pour changer le facteur constant par une fonction qui dépend de la variation de l'erreur depuis la
+dernière fois. Ceci permet à notre programme d'optimiser plus vite.
 #### Graphique de l'impact de chacun des facteurs par rapport aux données expérimental
 Pour modéliser la fonction multivariable, nous ne pouvons pas faire de graphique 
 traditional, car le corp humain peut voir au maximum une fonction à 2 paramètres. Ainsi, il faut être ingénieux
@@ -144,23 +149,22 @@ au début du script python qui indique à quel intervalle faire le graphique. Lo
 l'erreur est calculé. Par défaut, la constante est à 10 000. Pour avoir une ligne continue sur l'erreur, j'ai utilisé la
 librairie scipy et la fonction interpolate
 qui fait une ligne qui passe par les points donnés.
-#### Test sur jeux de donnée aléatoire
+### Test sur jeux de donnée aléatoire
 Pour tester notre intelligence artificielle rapidement et éfficacement, le code X
 génère un jeu de donnée aléatoire qui suit une fonction multivariable aléatoire de degré different.
 ##### Example 1
 $$ 
-f(a,b,c,d,e,f) = a_3*a^3+a_2*a^2 +a_1*a + a_0 + b_3*b^3+b_2*b^2 +b_1*b + b_0 + c_2*c^2 +c_1*c + c_0 + d_2*d^2 +d_1*d + d_0 
-+ e_1*e + e_0 + f_1*f + f_0
+f(a,b,c,d,e,f) = a_3*a^3+a_2*a^2 +a_1*a + a_0 + b_3*b^3+b_2*b^2 +b_1*b + b_0 + c_2*c^2 +c_1*c + c_0 + d_2*d^2 +d_1*d + d_0 + e_1*e + e_0 + f_1*f + f_0
 $$
 Lorsque le programme se lance, tous les paramètres sont définis aléatoirement. Après être optimisé, voici les résultats 
 que nous avons obtenus. 
 Dans ce graphique, vous pouvez constater la variation de chacun des paramètres par rapport à l'axe des Y
 
 Dans ce graphique, vous pouvez constater l'évolution de l'erreur en fonction de l'erreur
-#### Exécuter sur la carte graphique
+### Exécuter sur la carte graphique
 Afin d'optimiser l'optimisation de la fonction, la librairie Pytorch doit être réinstallé pour une 
 version compatible avec ta version de CUDA. Dans mon cas, j'ai installé la version 13.0.
-Pour installer la version de pytorch, j'ai utilisé la commande : 
+Pour installer la version de pytorch, j'ai utilisé la commande : 
 ```console
 pip install torch --index-url https://download.pytorch.org/whl/cu130
 ```
