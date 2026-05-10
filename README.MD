@@ -2,6 +2,7 @@
 <!-- TOC -->
 * [Prédiction de l'autonomie des voitures électriques](#prédiction-de-lautonomie-des-voitures-électriques)
   * [Description du projet](#description-du-projet)
+    * [L'équipe](#léquipe)
     * [Idée](#idée)
     * [Utilité](#utilité)
     * [Inovation](#inovation)
@@ -95,7 +96,7 @@ Tous les fichiers de cette section sont dans le répertoire transformation de do
 #### VicomTech
 #### VEDElectrique
 #### Calcul de la pente lorsque l'info est manquante
-### AI
+### AI sur des données aléatoire
 Tous les fichiers de cette section sont dans le répertoire AI
 #### Requis
 Les librairies suivantes sont nécessaires.
@@ -105,15 +106,9 @@ Les librairies suivantes sont nécessaires.
 - Numpy
 - Sicpy
 - Matplotlib
-#### Impact des facteurs pris en compte pour prédire l'autonomie des véhicules électriques
-##### Pente
-##### Distance
-##### Vitesse moyenne
-##### Température extérieure
-##### Formule globale
 #### Base de l'optimisation par l'IA
-L'IA trouve les facteurs optimaux pour que la 
-formule globale trouvée avant 
+Notre IA optimise une fonction qui se définit par une somme de fonction polynomiale telle que $$f(x,y,z)= f_1(x) + f_2(y) +  f_3(z)$$\
+L'IA trouve les facteurs optimaux pour que la formule globale trouvée avant 
 suive le plus possible les données dans notre jeu de 
 donnée transformées. La library Pytorch est utilisé 
 pour facilement faire une descente de gradient avec l'optimiseur ADAM qui détermine le multiple optimal à la pente.
@@ -124,13 +119,13 @@ traditional, car le corp humain peut voir au maximum une fonction à 2 paramètr
 pour représenter une fonctione à plus de variable avec des graphiques. 
 
 En ayant une fonction de type  
-$$f(x,y,z)= f_1(x) + f_2(x) +  f_3(x)$$\
+$$f(x,y,z)= f_1(x) + f_2(y) +  f_3(z)$$\
 Avec la formule suivante, on peut avoir l'effet du paramètre a sur la fonction\
-$$f(x,y,z) - f_2(x)- f_3(x) = f_1(x)$$\
+$$f(x,y,z) - f_2(y)- f_3(z) = f_1(x)$$\
 Avec la formule suivante, on peut avoir l'effet du paramètre b sur la fonction\
-$$f(x,y,z) - f_1(x) - f_3(x) = f_2(x)$$\
+$$f(x,y,z) - f_1(x) - f_3(z) = f_2(y)$$\
 Avec la formule suivante, on peut avoir l'effet du paramètre c sur la fonction\
-$$f(x,y,z) - f_1(x) - f_2(x) = f_3(x)$$\
+$$f(x,y,z) - f_1(x) - f_2(y) = f_3(z)$$\
 On peut ainsi généraliser ceci pour une fonction multivariable.\
 $$f(n_1,n_2, ..., n_n) - \sum_{i=1}^{n} f_n(n_n) + f_a(n_a) = f_a(n_a)$$ où a est le paramètre à évaluer\
 Ainsi, on peut représenter l'effet d'un paramètre sur la fontion globale.
@@ -150,7 +145,7 @@ l'erreur est calculé. Par défaut, la constante est à 10 000. Pour avoir une l
 librairie scipy et la fonction interpolate
 qui fait une ligne qui passe par les points donnés.
 #### Test sur jeux de donnée aléatoire
-Pour tester notre intelligence artificielle, les données n'étaient pas prête. Ainsi, le script Y,
+Pour tester notre intelligence artificielle rapidement et éfficacement, le code X
 génère un jeu de donnée aléatoire qui suit une fonction multivariable aléatoire de degré different.
 ##### Example 1
 $$ 
@@ -169,6 +164,19 @@ Pour installer la version de pytorch, j'ai utilisé la commande :
 ```console
 pip install torch --index-url https://download.pytorch.org/whl/cu130
 ```
+### IA sur les vraies données
+#### Impact des facteurs pris en compte pour prédire l'autonomie des véhicules électriques
+Après avoir fait des recherches, nous avons déterminé telle relation pour estimer l'autonomie d'un véhicule électrique
+Il existe une corrélation entre X et Y
+#### Quand arrêter l'entrainement
+Normalement, sur un jeu de donnée aléatoire où toutes les données n'ont pas de bruit. Le plus que le programme le mieux 
+que c'est. Cependant, lorsque les données ont du bruit, l'IA va trop optimiser sur le jeu de donné et ne plus être précis.
+Ainsi, il faut séparer les données en deux, soit une partie pour l'entrainement et une autre pour valider. Lorsque les 
+données sont séparées, on calcule l'erreur sur la partie de validation et d'entrainement. Lorsque que le programme est 
+surentrainé, l'erreur sur les données de validation montre en flèche comme qu'on peut le voir sur le graphique suivant. 
+On peut aussi calculer une erreur globale qui est une moyenne pondérée entre celle des données de validation et 
+entrainement. On sauvegarde aussi le model dans un fichier qui s'appelle model.json pour être capable d'accéder 
+certaines des itérations du programme.
 ### Site Web
 #### Graphique des communications
 Tous les fichiers de cette section sont dans le répertoire fastAPIProject
