@@ -9,16 +9,8 @@ import matplotlib.pyplot as plt
 import time
 from scipy.interpolate import interp1d
 import json
+import AIRunParameter as Parameter
 
-NUMBEROFPOINTPERGRAPH = 200
-NUMBEROFGRAPHPERROW = 2
-CALCULATELOSSEVERYXUPDATE = 500
-GENERATEGRAPHEVERYXUPDATE = 2 * CALCULATELOSSEVERYXUPDATE
-QUALITYPERCENTDATA = 0.15
-QUALITYLOSSWEIGHT = 0.15
-LOSSLASTXUPDATE = 10
-SAVEMODELEVERYXUPDATE = 5000
-COMPARECOLUMNNAME = "energy_consumption"#Énergie consommé en WH
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 startTime = time.time()
 functionParamSaved = {}
@@ -150,10 +142,10 @@ class Param:
         self.model = model
         self.pandastrainData = trainData[letter]
         self.tensortrainData = torch.tensor(self.pandastrainData.values, dtype=torch.float32).view(-1, 1)
-        self.lineSpace = np.linspace(min(self.pandastrainData), max(self.pandastrainData), NUMBEROFPOINTPERGRAPH)
+        self.lineSpace = np.linspace(min(self.pandastrainData), max(self.pandastrainData), Parameter.NUMBEROFPOINTPERGRAPH)
 
     def reCalculateLineSpace(self):
-        self.lineSpace = np.linspace(min(self.pandastrainData), max(self.pandastrainData), NUMBEROFPOINTPERGRAPH)
+        self.lineSpace = np.linspace(min(self.pandastrainData), max(self.pandastrainData), Parameter.NUMBEROFPOINTPERGRAPH)
 
     def __str__(self):
         return f"{self.letter} with {self.model}"
@@ -178,7 +170,7 @@ def plotEvolution(x, y, y_valid, bestI, bestLoss, tilte="loss evolution"):
     x = pd.Series(x)
     y = pd.Series(y)
     y_valid = pd.Series(y_valid)
-    yGlobal = (1 - QUALITYLOSSWEIGHT) * y + QUALITYLOSSWEIGHT * y_valid
+    yGlobal = (1 - Parameter.QUALITYLOSSWEIGHT) * y + Parameter.QUALITYLOSSWEIGHT * y_valid
     fig = plt.figure()
     currentFig = fig.add_subplot(1, 1, 1)
     x_new = np.linspace(x.min(), x.max(), 500)
@@ -223,19 +215,19 @@ def train():
         opt.zero_grad()
         i += 1
         validationError = calculateErrorOnValidationData()
-        globalError = (1 - QUALITYLOSSWEIGHT) * int(loss.data) + QUALITYLOSSWEIGHT * validationError
+        globalError = (1 - Parameter.QUALITYLOSSWEIGHT) * int(loss.data) + Parameter.QUALITYLOSSWEIGHT * validationError
         if globalError < bestGlobalLoss:
             bestGlobalLoss = globalError
             bestI = i
             addModelToDict(i, int(loss.data), int(validationError))
-        if i % CALCULATELOSSEVERYXUPDATE == 0 or loss < TARGETMAXLOSS:
+        if i % Parameter.CALCULATELOSSEVERYXUPDATE == 0 or loss < TARGETMAXLOSS:
             iteration.append(i)
             lossHistory.append(loss.data)
             validationLossHistory.append(validationError)
             print(
                 f"Iter {i}, Loss = {loss.data}, deltaLoss = {lastLoss - loss.data}, validationError = {validationError},globalError = {bestGlobalLoss}, bestI = {bestI}, elapseTime = {time.time() - startTime}")
             lastLoss = loss.data
-            if i % GENERATEGRAPHEVERYXUPDATE == 0:
+            if i % Parameter.GENERATEGRAPHEVERYXUPDATE == 0:
                 for model in listModel:
                     trainData["new" + model.letter] = model.pandastrainData.apply(model.model).apply(lambda x: x.item())
                 # predict function
@@ -251,22 +243,22 @@ def train():
                             excludetrainData += trainData["new" + othermodel.letter]
                     createFig(fig, model.lineSpace, yPredBaseOnModel, model.pandastrainData.values,
                               (comparedColumn - excludetrainData).values,
-                              model.letter, NUMBEROFGRAPHPERROW, numberOfColumnForGraph, index)
+                              model.letter, Parameter.NUMBEROFGRAPHPERROW, numberOfColumnForGraph, index)
                 fig.suptitle(f"iter {i}, Loss = {loss.data}, elapseTime = {round(time.time() - startTime)}")
                 plt.legend()
                 plt.show()
                 if len(iteration) >= 3:
                     plotEvolution(iteration, lossHistory, validationLossHistory, bestI, bestGlobalLoss)
-                    if len(iteration) >= LOSSLASTXUPDATE:
-                        plotEvolution(iteration[-LOSSLASTXUPDATE:], lossHistory[-LOSSLASTXUPDATE:],
-                                      validationLossHistory[-LOSSLASTXUPDATE:], bestI, bestGlobalLoss,
-                                      f"loss of evolution of last {LOSSLASTXUPDATE} update")
-        if i%SAVEMODELEVERYXUPDATE ==0:
+                    if len(iteration) >= Parameter.LOSSLASTXUPDATE:
+                        plotEvolution(iteration[-Parameter.LOSSLASTXUPDATE:], lossHistory[-Parameter.LOSSLASTXUPDATE:],
+                                      validationLossHistory[-Parameter.LOSSLASTXUPDATE:], bestI, bestGlobalLoss,
+                                      f"loss of evolution of last {Parameter.LOSSLASTXUPDATE} update")
+        if i % Parameter.SAVEMODELEVERYXUPDATE ==0:
             saveModel(i, int(loss.data), int(validationError))
 
 def calculateErrorOnValidationData():
     data["prediction"] = sum([model.appliedOnColumn(validationData) for model in listModel])
-    data["squarreError"] = (data["prediction"] - data[COMPARECOLUMNNAME]) ** 2
+    data["squarreError"] = (data["prediction"] - data[Parameter.COMPARECOLUMNNAME]) ** 2
     return data["squarreError"].mean()
 
 
@@ -275,7 +267,7 @@ def addModelToDict(currentIter, currentLoss, currentValidationLoss):
         "functions": {model.letter: model.to_json() for model in listModel},
         "loss": currentLoss,
         "validationLoss": currentValidationLoss,
-        "globalError": (1 - QUALITYLOSSWEIGHT) * currentLoss + QUALITYLOSSWEIGHT * currentValidationLoss,
+        "globalError": (1 - Parameter.QUALITYLOSSWEIGHT) * currentLoss + Parameter.QUALITYLOSSWEIGHT * currentValidationLoss,
     }
 
 
@@ -295,9 +287,9 @@ if __name__ == "__main__":
     data["distanceMultiplyByTemperatureSquaredDivideBySpeed"]= data["total_distance"]*data["temperature"] ** 2/data["speed_avg"]
     data["distanceMultiplyByTemperatureDivideBySpeed"]= data["total_distance"]*data["temperature"]/data["speed_avg"]
 
-    trainData = data.sample(frac=1 - QUALITYPERCENTDATA)
+    trainData = data.sample(frac=1 - Parameter.QUALITYPERCENTDATA)
     validationData = data.iloc[~data.index.isin(trainData.index)]
-    comparedColumn = trainData[COMPARECOLUMNNAME]
+    comparedColumn = trainData[Parameter.COMPARECOLUMNNAME]
     y = torch.tensor(comparedColumn.values, dtype=torch.float32).view(-1, 1)
 
     listModel: list[Param] = [Param("distanceMultiplyBySpeedSquared", modelLineaire(),trainData),
@@ -305,5 +297,5 @@ if __name__ == "__main__":
                               Param("temperature", modelCube(),trainData),
                               Param("distanceMultiplyByTemperatureDivideBySpeed", modelLineaire(),trainData),
                               Param("distanceMultiplyByTemperatureSquaredDivideBySpeed", modelLineaire(),trainData),]
-    numberOfColumnForGraph = len(listModel) // NUMBEROFGRAPHPERROW + (len(listModel) % NUMBEROFGRAPHPERROW > 0)
+    numberOfColumnForGraph = len(listModel) // Parameter.NUMBEROFGRAPHPERROW + (len(listModel) % Parameter.NUMBEROFGRAPHPERROW > 0)
     train()
