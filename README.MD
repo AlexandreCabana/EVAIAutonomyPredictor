@@ -83,11 +83,7 @@ pip install torch --index-url https://download.pytorch.org/whl/cu130
 ## User Interface
 Tous les fichiers de cette section sont dans le répertoire website
 
-Configuration pour héberger le site web sur un serveur local avec uvicorn
-Dans votre terminal d'IDE entrez la commande:
-uvicorn fastApiProject.main:app --reload
-
-Pour accéder au site, dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
+Pour accéder au site, exécutez runServer.py et dirigez-vous sur http://0.0.0.0:10000 dans votre navigateur
 
 
 Fait par Alexandre Cabana, Guillaume Lavertus, Luca Ferrandes, Thierry
