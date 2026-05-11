@@ -15,22 +15,19 @@
       * [VicomTech](#vicomtech)
       * [VEDElectrique](#vedelectrique)
       * [Calcul de la pente lorsque l'info est manquante](#calcul-de-la-pente-lorsque-linfo-est-manquante)
-    * [AI](#ai)
+    * [AI sur des données aléatoire](#ai-sur-des-données-aléatoire)
       * [Requis](#requis)
-      * [Impact des facteurs pris en compte pour prédire l'autonomie des véhicules électriques](#impact-des-facteurs-pris-en-compte-pour-prédire-lautonomie-des-véhicules-électriques)
-        * [Pente](#pente)
-        * [Distance](#distance)
-        * [Vitesse moyenne](#vitesse-moyenne)
-        * [Température extérieure](#température-extérieure)
-        * [Formule globale](#formule-globale)
       * [Base de l'optimisation par l'IA](#base-de-loptimisation-par-lia)
       * [Graphique de l'impact de chacun des facteurs par rapport aux données expérimental](#graphique-de-limpact-de-chacun-des-facteurs-par-rapport-aux-données-expérimental)
       * [Graphique de l'erreur en fonction du nombre d'iteration](#graphique-de-lerreur-en-fonction-du-nombre-diteration)
         * [Calcul de l'erreur](#calcul-de-lerreur)
         * [Optimisation et ligne continue](#optimisation-et-ligne-continue)
-      * [Test sur jeux de donnée aléatoire](#test-sur-jeux-de-donnée-aléatoire)
+    * [Test sur jeux de donnée aléatoire](#test-sur-jeux-de-donnée-aléatoire)
         * [Example 1](#example-1)
-      * [Exécuter sur la carte graphique](#exécuter-sur-la-carte-graphique)
+    * [Exécuter sur la carte graphique](#exécuter-sur-la-carte-graphique)
+    * [IA sur les vraies données](#ia-sur-les-vraies-données)
+      * [Impact des facteurs pris en compte pour prédire l'autonomie des véhicules électriques](#impact-des-facteurs-pris-en-compte-pour-prédire-lautonomie-des-véhicules-électriques)
+      * [Quand arrêter l'entrainement](#quand-arrêter-lentrainement)
     * [Site Web](#site-web)
       * [Graphique des communications](#graphique-des-communications)
     * [Technologie utilisé](#technologie-utilisé)
@@ -69,9 +66,7 @@ Fonctionnalité :
 - Prise en compte des données météos (automatiquement ou manuellement)
 - Entrainement du modèle sur 175Mo de données
 
-Problème à résoudre : Les manufacturiers de véhicules électriques prédisent l’autonomie de leurs véhicules avec des 
-tests sur dynamomètres. Les conditions de tests étant idéales, Les estimations sont souvent mauvaises dû aux impacts 
-qu'à l’environnement sur la décharge lorsqu’on roule sur de vrais routes (vent, température, chauffage, etc.)
+Problème à résoudre : Les manufacturiers de véhicules électriques prédisent l’autonomie de leurs véhicules avec des tests sur dynamomètres. Les conditions de tests étant idéales, Les estimations sont souvent mauvaises dû aux impacts qu'à l’environnement sur la décharge lorsqu’on roule sur de vrais routes (vent, température, chauffage, etc.)
 
 Solution : Prédire l’autonomie avec un modèle de machine learning qui est entrainé avec des données de trajets réels.
 
@@ -97,7 +92,7 @@ Tous les fichiers de cette section sont dans le répertoire transformation de do
 #### VEDElectrique
 #### Calcul de la pente lorsque l'info est manquante
 ### AI sur des données aléatoire
-Tous les fichiers de cette section sont dans le répertoire AI
+Tous les fichiers de cette section sont dans le répertoire AIScript
 #### Requis
 Les librairies suivantes sont nécessaires.
 - uvicorn
@@ -107,10 +102,14 @@ Les librairies suivantes sont nécessaires.
 - Sicpy
 - Matplotlib
 #### Base de l'optimisation par l'IA
-Notre IA optimise une fonction qui se définit par une somme de fonction polynomiale telle que $$f(x,y,z)= f_1(x) + f_2(y) +  f_3(z)$$\
+Notre IA optimise une fonction qui se définit par une somme de fonction polynomiale telle que 
+$f(x,y,z)= f_1(x) + f_2(y) +  f_3(z) $ où $f_n$ est une fonction polynomiale et n fait partie des réelles.
+Par exemple,
+$$ f(x,y,z)= \alpha_{x2} \cdot x ^2 + \alpha_{x1} \cdot x + \alpha_{x0}  + \alpha_{y1} \cdot y + \alpha_{y0} + \alpha_{z1} \cdot z + \alpha_{z0} $$ où $\alpha$ représente des facteurs 
+
 L'IA trouve les facteurs optimaux pour que la formule globale trouvée avant 
 suive le plus possible les données dans notre jeu de 
-donnée transformées. La library Pytorch est utilisé 
+donnée transformées. La library Pytorch est utilisée 
 pour facilement faire une descente de gradient avec l'optimiseur ADAM qui détermine le multiple optimal à la pente. La 
 descente de gradient est un principe d'optimisation. Pour ce faire, il faut définir une fonction qui calcul l'erreur en
 fonction des paramètres que le modèle prend. Ensuite, tu fais la dérivée partielle de chacun des paramètres par rapport
@@ -139,48 +138,34 @@ s'entraine sont moins représentatif, car les prédictions sont plus ou moins bo
 Cependant, une fois entrainé, cette technique marche parfaitement et les graphiques sont cohérents.
 #### Graphique de l'erreur en fonction du nombre d'iteration
 ##### Calcul de l'erreur
-L'erreur est calculé avec la technique de l'erreur quadratique moyenne, soit\
-$$MSE = \sum_{i=1}^{n} \frac{x_n-\overline x}{\sigma}$$\
+L'erreur est calculé avec la technique de l'erreur quadratique moyenne, soit
+$$MSE = \frac{1}{N} \cdot \sum_{i=1}^{N} {(x_n-\overline x)^2} $$ où N représente le nombre d'éléments et $x_n$ 
+représente la valeur du n-ième élément
 $$\overline x = \frac{\sum_{i=1}^{n} x_n}{n}$$\
-$$\sigma = \sqrt\frac{\sum_{i=1}^{n}(x_n - \overline x)^2}{n}$$
 ##### Optimisation et ligne continue
-Afin d'accélérer le programme, le programme ne calcul pas l'erreur à chaque itération. Il y a une constante
-au début du script python qui indique à quel intervalle faire le graphique. Lorsque le graphique ce fait,
-l'erreur est calculé. Par défaut, la constante est à 10 000. Pour avoir une ligne continue sur l'erreur, j'ai utilisé la
-librairie scipy et la fonction interpolate
-qui fait une ligne qui passe par les points donnés.
+Afin d'accélérer le programme, le programme ne génère pas le graphique de l'erreur en fonction du nombre d'ittération. Il y a une constante
+au début du script python qui indique à quel intervalle faire le graphique. Lorsque le graphique ce fait, l'erreur est calculé. Par défaut, la constante est à 10 000. Pour avoir une ligne continue sur l'erreur, j'ai utilisé la librairie scipy et la fonction interpolate qui fait une ligne qui passe par les points donnés.
 ### Test sur jeux de donnée aléatoire
-Pour tester notre intelligence artificielle rapidement et éfficacement, le code X
-génère un jeu de donnée aléatoire qui suit une fonction multivariable aléatoire de degré different.
+Pour tester notre intelligence artificielle rapidement et éfficacement, le code X génère un jeu de donnée aléatoire qui suit une fonction multivariable aléatoire de degré different.
 ##### Example 1
 $$ 
-f(a,b,c,d,e,f) = a_3*a^3+a_2*a^2 +a_1*a + a_0 + b_3*b^3+b_2*b^2 +b_1*b + b_0 + c_2*c^2 +c_1*c + c_0 + d_2*d^2 +d_1*d + d_0 + e_1*e + e_0 + f_1*f + f_0
+f(a,b,c,d,e,f) = a_3 \cdot a^3 + a_2 \cdot a^2 + a_1 \cdot a + a_0 + b_3 \cdot b^3 + b_2 \cdot b^2 + b_1 \cdot b + b_0 + c_2 \cdot c^2 + c_1 \cdot c + c_0 + d_2 \cdot d^2 + d_1 \cdot d + d_0 + e_1 \cdot e + e_0 + f_1 \cdot f + f_0
 $$
-Lorsque le programme se lance, tous les paramètres sont définis aléatoirement. Après être optimisé, voici les résultats 
-que nous avons obtenus. 
-Dans ce graphique, vous pouvez constater la variation de chacun des paramètres par rapport à l'axe des Y
+Lorsque le programme se lance, tous les paramètres sont définis aléatoirement. Après être optimisé, voici les résultats que nous avons obtenus. Dans ce graphique, vous pouvez constater la variation de chacun des paramètres par rapport à l'axe des Y
 
 Dans ce graphique, vous pouvez constater l'évolution de l'erreur en fonction de l'erreur
 ### Exécuter sur la carte graphique
-Afin d'optimiser l'optimisation de la fonction, la librairie Pytorch doit être réinstallé pour une 
-version compatible avec ta version de CUDA. Dans mon cas, j'ai installé la version 13.0.
+Afin d'optimiser l'optimisation de la fonction, la librairie Pytorch doit être réinstallé pour une version compatible avec ta version de CUDA. Dans mon cas, j'ai installé la version 13.0.
 Pour installer la version de pytorch, j'ai utilisé la commande : 
 ```console
 pip install torch --index-url https://download.pytorch.org/whl/cu130
 ```
 ### IA sur les vraies données
 #### Impact des facteurs pris en compte pour prédire l'autonomie des véhicules électriques
-Après avoir fait des recherches, nous avons déterminé telle relation pour estimer l'autonomie d'un véhicule électrique
+Après avoir fait des recherches, nous avons déterminé telle relation pour estimer l'autonomie d'un véhicule électrique.
 Il existe une corrélation entre X et Y
 #### Quand arrêter l'entrainement
-Normalement, sur un jeu de donnée aléatoire où toutes les données n'ont pas de bruit. Le plus que le programme le mieux 
-que c'est. Cependant, lorsque les données ont du bruit, l'IA va trop optimiser sur le jeu de donné et ne plus être précis.
-Ainsi, il faut séparer les données en deux, soit une partie pour l'entrainement et une autre pour valider. Lorsque les 
-données sont séparées, on calcule l'erreur sur la partie de validation et d'entrainement. Lorsque que le programme est 
-surentrainé, l'erreur sur les données de validation montre en flèche comme qu'on peut le voir sur le graphique suivant. 
-On peut aussi calculer une erreur globale qui est une moyenne pondérée entre celle des données de validation et 
-entrainement. On sauvegarde aussi le model dans un fichier qui s'appelle model.json pour être capable d'accéder 
-certaines des itérations du programme.
+Normalement, sur un jeu de donnée aléatoire où toutes les données n'ont pas de bruit. Le plus que le programme le mieux que c'est. Cependant, lorsque les données ont du bruit, l'IA va trop optimiser sur le jeu de donné et ne plus être précis. Ainsi, il faut séparer les données en deux, soit une partie pour l'entrainement et une autre pour valider. Lorsque les données sont séparées, on calcule l'erreur sur la partie de validation et d'entrainement. Lorsque que le programme est surentrainé, l'erreur sur les données de validation montre en flèche comme qu'on peut le voir sur le graphique suivant. On peut aussi calculer une erreur globale qui est une moyenne pondérée entre celle des données de validation et entrainement. On sauvegarde aussi le model dans un fichier qui s'appelle model.json pour être capable d'accéder certaines des itérations du programme.
 ### Site Web
 #### Graphique des communications
 Tous les fichiers de cette section sont dans le répertoire fastAPIProject
@@ -243,10 +228,5 @@ Si nous avions eu le double du temps pour réaliser notre projet, nous aurions a
 - Plus de données et des données plus variées
 - Amélioration des opérations possibles
 ### Conclusion
-Bien que les résultats de l’IA ne soient pas très précis, ce projet nous a permis d’acquérir de nombreuses compétences 
-en machine learning, en APIs, en développement frontend et dans plusieurs langages de programmation. Ces compétences
-nous serons très utiles dans nos études ou notre carrière. Ce projet servait surtout à comprendre le fonctionnement d’
-une IA plus qu’à réellement révolutionner l’automobile dû au manque de données. Nous avons beaucoup appris et nous 
-sommes fiers de l’effort que nous avons mis dans l’apprentissage des compétences nécessaires à la réalisation de 
-notre projet.
+Bien que les résultats de l’IA ne soient pas très précis, ce projet nous a permis d’acquérir de nombreuses compétences en machine learning, en APIs, en développement frontend et dans plusieurs langages de programmation. Ces compétences nous serons très utiles dans nos études ou notre carrière. Ce projet servait surtout à comprendre le fonctionnement d’ une IA plus qu’à réellement révolutionner l’automobile dû au manque de données. Nous avons beaucoup appris et nous sommes fiers de l’effort que nous avons mis dans l’apprentissage des compétences nécessaires à la réalisation de notre projet.
 Fait par Alexandre Cabana, Guillaume Lavertus, Luca Ferrandes, Thierry
