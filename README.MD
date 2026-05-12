@@ -107,7 +107,7 @@ $f(x,y,z)= f_1(x) + f_2(y) +  f_3(z)$ où $f_n$ est une fonction polynomiale et 
 Par exemple,
 $$f(x,y,z)= \alpha_{x2} \cdot x ^2 + \alpha_{x1} \cdot x + \alpha_{x0}  + \alpha_{y1} \cdot y + \alpha_{y0} + \alpha_{z1} \cdot z + \alpha_{z0}$$ où $\alpha$ représente des facteurs. 
 
-L'IA trouve les facteurs optimaux pour que la formule globale trouvée  suive le plus possible les données dans notre jeu de donnée transformées. La library Pytorch est utilisée pour facilement faire une descente de gradient avec l'optimiseur ADAM qui détermine le multiple optimal à la pente. La descente de gradient est un principe d'optimisation. Pour ce faire, il faut définir une fonction qui calcul l'erreur en fonction des paramètres que le modèle prend. Ensuite, tu fais la dérivée partielle de chacun des paramètres par rapport à l'erreur. Ensuite, tu multiplies la dérivée par un facteur habituellement constant que tu soustrais à l'erreur. Ainsi, l'erreur va être réduite. Tu fais ça en boucle jusqu'à temp que l'erreur est minimal. Dans notre cas, on utilise l'optimiseur ADAM pour changer le facteur constant par une fonction qui dépend de la variation de l'erreur depuis la dernière fois. Ceci permet à notre programme d'optimiser plus vite. Dans le graphique suivant, vous pouvez constater l'évolution de l'erreur en fonction du nombre d'itération d'une fonction parfaite.
+L'IA trouve les facteurs optimaux pour que la formule globale trouvée  suive le plus possible les données dans notre jeu de donnée transformées. La library Pytorch est utilisée pour facilement faire une descente de gradient avec l'optimiseur ADAM qui détermine le multiple optimal à la pente. La descente de gradient est un principe d'optimisation. Pour ce faire, il faut définir une fonction qui calcul l'erreur en fonction des paramètres que le modèle prend. Ensuite, tu fais la dérivée partielle de chacun des paramètres par rapport à l'erreur. Ensuite, tu multiplies la dérivée par un facteur habituellement constant que tu soustrais à l'erreur. Ainsi, l'erreur va être réduite. Tu fais ça en boucle jusqu'à temp que l'erreur est minimal. Dans notre cas, on utilise l'optimiseur ADAM pour changer le facteur constant par une fonction qui dépend de la variation de l'erreur depuis la dernière fois. Ceci permet à notre programme d'optimiser plus vite. Dans le graphique suivant, vous pouvez constater l'évolution de l'erreur en fonction du nombre d'itérations d'une fonction parfaite.\
 ![My image](./images/errorOptmisation.png)
 #### Graphique de l'impact de chacun des facteurs par rapport aux données expérimental
 Pour modéliser la fonction multivariable, nous ne pouvons pas faire de graphique 
@@ -125,11 +125,10 @@ $$f(x,y,z) - f_1(x) - f_2(y) = f_3(z)$$\
 On peut ainsi généraliser ceci pour une fonction multivariable.\
 $$f(n_1,n_2, ..., n_n) - \sum_{i=1}^{n} f_n(n_n) + f_a(n_a) = f_a(n_a)$$ où a est le paramètre à évaluer\
 Ainsi, on peut représenter l'effet d'un paramètre sur la fontion globale.
-L'inconvénient de cette technique est que les graphiques générés lorsque l'IA
-s'entraine sont moins représentatif comme vous pouvez le voir avec le graphique suivant
+L'inconvénient de cette technique est que les graphiques générés lorsque l'IA s'entraine sont moins représentatif comme vous pouvez le voir avec le graphique suivant: \
 ![My image](./images/MultidimensionalGraphBeginEnd/beginPrecisionGraph.png)
 Ceci se produit, car les prédictions des autres fonctions sont erronées.
-Cependant, une fois entrainé, cette technique marche parfaitement et les graphiques sont cohérents.
+Cependant, une fois entrainé, cette technique marche parfaitement et les graphiques sont cohérents.\
 ![My image](./images/MultidimensionalGraphBeginEnd/endPrecisionGraph.png)
 #### Graphique de l'erreur en fonction du nombre d'iteration
 ##### Calcul de l'erreur
