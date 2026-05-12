@@ -41,13 +41,13 @@
 <!-- TOC -->
 ## Description du projet
 ### L'équipe
-**Alexandre:** Backend/IA
+**Alexandre (AlexandreCabana):** Backend/IA
 
-**Luca:** Modèle et SiteWeb
+**Luca (LucaFL02):** Modèle et SiteWeb
 
-**Thierry:** Traitement des données
+**Thierry (EatANapkin):** Traitement des données
 
-**Guillaume:** SiteWeb
+**Guillaume (gliglo7):** SiteWeb
 ### Idée
 Nous souhaitons créer une application qui permet à ses utilisateurs de prédire avec une IA la distance qu'ils peuvent 
 parcourir avec l'énergie restante dans leur véhicule électrique.
@@ -80,6 +80,7 @@ Toutes les personnes qui ont accès à un véhicule électrique ou qui souhaiten
 
 ### Lien avec autre matière
 Maths et informatique : Machine learning, analyse de données
+
 Physique : Paramètres du modèle modifiées par des fonctions physiques pour des prédictions plus précises.
 Certains calculs basés sur la physique pour : Distance, altitude, énergie du chauffage/climatisation
 
@@ -93,14 +94,7 @@ Tous les fichiers de cette section sont dans le répertoire transformation de do
 #### Calcul de la pente lorsque l'info est manquante
 ### AI sur des données suivant une somme de fonction polynomiale
 Tous les fichiers de cette section sont dans le répertoire AIScript
-#### Requis
-Les librairies suivantes sont nécessaires.
-- uvicorn
-- Pandas
-- Pytorch
-- Numpy
-- Sicpy
-- Matplotlib
+
 #### Base de l'optimisation par l'IA
 Notre IA optimise une fonction qui se définit par une somme de fonction polynomiale telle que 
 $f(x,y,z)= f_1(x) + f_2(y) +  f_3(z)$ où $f_n$ est une fonction polynomiale et n fait partie des réelles.
@@ -162,15 +156,8 @@ Après avoir fait des recherches, nous avons déterminé telle relation pour est
 Il existe une corrélation entre X et Y
 #### Overtrainnimg
 Normalement, sur un jeu de donnée aléatoire où toutes les données n'ont pas de bruit. Le plus que le programme roule le mieux que c'est. Cependant, lorsque les données ont du bruit, l'IA va trop optimiser sur le jeu de donné et ne plus être précis. Ainsi, il faut séparer les données en deux, soit une partie pour l'entrainement et une autre pour valider. Lorsque les données sont séparées, on calcule l'erreur sur la partie de validation et d'entrainement. Lorsque que le programme est surentrainé, l'erreur sur les données de validation montre en flèche comme qu'on peut le voir sur le graphique suivant. On peut aussi calculer une erreur globale qui est une moyenne pondérée entre celle des données de validation et entrainement. On sauvegarde aussi le model dans un fichier qui s'appelle model.json pour être capable d'accéder certaines des itérations du programme.
-### Site Web
-#### Graphique des communications
-Tous les fichiers de cette section sont dans le répertoire fastAPIProject
 
-Configuration pour héberger le site web sur un serveur local avec uvicorn
-Dans votre terminal d'IDE entrez la commande:
-uvicorn fastApiProject.main:app --reload
 
-Pour accéder au site, dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
 ### Technologie utilisé
 - **Technologies à utiliser** :
     - Language frontend: JavaScript (HTML et CSS)
@@ -209,11 +196,18 @@ Pour accéder au site, dirigez-vous sur http://127.0.0.1:8000 dans votre navigat
         - VEDElectrique
     - Version control: Git et Github
 ## Tutoriel
+A FAIRE
 
+Pour accéder au site, exécutez main.py dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
 ## Analyse final
 ### Difficulté rencontrer
+A FAIRE
+### Diagramme de communication
+![My image](./images/diagramme-com.jpg)
 ### Diagramme de Gant
+A FAIRE
 ### Respect de l'échéancier
+A FAIRE
 ### Percepective
 
 Si nous avions eu le double du temps pour réaliser notre projet, nous aurions ajouté et amélioré les fonctionnalités suivantes:
@@ -221,8 +215,7 @@ Si nous avions eu le double du temps pour réaliser notre projet, nous aurions a
 - Collecte de plusieurs données sur le véhicule de l’utilisateur en connectant un microcontrôleur au port OBD2 du véhicule
 - Prédiction en temps réel en conduisant
 - Meilleur UI/UX
-- Plus de données et des données plus variées
+- Plus de données et des données plus variées (surtout dans des conditions hivernales)
 - Amélioration des opérations possibles
 ### Conclusion
 Bien que les résultats de l’IA ne soient pas très précis, ce projet nous a permis d’acquérir de nombreuses compétences en machine learning, en APIs, en développement frontend et dans plusieurs langages de programmation. Ces compétences nous serons très utiles dans nos études ou notre carrière. Ce projet servait surtout à comprendre le fonctionnement d’ une IA plus qu’à réellement révolutionner l’automobile dû au manque de données. Nous avons beaucoup appris et nous sommes fiers de l’effort que nous avons mis dans l’apprentissage des compétences nécessaires à la réalisation de notre projet.
-Fait par Alexandre Cabana, Guillaume Lavertus, Luca Ferrandes, Thierry
