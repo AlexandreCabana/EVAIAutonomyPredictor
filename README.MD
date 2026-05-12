@@ -91,7 +91,7 @@ Tous les fichiers de cette section sont dans le répertoire transformation de do
 #### VicomTech
 #### VEDElectrique
 #### Calcul de la pente lorsque l'info est manquante
-### AI sur des données aléatoire
+### AI sur des données suivant une somme de fonction polynomiale
 Tous les fichiers de cette section sont dans le répertoire AIScript
 #### Requis
 Les librairies suivantes sont nécessaires.
@@ -103,9 +103,9 @@ Les librairies suivantes sont nécessaires.
 - Matplotlib
 #### Base de l'optimisation par l'IA
 Notre IA optimise une fonction qui se définit par une somme de fonction polynomiale telle que 
-$f(x,y,z)= f_1(x) + f_2(y) +  f_3(z) $ où $f_n$ est une fonction polynomiale et n fait partie des réelles.
+$f(x,y,z)= f_1(x) + f_2(y) +  f_3(z)$ où $f_n$ est une fonction polynomiale et n fait partie des réelles.
 Par exemple,
-$$ f(x,y,z)= \alpha_{x2} \cdot x ^2 + \alpha_{x1} \cdot x + \alpha_{x0}  + \alpha_{y1} \cdot y + \alpha_{y0} + \alpha_{z1} \cdot z + \alpha_{z0} $$ où $\alpha$ représente des facteurs 
+$$f(x,y,z)= \alpha_{x2} \cdot x ^2 + \alpha_{x1} \cdot x + \alpha_{x0}  + \alpha_{y1} \cdot y + \alpha_{y0} + \alpha_{z1} \cdot z + \alpha_{z0}$$ où $\alpha$ représente des facteurs 
 
 L'IA trouve les facteurs optimaux pour que la formule globale trouvée avant 
 suive le plus possible les données dans notre jeu de 
@@ -141,16 +141,14 @@ Cependant, une fois entrainé, cette technique marche parfaitement et les graphi
 L'erreur est calculé avec la technique de l'erreur quadratique moyenne, soit
 $$MSE = \frac{1}{N} \cdot \sum_{i=1}^{N} {(x_n-\overline x)^2} $$ où N représente le nombre d'éléments et $x_n$ 
 représente la valeur du n-ième élément
-$$\overline x = \frac{\sum_{i=1}^{n} x_n}{n}$$\
+$$\overline x = \frac{\sum_{i=1}^{n} x_n}{n}$$
 ##### Optimisation et ligne continue
-Afin d'accélérer le programme, le programme ne génère pas le graphique de l'erreur en fonction du nombre d'ittération. Il y a une constante
+Afin d'accélérer le programme, le programme ne génère pas le graphique de l'erreur en fonction du nombre d'iteration à chaque X iteration. Il y a une constante
 au début du script python qui indique à quel intervalle faire le graphique. Lorsque le graphique ce fait, l'erreur est calculé. Par défaut, la constante est à 10 000. Pour avoir une ligne continue sur l'erreur, j'ai utilisé la librairie scipy et la fonction interpolate qui fait une ligne qui passe par les points donnés.
 ### Test sur jeux de donnée aléatoire
 Pour tester notre intelligence artificielle rapidement et éfficacement, le code X génère un jeu de donnée aléatoire qui suit une fonction multivariable aléatoire de degré different.
-##### Example 1
-$$ 
-f(a,b,c,d,e,f) = a_3 \cdot a^3 + a_2 \cdot a^2 + a_1 \cdot a + a_0 + b_3 \cdot b^3 + b_2 \cdot b^2 + b_1 \cdot b + b_0 + c_2 \cdot c^2 + c_1 \cdot c + c_0 + d_2 \cdot d^2 + d_1 \cdot d + d_0 + e_1 \cdot e + e_0 + f_1 \cdot f + f_0
-$$
+##### Exemple 1
+$$f(a,b,c,d,e,f) = a_3 \cdot a^3 + a_2 \cdot a^2 + a_1 \cdot a + a_0 + b_3 \cdot b^3 + b_2 \cdot b^2 + b_1 \cdot b + b_0 + c_2 \cdot c^2 + c_1 \cdot c + c_0 + d_2 \cdot d^2 + d_1 \cdot d + d_0 + e_1 \cdot e + e_0 + f_1 \cdot f + f_0$$
 Lorsque le programme se lance, tous les paramètres sont définis aléatoirement. Après être optimisé, voici les résultats que nous avons obtenus. Dans ce graphique, vous pouvez constater la variation de chacun des paramètres par rapport à l'axe des Y
 
 Dans ce graphique, vous pouvez constater l'évolution de l'erreur en fonction de l'erreur
@@ -164,8 +162,8 @@ pip install torch --index-url https://download.pytorch.org/whl/cu130
 #### Impact des facteurs pris en compte pour prédire l'autonomie des véhicules électriques
 Après avoir fait des recherches, nous avons déterminé telle relation pour estimer l'autonomie d'un véhicule électrique.
 Il existe une corrélation entre X et Y
-#### Quand arrêter l'entrainement
-Normalement, sur un jeu de donnée aléatoire où toutes les données n'ont pas de bruit. Le plus que le programme le mieux que c'est. Cependant, lorsque les données ont du bruit, l'IA va trop optimiser sur le jeu de donné et ne plus être précis. Ainsi, il faut séparer les données en deux, soit une partie pour l'entrainement et une autre pour valider. Lorsque les données sont séparées, on calcule l'erreur sur la partie de validation et d'entrainement. Lorsque que le programme est surentrainé, l'erreur sur les données de validation montre en flèche comme qu'on peut le voir sur le graphique suivant. On peut aussi calculer une erreur globale qui est une moyenne pondérée entre celle des données de validation et entrainement. On sauvegarde aussi le model dans un fichier qui s'appelle model.json pour être capable d'accéder certaines des itérations du programme.
+#### Overtrainnimg
+Normalement, sur un jeu de donnée aléatoire où toutes les données n'ont pas de bruit. Le plus que le programme roule le mieux que c'est. Cependant, lorsque les données ont du bruit, l'IA va trop optimiser sur le jeu de donné et ne plus être précis. Ainsi, il faut séparer les données en deux, soit une partie pour l'entrainement et une autre pour valider. Lorsque les données sont séparées, on calcule l'erreur sur la partie de validation et d'entrainement. Lorsque que le programme est surentrainé, l'erreur sur les données de validation montre en flèche comme qu'on peut le voir sur le graphique suivant. On peut aussi calculer une erreur globale qui est une moyenne pondérée entre celle des données de validation et entrainement. On sauvegarde aussi le model dans un fichier qui s'appelle model.json pour être capable d'accéder certaines des itérations du programme.
 ### Site Web
 #### Graphique des communications
 Tous les fichiers de cette section sont dans le répertoire fastAPIProject
