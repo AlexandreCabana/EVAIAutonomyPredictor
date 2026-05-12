@@ -191,9 +191,9 @@ Normalement, sur un jeu de donnée aléatoire où toutes les données n'ont pas 
         - JSON
         - Math
     - Bases de données pour entrainer IA:
-        - Kagle
-        - VicomTech
-        - VEDElectrique
+        - Kaggle (https://www.kaggle.com/datasets/ziya07/ev-energy-consumption-dataset)
+        - VicomTech (https://github.com/Vicomtech/d-EVD_dual-Electric-Vehicle-Dataset)
+        - VEDElectrique (https://github.com/gsoh/VED)
     - Version control: Git et Github
 ## Tutoriel
 A FAIRE
