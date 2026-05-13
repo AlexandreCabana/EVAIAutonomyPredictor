@@ -294,7 +294,6 @@ Après avoir modélisé le modèle, Alexandre et Luca devaient créer l'IA pour 
 Nous avons décidé de rendre notre site plus beau en modifiant notre CSS avec Gemini et Claude. Cela a eu pour effet de ralentir notre progression sur le siteweb dû aux hallucinations et bugs de cohérences causées par les LLMs. Nous aurions dû nous satisfaire d'un siteweb moins esthétique, mais plus simple afin d'accélérer notre productivité sur des fonctionnalitées concrètes.
 #### 5. A FAIRE
 #### 6. A FAIRE
-## Analyse final
 A FAIRE
 
 ### Diagramme de Gant
