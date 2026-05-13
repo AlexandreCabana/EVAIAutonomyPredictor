@@ -39,8 +39,8 @@
   * [Analyse finale](#analyse-finale)
     * [Difficulté rencontrée](#difficulté-rencontrée)
       * [1. Les erreurs de logique](#1-les-erreurs-de-logique)
-      * [A.Modèle cubique](#amodèle-cubique)
-      * [B. Multiplication de fonction](#b-multiplication-de-fonction)
+        * [A.Modèle cubique](#amodèle-cubique)
+        * [B. Multiplication de fonction](#b-multiplication-de-fonction)
       * [2. Pas accès aux données au début](#2-pas-accès-aux-données-au-début)
       * [3. Difficulté à travailler sur l'IA à 2:](#3-difficulté-à-travailler-sur-lia-à-2-)
       * [4. Design fait par des LLMs:](#4-design-fait-par-des-llms-)
@@ -105,7 +105,7 @@ Tous les fichiers de cette section sont dans le répertoire transformation de do
 #### Kagle
 Ce premier dataset était le plus riche en données puisqu'il offrait plusieurs trips pour chaque voiture pour arriver à un total de 5000 trips différents. Le dataset était également déjà regroupé par trip ce qui a sauvé beaucoup de temps dans le tri des données pertinentes. 
 #### VicomTech
-Cette deuxième source de donnée regroupe 29 trips avec deux voitures différentes pour obtenir 58 trips au total. Ce dataset était regroupé par timestamp avec des données correspondates. Pour obtenir une meilleure vue d'ensemble, il a fallu donc regrouper le dataset selon chaque trip_id et faire une analyse statistique pour sortir les données pertinentes. 
+Cette deuxième source de donnée regroupe 29 trips avec deux voitures différentes pour obtenir 58 trips au total. Ce dataset était regroupé par timestamp avec des données correspondantes. Pour obtenir une meilleure vue d'ensemble, il a fallu donc regrouper le dataset selon chaque trip_id et faire une analyse statistique pour sortir les données pertinentes. 
 #### VEDElectrique
 Comme VicomTech, ce dataset était regroupé par timestamps, mais il comportait également beaucoup de données sur des véhicules hybrides ou des véhicules à gaz. Il a donc fallu garder seulement les véhicules exclusivement électriques. Il n'en comportait que 3 et seulement 2 des 3 ont enregistré des données utilisables. Ce qui fait de cette source de donnée la moins riche en donnée.
 
@@ -130,7 +130,7 @@ Dans le graphique suivant, la fonction en mauve est l'erreur que nous optimisons
 ![My image](https://lucidar.me/fr/neural-networks/files/gradient-descent.png)
 #### Graphique de l'erreur en fonction du nombre d'iteration
 Ce type de graphique permet de suivre l'évolution de l'intelligence artificielle avec le temps. Il y a une constante dans le fichier de configuration que vous pouvez modifier afin de déterminer à quelle fréquence il sauvegarde et génère les graphiques.
-Dans le graphique suivant, vous pouvez constater l'évolution de l'erreur en fonction du nombre d'itérations.
+Dans le graphique suivant, vous pouvez constater l'évolution de l'erreur en fonction du nombre d'itérations.\
 ![My image](./images/errorOptmisation.png)
 ##### Calcul de l'erreur
 L'erreur est calculé avec la technique de l'erreur quadratique moyenne, soit
