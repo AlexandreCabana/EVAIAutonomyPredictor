@@ -81,6 +81,7 @@ Problème à résoudre : Les manufacturiers de véhicules électriques prédisen
 Solution : Prédire l’autonomie avec un modèle de machine learning qui est entrainé avec des données de trajets réels.
 
 ### Inovation
+à FAIRE
 ### Cas d'utilisation
 1. Un utilisateur de VÉ veut connaitre avec une meilleure précision son range pour planifier ses déplacements
 2. Un manufacturier de VÉ intègre notre app à ses véhicules pour offrir une meilleure prédiction du range à ses clients
