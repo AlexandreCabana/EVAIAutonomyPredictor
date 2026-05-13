@@ -237,7 +237,7 @@ sequenceDiagram
     UI-->>User: Affiche autonomie predite
 ```
 
-## Tutoriel
+## Comprendre FastAPI
 
 ### Qu’est-ce qu’une API?
 C’est tout simplement un intermédiaire qui permet à différentes applications de communiquer entre elles. Par exemple, il existe des API pour la météo où, dans l’URL, tu spécifies la position voulue, la date voulue, et l’API de météo va te renvoyer les informations de température et de précipitation pour cette localisation et date spécifique.
