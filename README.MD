@@ -17,6 +17,7 @@
       * [Calcul de la pente lorsque l'info est manquante](#calcul-de-la-pente-lorsque-linfo-est-manquante)
     * [AI sur des données suivant une somme de fonction polynomiale](#ai-sur-des-données-suivant-une-somme-de-fonction-polynomiale)
       * [Base de l'optimisation par l'IA](#base-de-loptimisation-par-lia)
+      * [Graphique de l'impact de chacun des facteurs par rapport aux données expérimental](#graphique-de-limpact-de-chacun-des-facteurs-par-rapport-aux-données-expérimental)
       * [Graphique de l'erreur en fonction du nombre d'iteration](#graphique-de-lerreur-en-fonction-du-nombre-diteration)
         * [Calcul de l'erreur](#calcul-de-lerreur)
         * [Optimisation et ligne continue](#optimisation-et-ligne-continue)
@@ -41,6 +42,7 @@
       * [4. Design fait par des LLMs:](#4-design-fait-par-des-llms-)
       * [5. A FAIRE](#5-a-faire)
       * [6. A FAIRE](#6-a-faire)
+  * [Analyse final](#analyse-final)
     * [Diagramme de Gant](#diagramme-de-gant)
     * [Respect de l'échéancier](#respect-de-léchéancier)
     * [Percepective](#percepective)
@@ -78,6 +80,7 @@ Problème à résoudre : Les manufacturiers de véhicules électriques prédisen
 Solution : Prédire l’autonomie avec un modèle de machine learning qui est entrainé avec des données de trajets réels.
 
 ### Inovation
+à FAIRE
 ### Cas d'utilisation
 1. Un utilisateur de VÉ veut connaitre avec une meilleure précision son range pour planifier ses déplacements
 2. Un manufacturier de VÉ intègre notre app à ses véhicules pour offrir une meilleure prédiction du range à ses clients
@@ -89,7 +92,7 @@ Toutes les personnes qui ont accès à un véhicule électrique ou qui souhaiten
 Maths et informatique : Machine learning, analyse de données
 
 Physique : Paramètres du modèle modifiées par des fonctions physiques pour des prédictions plus précises.
-Certains calculs basés sur la physique pour : Distance, altitude, énergie du chauffage/climatisation
+Certains calculs basés sur la physique pour : Distance, altitude, énergie du chauffage/climatisation, énergie et autonomie
 
 ## Fonctionemment de l'application
 Pour avoir un produit final, il y a trois sections importantes. La première partie est la transformation des données. La deuxième partie est l’entrainement de l’intelligence artificielle pour avoir une fonction mathématique qui prédit l’autonomie. Ensuite, il y a la partie du site-web qui permet à l’utilisateur d’utiliser la fonction mathématique.
@@ -304,12 +307,15 @@ Après avoir modélisé le modèle, Alexandre et Luca devaient créer l'IA pour 
 
 #### 4. Design fait par des LLMs: 
 Nous avons décidé de rendre notre site plus beau en modifiant notre CSS avec Gemini et Claude. Cela a eu pour effet de ralentir notre progression sur le siteweb dû aux hallucinations et bugs de cohérences causées par les LLMs. Nous aurions dû nous satisfaire d'un siteweb moins esthétique, mais plus simple afin d'accélérer notre productivité sur des fonctionnalitées concrètes.
-#### 5. A FAIRE
+#### 5. Oubli de clear le cache
+Un des problèmes qui est survenu à quelques reprises est celui de voir aucun changement lors qu'on modifie le code de l'interface graphique. Cela est dû au cache du navigateur. Pour résoudre le problème, il suffit seulement de clear le cache et de le désactiver. Cependant, lorsqu'on y pense pas, cela peut nous faire perdre un temps précieux.
+
 #### 6. A FAIRE
 A FAIRE
 
 ### Diagramme de Gant
-A FAIRE
+![image](images/Diagramme_de_Gantt.png)
+
 ### Respect de l'échéancier
 A FAIRE
 ### Percepective
