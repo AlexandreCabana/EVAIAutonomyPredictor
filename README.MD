@@ -129,6 +129,8 @@ Cependant, une fois entrainé, cette technique marche parfaitement et les graphi
 
 ![My image](./images/MultidimensionalGraphBeginEnd/endPrecisionGraph.png)
 #### Graphique de l'erreur en fonction du nombre d'iteration
+Ce type de graphique permet de suivre l'évolution de l'intelligence artificielle avec le temps.
+![My image](./images/MultidimensionalGraphBeginEnd/endPrecisionGraph.png)
 ##### Calcul de l'erreur
 L'erreur est calculé avec la technique de l'erreur quadratique moyenne, soit
 $$MSE = \frac{1}{N} \cdot \sum_{i=1}^{N} {(x_n-\overline x)^2} $$ où N représente le nombre d'éléments et $x_n$ 
@@ -143,6 +145,7 @@ Pour tester notre intelligence artificielle rapidement et éfficacement, le code
 $$f(a,b,c,d,e,f) = a_3 \cdot a^3 + a_2 \cdot a^2 + a_1 \cdot a + a_0 + b_3 \cdot b^3 + b_2 \cdot b^2 + b_1 \cdot b + b_0 + c_2 \cdot c^2 + c_1 \cdot c + c_0 + d_2 \cdot d^2 + d_1 \cdot d + d_0 + e_1 \cdot e + e_0 + f_1 \cdot f + f_0$$
 Lorsque le programme se lance, tous les paramètres sont définis aléatoirement. Après être optimisé, voici les résultats que nous avons obtenus. Dans ce graphique, vous pouvez constater la variation de chacun des paramètres par rapport à l'axe des Y
 
+![My image](./images/errorOptmisation.png)
 Dans ce graphique, vous pouvez constater l'évolution de l'erreur en fonction de l'erreur
 ### Exécuter sur la carte graphique
 Afin d'optimiser l'optimisation de la fonction, la librairie Pytorch doit être réinstallé pour une version compatible avec ta version de CUDA. Dans mon cas, j'ai installé la version 13.0.
@@ -198,10 +201,43 @@ Normalement, sur un jeu de donnée aléatoire où toutes les données n'ont pas 
 ## Tutoriel
 A FAIRE
 
-
 Pour accéder au site, exécutez main.py dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
+## Analyse finale
+### Difficulté rencontrée
+#### 1. Les erreurs de logique
+#### A.Modèle cubique
+La fonction cubique avait mal été définis. Ainsi, lorsque l'optimiseur faisait de l'optimist, elle ne marchait pas. Au début, c'était définit par $f(x)=\alpha_3 \cdot x^3 + \alpha_2 \cdot x^2 + \alpha_3$
+Ceci est éroné et devrait être $f(x)=\alpha_3 \cdot x^3 + \alpha_2 \cdot x^2 + \alpha_1$
+Ceci est un problème simple, mais il a pris 3h à résoudre.
+#### B. Multiplication de fonction
+Pendant un moment, je n'arrivais pas à comprendre pourquoi le modèle était très imprécis. Après analyse et réflexion, ceci était dû au fait que si deux paramètres sont multipliées ensemble, toutes les combinaisons de degrés ne sont pas calculées. Par exemple, 
+$$f_2(x) = \alpha_{x2} \cdot x^2 + \alpha_{x1} \cdot x + \alpha_{x0}$$
+$$f_3(y) = \alpha_{y3} \cdot y^3 +\alpha_{y2} \cdot y^2 + \alpha_{y1} \cdot y + \alpha_{y0}$$
+$$f(x,y) = f_2(x)) \cdot f_3(y) $$
+$$f(x,y) = (\alpha_{x2} \cdot x^2 + \alpha_{x1} \cdot x + \alpha_{x0}) \cdot (\alpha_{y3} \cdot y^3 +\alpha_{y2} \cdot y^2 + \alpha_{y1} \cdot y + \alpha_{y0})$$
+$$f(x, y)=\alpha_{x2} \cdot \alpha_{y3} \cdot x^2 \cdot y^3 + \alpha_{x2} \cdot \alpha_{y2} \cdot x^2 \cdot y^2 +
+\alpha_{x2} \cdot \alpha_{y1} \cdot x^2 \cdot y +
+\alpha_{x2} \cdot \alpha_{y0} \cdot x^2 +
+\alpha_{x1} \cdot \alpha_{y3} \cdot x \cdot y^3 +
+\alpha_{x1} \cdot \alpha_{y2} \cdot x \cdot y^2 +
+\alpha_{x1} \cdot \alpha_{y1} \cdot x \cdot y +
+\alpha_{x1} \cdot \alpha_{y0} \cdot x +
+\alpha_{x0} \cdot \alpha_{y3} \cdot y^3 +
+\alpha_{x0} \cdot \alpha_{y2} \cdot y^2 +
+\alpha_{x0} \cdot \alpha_{y1} \cdot y +
+\alpha_{x0} \cdot \alpha_{y0}$$
+
+Au lieu de faire ça, mon code faisait
+$$f(x,y) = \alpha_2 \cdot (xy)^2 + \alpha_1 \cdot xy + \alpha 2 $$
+
+Ce n'est donc pas equivalent. J'ai donc fait que l'équivalence soit vraie.
+#### 2. Pas accès aux données au début
+Un problème que nous avons eu est que pour pratiquer une intelligence artificielle, il faut avoir des données. Cependant, il fallait transformer les données en premier. Pour résoudre ceci, nous avons créé un script qui génère des données aléatoires suivant une fonction multivariable de degré 1 à 3.
+#### 3.
+#### 4.
+#### 5.
+#### 6.
 ## Analyse final
-### Difficultés rencontrées
 A FAIRE
 
 ### Diagramme de fonctionnement
@@ -252,7 +288,7 @@ A FAIRE
 A FAIRE
 ### Percepective
 
-Si nous avions eu le double du temps pour réaliser notre projet, nous aurions ajouté et amélioré les fonctionnalités suivantes:
+Si nous avions eu le double du temps pour réaliser notre projet, nous aurions ajouté et amélioré les fonctionnalités suivantes :
 
 - Collecte de plusieurs données sur le véhicule de l’utilisateur en connectant un microcontrôleur au port OBD2 du véhicule
 - Prédiction en temps réel en conduisant
