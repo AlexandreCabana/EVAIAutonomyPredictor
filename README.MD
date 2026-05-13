@@ -95,10 +95,10 @@ Toutes les personnes qui ont accès à un véhicule électrique ou qui souhaiten
 ### Lien avec autre matière
 Maths et informatique : Machine learning, analyse de données
 
-Physique : Paramètres du modèle modifiées par des fonctions physiques pour des prédictions plus précises.
+Physique : Paramètres du modèle modifiés par des fonctions physiques pour des prédictions plus précises.
 Certains calculs basés sur la physique pour : Distance, altitude, énergie du chauffage/climatisation, énergie et autonomie
 
-## Fonctionemment de l'application
+## Fonctionnement de l'application
 Pour avoir un produit final, il y a trois sections importantes. La première partie est la transformation des données. La deuxième partie est l’entrainement de l’intelligence artificielle pour avoir une fonction mathématique qui prédit l’autonomie. Ensuite, il y a la partie du site-web qui permet à l’utilisateur d’utiliser la fonction mathématique.
 ### Source de donnée et transformation
 Tous les fichiers de cette section sont dans le répertoire transformation de donnée
@@ -134,7 +134,7 @@ Dans le graphique suivant, la fonction en mauve est l'erreur que nous optimisons
 
 
 ![My image](https://lucidar.me/fr/neural-networks/files/gradient-descent.png)
-#### Graphique de l'erreur en fonction du nombre d'iteration
+#### Graphique de l'erreur en fonction du nombre d'itérations
 Ce type de graphique permet de suivre l'évolution de l'intelligence artificielle avec le temps. Il y a une constante dans le fichier de configuration que vous pouvez modifier afin de déterminer à quelle fréquence il sauvegarde et génère les graphiques.
 Dans le graphique suivant, vous pouvez constater l'évolution de l'erreur en fonction du nombre d'itérations.\
 ![My image](./images/errorOptmisation.png)
@@ -143,7 +143,7 @@ L'erreur est calculé avec la technique de l'erreur quadratique moyenne, soit
 $$MSE = \frac{1}{N} \cdot \sum_{i=1}^{N} {(x_n- \tilde{x_n})^2} $$ où N représente le nombre d'éléments, $x_n$ 
 représente la valeur théorique du n-ième élément et $\tilde{x_n}$ représente la valeur n-ième élément prédit.
 ##### Optimisation et ligne continue
-Afin d'accélérer le programme, le programme ne génère pas le graphique de l'erreur en fonction du nombre d'iteration à chaque X iteration. Il y a une constante
+Afin d'accélérer le programme, le programme ne génère pas le graphique de l'erreur en fonction du nombre d'itérations à chaque X iteration. Il y a une constante
 au début du script python qui indique à quel intervalle dessiner le graphique. Lorsque le graphique ce fait, l'erreur est calculé. Par défaut, la constante est à 10 000. Pour avoir une ligne continue sur l'erreur, la librairie scipy avec la fonction interpolate qui fait une ligne qui passe par les points donnés.
 #### Test sur jeux de donnée aléatoire
 Pour tester notre intelligence artificielle rapidement et éfficacement, le code X génère un jeu de donnée aléatoire qui suit une fonction multivariable aléatoire de degré different.
@@ -154,7 +154,7 @@ Lorsque le programme se lance, tous les paramètres sont définis aléatoirement
 ![My image](./images/errorOptmisation.png)
 ##### Graphique de l'impact de chacun des facteurs par rapport aux données expérimental
 Pour modéliser la fonction multivariable, nous ne pouvons pas faire de graphique 
-traditionelle, car le corp humain ne peut pas observer une fonction qui a plus que deux paramètres. Ainsi, il faut être ingénieux pour représenter une fonction à plus de variable avec des graphiques. 
+traditionel, car le corp humain ne peut pas observer une fonction qui a plus que deux paramètres. Ainsi, il faut être ingénieux pour représenter une fonction à plus de variable avec des graphiques. 
 
 En ayant une fonction de type  
 $$f(x,y,z)= f_1(x) + f_2(y) +  f_3(z)$$\
@@ -166,7 +166,7 @@ Avec la formule suivante, on peut avoir l'effet du paramètre c sur la fonction\
 $$f(x,y,z) - f_1(x) - f_2(y) = f_3(z)$$\
 On peut ainsi généraliser ceci pour une fonction multivariable.\
 $$f(n_1,n_2, ..., n_n) - \sum_{i=1}^{n} f_n(n_n) + f_a(n_a) = f_a(n_a)$$ où a est le paramètre à évaluer\
-Ainsi, on peut représenter l'effet d'un paramètre sur la fontion globale.
+Ainsi, on peut représenter l'effet d'un paramètre sur la fonction globale.
 L'inconvénient de cette technique est que les graphiques générés lorsque l'IA s'entraine sont moins représentatif comme vous pouvez le voir avec le graphique suivant :
 
 ![My image](./images/MultidimensionalGraphBeginEnd/beginPrecisionGraph.png)
@@ -246,7 +246,7 @@ sequenceDiagram
     UI->>API: POST /submit (modele, ac_target_temp, ..., meteo, start, end, distance, duration)
     Cars->>API: Recuperer dimensions + batterie
     API->>Meteo: Position de départ et d'arrivée
-    Meteo-->>API: Récuperer données d'altitude
+    Meteo-->>API: Récupérer données d'altitude
     Model->>API: Charger les coefficients appris
     API->>API: Calcul pente, vitesse moyenne, consommation, autonomie
     UI->>API: GET /result 
@@ -274,12 +274,12 @@ Référence intéressante: https://www.jetbrains.com/help/pycharm/fastapi-projec
 Si le site est actif, dirigez-vous sur : https://evaiautonomypredictor.onrender.com/
 Sinon,
 1) Importez notre projet dans PyCharm
-2) Créez un envivronnment venv
-    Pour s'y faire vous devez ouvrir le terminal et être au root du projet (vous devriez y voir ```EVAIAutonomyPredictor %```). Ensuite, si vous n'avez pas encore d'environnement virtuel, faites la commande suivante: 
+2) Créez un environnement venv
+    Pour s'y faire, vous devez ouvrir le terminal et être au root du projet (vous devriez y voir ```EVAIAutonomyPredictor %```). Ensuite, si vous n'avez pas encore d'environnement virtuel, faites la commande suivante: 
     ```bash
     python -m venv .venv
     ```
-    Puis, activer cette environnement de la façon suivante si vous êtes sur _**Windows**_:
+    Puis, activer cet environnement de la façon suivante si vous êtes sur _**Windows**_:
    
     ```bash
     .venv\Scripts\activate
@@ -289,8 +289,8 @@ Sinon,
     ```bash
     source .venv/bin/activate
     ```
-   À présent vous devrez voir un ```(.venv)``` dans votre terminal.
-3) Installer les librairies requises:
+   À présent, vous devrez voir un ```(.venv)``` dans votre terminal.
+3) Installer les librairies requises :
     ```bash
     pip install -r requirements.txt
     ```
@@ -345,8 +345,8 @@ python main.py
 ### Difficulté rencontrée
 #### 1. Les erreurs de logique
 ##### A.Modèle cubique
-La fonction cubique avait mal été définis. Ainsi, lorsque l'optimiseur faisait de l'optimist, elle ne marchait pas. Au début, c'était définit par $f(x)=\alpha_3 \cdot x^3 + \alpha_2 \cdot x^2 + \alpha_3$
-Ceci est éroné et devrait être $f(x)=\alpha_3 \cdot x^3 + \alpha_2 \cdot x^2 + \alpha_1$
+La fonction cubique avait mal été définis. Ainsi, lorsque l'optimiseur faisait de l'optimist, elle ne fonctionnait pas. Au début, c'était définit par $f(x)=\alpha_3 \cdot x^3 + \alpha_2 \cdot x^2 + \alpha_3$
+Ceci est érroné et devrait être $f(x)=\alpha_3 \cdot x^3 + \alpha_2 \cdot x^2 + \alpha_1$
 Ceci est un problème simple, mais il a pris 3h à résoudre.
 ##### B. Multiplication de fonction
 Pendant un moment, je n'arrivais pas à comprendre pourquoi le modèle était très imprécis. Après analyse et réflexion, ceci était dû au fait que si deux paramètres sont multipliées ensemble, toutes les combinaisons de degrés ne sont pas calculées. Par exemple, 
@@ -376,9 +376,9 @@ Un problème que nous avons eu est que pour pratiquer une intelligence artificie
 Après avoir modélisé le modèle, Alexandre et Luca devaient créer l'IA pour intégrer le modèle en Python. Travailler en peer-to-peer se révélait inefficace et une personne faisait plus de travail que l'autre. Nous avons donc décidé de laisser la conception de l'IA à Alexandre alors que Luca aidait Guillaume à concevoir le SiteWeb.
 
 #### 4. Design fait par des LLMs: 
-Nous avons décidé de rendre notre site plus beau en modifiant notre CSS avec Gemini et Claude. Cela a eu pour effet de ralentir notre progression sur le siteweb dû aux hallucinations et bugs de cohérences causées par les LLMs. Nous aurions dû nous satisfaire d'un siteweb moins esthétique, mais plus simple afin d'accélérer notre productivité sur des fonctionnalitées concrètes.
+Nous avons décidé de rendre notre site plus beau en modifiant notre CSS avec Gemini et Claude. Cela a eu pour effet de ralentir notre progression sur le site dû aux hallucinations et bugs de cohérences causées par les LLMs. Nous aurions dû nous satisfaire d'un site moins esthétique, mais plus simple afin d'accélérer notre productivité sur des fonctionnalitées concrètes.
 #### 5. Oubli de clear le cache
-Un des problèmes qui est survenu à quelques reprises est celui de voir aucun changement lors qu'on modifie le code de l'interface graphique. Cela est dû au cache du navigateur. Pour résoudre le problème, il suffit seulement de clear le cache et de le désactiver. Cependant, lorsqu'on y pense pas, cela peut nous faire perdre un temps précieux.
+Un des problèmes qui est survenu à quelques reprises est celui de voir aucun changement lors qu'on modifie le code de l'interface graphique. Cela est dû au cache du navigateur. Pour résoudre le problème, il suffit seulement de clear le cache et de le désactiver. Cependant, lorsqu'on n'y pense pas, cela peut nous faire perdre un temps précieux.
 
 #### 6. A FAIRE
 ## Analyse final
@@ -416,8 +416,8 @@ Voici précisément ce que chacun a fait
 * Analyse de données
 #### Thierry
 * Calculs du dénivelé moyen avec open-meteo
-* Supression des véhicules non-électriques dans les 3 datasets
-* Supression des paramètres inutiles dans les 3 datasets
+* Suppression des véhicules non-électriques dans les 3 datasets
+* Suppression des paramètres inutiles dans les 3 datasets
 * Combinaisons des 3 datasets en un csv uniforme
 ### Diagramme de Gant
 ![image](images/Diagramme_de_Gantt.png)
