@@ -97,9 +97,15 @@ Pour avoir un produit final, il y a trois sections importantes. La première par
 ### Source de donnée et transformation
 Tous les fichiers de cette section sont dans le répertoire transformation de donnée
 #### Kagle
+Ce premier dataset était le plus riche en données puisqu'il offrait plusieurs trips pour chaque voiture pour arriver à un total de 5000 trips différents. Le dataset était également déjà regroupé par trip ce qui a sauvé beaucoup de temps dans le tri des données pertinentes. 
 #### VicomTech
+Cette deuxième source de donnée regroupe 29 trips avec deux voitures différentes pour obtenir 58 trips au total. Ce dataset était regroupé par timestamp avec des données correspondates. Pour obtenir une meilleure vue d'ensemble, il a fallu donc regrouper le dataset selon chaque trip_id et faire une analyse statistique pour sortir les données pertinentes. 
 #### VEDElectrique
+Comme VicomTech, ce dataset était regroupé par timestamps, mais il comportait également beaucoup de données sur des véhicules hybrides ou des véhicules à gaz. Il a donc fallu garder seulement les véhicules exclusivement électriques. Il n'en comportait que 3 et seulement 2 des 3 ont enregistré des données utilisables. Ce qui fait de cette source de donnée la moins riche en donnée.
 #### Calcul de la pente lorsque l'info est manquante
+Pour les données provenant de VED et VicomTech, la pente en % nécessaire pour nos calculs de l'IA n'était pas donné. Ils donnaient cependant la longitude et lattitude en degrés. Il était donc possible d'utiliser l'API de OpenMeteo afin de trouver une altitude pour une lattitude et longitude donnée. Il suffisait ensuite de faire le calcul suivant pour trouver le slope en %.
+
+delta altitude(m) /distance parcourue(m) * 100
 ### AI sur des données suivant une somme de fonction polynomiale
 Tous les fichiers de cette section sont dans le répertoire AIScript
 
