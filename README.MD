@@ -85,7 +85,6 @@ Problème à résoudre : Les manufacturiers de véhicules électriques prédisen
 
 Solution : Prédire l’autonomie avec un modèle de machine learning qui est entrainé avec des données de trajets réels.
 
-### Inovation
 ### Cas d'utilisation
 1. Un utilisateur de VÉ veut connaitre avec une meilleure précision son range pour planifier ses déplacements
 2. Un manufacturier de VÉ intègre notre app à ses véhicules pour offrir une meilleure prédiction du range à ses clients
@@ -257,7 +256,6 @@ sequenceDiagram
 Référence intéressante: https://www.jetbrains.com/help/pycharm/fastapi-project.html#create-project
 
 ## Création d’un projet fastAPI
-A FAIRE
 1)	Installer PyCharm (https://www.jetbrains.com/pycharm/)
 2)	Créer un nouveau projet
 3)	Sélectionner FastAPI comme type de projet
@@ -295,6 +293,9 @@ Sinon,
 3) Installer les librairies requises:
     ```bash
     pip install -r requirements.txt
+    ```
+   ```bash
+    pip install -r requirementsWebsite.txt
     ```
 4) Exécutez  
 ```bash
@@ -339,10 +340,7 @@ python main.py
         - VicomTech (https://github.com/Vicomtech/d-EVD_dual-Electric-Vehicle-Dataset)
         - VEDElectrique (https://github.com/gsoh/VED)
     - Version control: Git et Github
-## Tutoriel
-A FAIRE
 
-Pour accéder au site, exécutez main.py dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
 ## Analyse finale
 ### Difficulté rencontrée
 #### 1. Les erreurs de logique
@@ -387,11 +385,40 @@ Un des problèmes qui est survenu à quelques reprises est celui de voir aucun c
 
 
 ### Répartition des tâches
-Pour la répartition des tâches, nous avons d'abord décidé de séparer le tout en 3 grande composantes:
-* Conception de l'interface graphique (**Guillaume** et Lucas)
-* Transformation des données (Thierry)
-* Conception et entrainement d'une intelligence artificielle (**Alexandre** et Lucas)
-
+Voici précisément ce que chacun a fait
+#### Guillaume
+* Conception du Layout du SiteWeb
+* Logique de sélection du véhicule
+* Logique radio buttons (habitudes de conduite, type de météo)
+* Sélection de la météo automatique/manuelle
+* Calls de open-meteo
+* Date de départ programmée
+* Logique de demande de position
+* Page Résultats
+* Récupération des données de modele.json
+* Calculs de l'autonomie
+#### Luca
+* Conception du modèle et choix des paramètres initiaux
+* Logique des Sliders (Charge actuelle, climatisation)
+* Estimation de l'énergie utilisée par la climatisation/chauffage
+* Estimation de l'impact du style de conduite
+* Intégration de la carte
+* Logique des marqueurs sur la carte et de la ligne du trajet
+* Calls TomTom et OpenStreetMap
+* Barre de recherche
+* Calculs de l'autonomie
+#### Alexandre
+* Choix des paramètres finaux
+* Tests sur des fonctions parfaites
+* Implémentation informatique du Machine Learning
+* Modifications mathématiques pour améliorer la performance
+* Utilisation de CUDA
+* Analyse de données
+#### Thierry
+* Calculs du dénivelé moyen avec open-meteo
+* Supression des véhicules non-électriques dans les 3 datasets
+* Supression des paramètres inutiles dans les 3 datasets
+* Combinaisons des 3 datasets en un csv uniforme
 ### Diagramme de Gant
 ![image](images/Diagramme_de_Gantt.png)
 
