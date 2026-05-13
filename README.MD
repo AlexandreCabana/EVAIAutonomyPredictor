@@ -114,7 +114,11 @@ Les sources des Datasets sont mentionnées dans la section [Technologie utilisé
 #### Calcul de la pente lorsque l'info est manquante
 Pour les données provenant de VED et VicomTech, la pente en % nécessaire pour nos calculs de l'IA n'était pas donné. Ils donnaient cependant la longitude et lattitude en degrés. Il était donc possible d'utiliser l'API de OpenMeteo afin de trouver une altitude pour une lattitude et longitude donnée. Il suffisait ensuite de faire le calcul suivant pour trouver le slope en %.
 
-delta altitude(m) /distance parcourue(m) * 100
+
+$$S = \frac{10 \cdot \Delta A}{\sqrt{d^2- {\Delta A}^2}}$$
+$\delta A$: variation d'altitude
+
+d:distance parcourue
 ### AI sur des données suivant une somme de fonction polynomiale
 Tous les fichiers de cette section sont dans le répertoire AIScript
 
