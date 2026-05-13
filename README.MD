@@ -41,7 +41,6 @@
       * [4. Design fait par des LLMs:](#4-design-fait-par-des-llms-)
       * [5. A FAIRE](#5-a-faire)
       * [6. A FAIRE](#6-a-faire)
-  * [Analyse final](#analyse-final)
     * [Diagramme de Gant](#diagramme-de-gant)
     * [Respect de l'échéancier](#respect-de-léchéancier)
     * [Percepective](#percepective)
@@ -165,7 +164,20 @@ pip install torch --index-url https://download.pytorch.org/whl/cu130
 ### IA sur les vraies données
 #### Impact des facteurs pris en compte pour prédire l'autonomie des véhicules électriques
 Après avoir fait des recherches, nous avons déterminé telle relation pour estimer l'autonomie d'un véhicule électrique.
-Il existe une corrélation entre X et Y
+En premier lieu, voici une liste de définition
+- E: énergie consomé sur le trajet
+- V: vitesse
+- S: pente
+- M: masse
+- D: distance
+- $T_ext$: température extérieure
+- $T_int$: température intérieure
+- $f_n$ est une fonction de degré n
+- $\alpha$ veut dire proportionnelle
+
+$$E \hspace{0.5em} \alpha \hspace{0.5em} f_1(D) \cdot f_1(M) \cdot f_3(S)$$
+$$E \hspace{0.5em} \alpha \hspace{0.5em} f_1(D) \cdot f_2(V) $$
+$$E \hspace{0.5em} \alpha \hspace{0.5em} f_1(D) \cdot f_2(T_ext - T_int)$$
 #### Overtrainnimg
 Normalement, sur un jeu de donnée aléatoire où toutes les données n'ont pas de bruit. Le plus que le programme roule le mieux que c'est. Cependant, lorsque les données ont du bruit, l'IA va trop optimiser sur le jeu de donnée et ne plus être précis. Ainsi, il faut séparer les données en deux, soit une partie pour l'entrainement et une autre pour valider. Lorsque les données sont séparées, on calcule l'erreur sur la partie de validation et d'entrainement. Lorsque que le programme est surentrainé, l'erreur sur les données de validation montre en flèche comme qu'on peut le voir sur le graphique suivant. 
 ![My image](./images/overtrainExample.png)
