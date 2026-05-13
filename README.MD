@@ -161,7 +161,7 @@ Il existe une corrélation entre X et Y
 Normalement, sur un jeu de donnée aléatoire où toutes les données n'ont pas de bruit. Le plus que le programme roule le mieux que c'est. Cependant, lorsque les données ont du bruit, l'IA va trop optimiser sur le jeu de donné et ne plus être précis. Ainsi, il faut séparer les données en deux, soit une partie pour l'entrainement et une autre pour valider. Lorsque les données sont séparées, on calcule l'erreur sur la partie de validation et d'entrainement. Lorsque que le programme est surentrainé, l'erreur sur les données de validation montre en flèche comme qu'on peut le voir sur le graphique suivant. On peut aussi calculer une erreur globale qui est une moyenne pondérée entre celle des données de validation et entrainement. On sauvegarde aussi le model dans un fichier qui s'appelle model.json pour être capable d'accéder certaines des itérations du programme.
 
 
-### Technologie utilisé
+## Technologie utilisé
 - **Technologies à utiliser** :
     - Language frontend: JavaScript (HTML et CSS)
     - Language backend: Python
