@@ -244,19 +244,20 @@ C’est tout simplement un intermédiaire qui permet à différentes application
 ### Qu’est-ce que FastAPI?
 C’est un framework qui permet de créer des API de manière simple et efficace. Il est notamment utilisé par des géants du web comme Netflix.
 ### Et un framework, c’est quoi?
-Un framework est une structure de base pour construire un projet avec de nombreux outils. Dans le cas de FastAPI, il permet de recevoir/envoyer des informations au site web avec Python.
-
+Un framework est une structure de base pour construire un projet avec de nombreux fonctionalité. La grosse différence avec une librairie et que la manière de lancer le projet est souvent différent qu'un script standard. Dans notre cas, FastAPI permet de crée le backend d'un serveur en python.
 
 Reference intéressante: https://www.jetbrains.com/help/pycharm/fastapi-project.html#create-project
+
 ## Tutoriel
 A FAIRE
 1)	Installer PyCharm (si ce n’est pas déjà fait)
 2)	Créer un nouveau projet
-3)	Sélectionner FastAPI comme type de projet[
+3)	Sélectionner FastAPI comme type de projet
 4)	Spécifier le nom de votre projet, son emplacement et si vous désirez créer un répertoire Git
 5)	Cliquer sur Create
 
 À ce moment-là PyCharm va installer le framework de FastAPI et uvicorn (un serveur web). Vous allez aussi voir apparaitre un fichier main.py qui contient du code de base pour la création d’API.
+
 6) //install requirements? rechercher comment faire pour installer dans le venv
 
 Pour accéder au site, exécutez main.py dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
