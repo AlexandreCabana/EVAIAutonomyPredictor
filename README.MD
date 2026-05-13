@@ -233,10 +233,11 @@ $$f(x,y) = \alpha_2 \cdot (xy)^2 + \alpha_1 \cdot xy + \alpha 2 $$
 Ce n'est donc pas equivalent. J'ai donc fait que l'équivalence soit vraie.
 #### 2. Pas accès aux données au début
 Un problème que nous avons eu est que pour pratiquer une intelligence artificielle, il faut avoir des données. Cependant, il fallait transformer les données en premier. Pour résoudre ceci, nous avons créé un script qui génère des données aléatoires suivant une fonction multivariable de degré 1 à 3.
-#### 3.
-#### 4.
-#### 5.
-#### 6.
+#### 3. Difficulté à travailler sur l'IA à 2: Après avoir modélisé le modèle, Alexandre et Luca devaient créer l'IA pour intégrer le modèle en Python. Travailler en peer-to-peer se révélait inefficace et une personne faisait plus de travail que l'autre. Nous avons donc décidé de laisser la conception de l'IA à Alexandre alors que Luca aidait Guillaume à concevoir le SiteWeb.
+
+#### 4. Design fait par des LLMs: Nous avons décider de rendre notre site plus beau en modifiant notre CSS avec Gemini et Claude. Cela a eu pour effet de ralentir notre progression sur le siteweb dû aux hallucinations et bugs de cohérences causées par les LLMs. Nous aurions dû nous satisfaire d'un siteweb moins esthétique, mais plus simple afin d'accélérer notre productivité sur des fonctionnalitées concrètes.
+#### 5. A FAIRE
+#### 6. A FAIRE
 ## Analyse final
 A FAIRE
 
