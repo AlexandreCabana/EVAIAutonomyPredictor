@@ -116,6 +116,7 @@ Pour les données provenant de VED et VicomTech, la pente en % nécessaire pour 
 
 
 $$S = \frac{10 \cdot \Delta A}{\sqrt{d^2- {\Delta A}^2}}$$
+
 $\delta A$: variation d'altitude
 
 d:distance parcourue
