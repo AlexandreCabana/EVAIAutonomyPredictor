@@ -384,7 +384,7 @@ async def submit(
     param = {"speed_avg":float(avg_speed),"slope":float(slope), "temperature":float(temperature), "total_distance":float(distance)}
     print(param)
     energy_consumption = estimate(computeDictParam(param), getFunctions(IFORMODEL))
-    consomation_per_km = energy_consumption / distance
+    consomation_per_km = round(energy_consumption / distance,2)
 
     # trouver la capacité de la batterie
     total_battery_capacity = float(car_data["battery_capacity_kWh"]) * 1000
@@ -392,7 +392,6 @@ async def submit(
     pourcentage_used = round(consomation_per_km / total_battery_capacity * 100, 2)
 
     predicted_range = int(battery_capacity / consomation_per_km) if energy_consumption > 0 else 0
-
     return RedirectResponse(
         url=(
             f"/result?range={predicted_range}"
@@ -404,7 +403,7 @@ async def submit(
 
 #Load la page de résulats
 @app.get("/result")
-def page_resultat(request: Request, range: float, pourcentage_used: float, consomation_per_km: float, distance: float | None = None, duration: float | None = None):
+def page_resultat(request: Request, range: int, pourcentage_used: float, consomation_per_km: float, distance: float | None = None, duration: float | None = None):
     print(range)
     return templates.TemplateResponse(
         request=request,
