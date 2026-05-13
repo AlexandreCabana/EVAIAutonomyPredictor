@@ -79,7 +79,7 @@ Fonctionnalité :
 - Carte pour sélectionner l’itinéraire prévu
 - Prise en compte du traffic selon l’heure de départ
 - Prise en compte des données météos (automatiquement ou manuellement)
-- Entrainement du modèle sur 175Mo de données
+- Entrainement du modèle par Machine Learning sur 586ko de données
 
 Problème à résoudre : Les manufacturiers de véhicules électriques prédisent l’autonomie de leurs véhicules avec des tests sur dynamomètres. Les conditions de tests étant idéales, Les estimations sont souvent mauvaises dû aux impacts qu'à l’environnement sur la décharge lorsqu’on roule sur de vraies routes (vent, température, chauffage, etc.)
 
