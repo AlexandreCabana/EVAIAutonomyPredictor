@@ -236,7 +236,8 @@ Un problème que nous avons eu est que pour pratiquer une intelligence artificie
 #### 3. Difficulté à travailler sur l'IA à 2: Après avoir modélisé le modèle, Alexandre et Luca devaient créer l'IA pour intégrer le modèle en Python. Travailler en peer-to-peer se révélait inefficace et une personne faisait plus de travail que l'autre. Nous avons donc décidé de laisser la conception de l'IA à Alexandre alors que Luca aidait Guillaume à concevoir le SiteWeb.
 
 #### 4. Design fait par des LLMs: Nous avons décider de rendre notre site plus beau en modifiant notre CSS avec Gemini et Claude. Cela a eu pour effet de ralentir notre progression sur le siteweb dû aux hallucinations et bugs de cohérences causées par les LLMs. Nous aurions dû nous satisfaire d'un siteweb moins esthétique, mais plus simple afin d'accélérer notre productivité sur des fonctionnalitées concrètes.
-#### 5. A FAIRE
+#### 5. Oubli de clear le cache
+Un des problèmes qui est survenu à quelques reprises est celui de voir aucun changement lors qu'on modifie le code de l'interface graphique. Cela est dû au cache du navigateur. Pour résoudre le problème, il suffit seulement de clear le cache et de le désactiver. Cependant, lorsqu'on y pense pas, cela peut nous faire perdre un temps précieux.
 #### 6. A FAIRE
 ## Analyse final
 A FAIRE
@@ -284,7 +285,8 @@ sequenceDiagram
 
 
 ### Diagramme de Gant
-A FAIRE
+![image](images/Diagramme_de_Gantt.png)
+
 ### Respect de l'échéancier
 A FAIRE
 ### Percepective
