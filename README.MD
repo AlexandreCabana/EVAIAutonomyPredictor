@@ -237,7 +237,7 @@ sequenceDiagram
     UI-->>User: Affiche autonomie predite
 ```
 
-## Création d’un projet fastAPI
+## Tutoriel
 
 ### Qu’est-ce qu’une API?
 C’est tout simplement un intermédiaire qui permet à différentes applications de communiquer entre elles. Par exemple, il existe des API pour la météo où, dans l’URL, tu spécifies la position voulue, la date voulue, et l’API de météo va te renvoyer les informations de température et de précipitation pour cette localisation et date spécifique.
@@ -246,21 +246,32 @@ C’est un framework qui permet de créer des API de manière simple et efficace
 ### Et un framework, c’est quoi?
 Un framework est une structure de base pour construire un projet avec de nombreux fonctionalité. La grosse différence avec une librairie et que la manière de lancer le projet est souvent différent qu'un script standard. Dans notre cas, FastAPI permet de crée le backend d'un serveur en python.
 
-Reference intéressante: https://www.jetbrains.com/help/pycharm/fastapi-project.html#create-project
+Référence intéressante: https://www.jetbrains.com/help/pycharm/fastapi-project.html#create-project
 
-## Tutoriel
+## Création d’un projet fastAPI
 A FAIRE
-1)	Installer PyCharm (si ce n’est pas déjà fait)
+1)	Installer PyCharm (https://www.jetbrains.com/pycharm/)
 2)	Créer un nouveau projet
 3)	Sélectionner FastAPI comme type de projet
+
+![My image](./images/1.png)
+
 4)	Spécifier le nom de votre projet, son emplacement et si vous désirez créer un répertoire Git
 5)	Cliquer sur Create
 
 À ce moment-là PyCharm va installer le framework de FastAPI et uvicorn (un serveur web). Vous allez aussi voir apparaitre un fichier main.py qui contient du code de base pour la création d’API.
 
-6) //install requirements? rechercher comment faire pour installer dans le venv
+![My image](./images/2.png)
 
-Pour accéder au site, exécutez main.py dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
+
+### Pour accéder au site:
+Si le site est actif, dirigez-vous sur : https://evaiautonomypredictor.onrender.com/
+Sinon,
+1) Importez notre projet dans PyCharm
+2) Créez un envivronnment venv //A FAIRE
+3) Installer les librairies requises: // A FAIRE (installées dans venv)
+4) Exécutez main.py 
+5) Dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
 
 ## Technologie utilisé
 - **Technologies à utiliser** :
