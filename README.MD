@@ -125,7 +125,7 @@ Par exemple,
 $$f(x,y,z)= \alpha_{x2} \cdot x ^2 + \alpha_{x1} \cdot x + \alpha_{x0}  + \alpha_{y1} \cdot y + \alpha_{y0} + \alpha_{z1} \cdot z + \alpha_{z0}$$ où $\alpha$ représente des facteurs. 
 
 L'IA trouve les facteurs optimaux, souvent appelé « weight » en anglais, pour que la formule globale trouvée suive le plus possible les données dans notre jeu de donnée transformées. La library Pytorch est utilisée pour facilement faire une descente de gradient basé sur la dérivée. La première étape consite à définir une fonction qui calcul l'erreur en fonction des paramètres que le modèle prend. Ensuite, la deuxième étape est de calculer la dérivée partielle de chacun des paramètres par rapport à l'erreur. Ensuite, la dérivée est multiplié par un facteur habituellement constant que tu soustrais à l'erreur. Ainsi, l'erreur va être réduite. Le programme exécute ceci en boucle jusqu'à temp que l'erreur est minimal. Dans notre cas, on utilise l'optimiseur ADAM pour changer le facteur constant par une fonction qui dépend de la variation de l'erreur depuis la dernière fois. Ceci permet à notre programme d'optimiser plus vite. Dans le graphique suivant, vous pouvez constater l'évolution de l'erreur en fonction du nombre d'itérations d'une fonction parfaite.
-Dans le graphique suivant, la fonction en mauve est l'erreur que nous optimisons à l'aide des dérivées partielles sur le paramètre x d'une fonction.\
+Dans le graphique suivant, la fonction en mauve est l'erreur que nous optimisons à l'aide des dérivées partielles sur le paramètre x d'une fonction.
 
 
 ![My image](https://lucidar.me/fr/neural-networks/files/gradient-descent.png)
