@@ -188,7 +188,7 @@ On peut aussi calculer une erreur globale qui est une moyenne pondérée entre c
 
 
 ### Site web
-Le site web a été concu avec le framework FastApi
+Le site web a été concu avec le framework FastApi. Un framework est une structure de base pour construire un projet avec de nombreux fonctionalité. La grosse différence avec une librairie et que la manière de lancer le projet est souvent différent qu'un script standard. Dans notre cas, FastAPI permet de crée le backend d'un serveur en python.
 #### Diagramme de fonctionnement
 Voici un diagramme qui représente les requêtes faites par l'utilisateur et ce qu'il se passe derrière.
 ```mermaid
@@ -229,6 +229,8 @@ sequenceDiagram
     API-->>UI: resultats.html   (range, distance, duration, ... , consomation_per_km)
     UI-->>User: Affiche autonomie predite
 ```
+## Tutoriel
+A FAIRE
 
 ## Technologie utilisé
 - **Technologies à utiliser** :
@@ -267,8 +269,7 @@ sequenceDiagram
         - VicomTech (https://github.com/Vicomtech/d-EVD_dual-Electric-Vehicle-Dataset)
         - VEDElectrique (https://github.com/gsoh/VED)
     - Version control: Git et Github
-## Tutoriel
-A FAIRE
+
 
 Pour accéder au site, exécutez main.py dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
 ## Analyse finale
