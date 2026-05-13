@@ -103,7 +103,7 @@ Cette deuxième source de donnée regroupe 29 trips avec deux voitures différen
 #### VEDElectrique
 Comme VicomTech, ce dataset était regroupé par timestamps, mais il comportait également beaucoup de données sur des véhicules hybrides ou des véhicules à gaz. Il a donc fallu garder seulement les véhicules exclusivement électriques. Il n'en comportait que 3 et seulement 2 des 3 ont enregistré des données utilisables. Ce qui fait de cette source de donnée la moins riche en donnée.
 
-Les sources des Datasets sont mentionnées dans la section * [Technologie utilisé](#technologie-utilisé)
+Les sources des Datasets sont mentionnées dans la section [Technologie utilisé](#technologie-utilisé)
 
 #### Calcul de la pente lorsque l'info est manquante
 Pour les données provenant de VED et VicomTech, la pente en % nécessaire pour nos calculs de l'IA n'était pas donné. Ils donnaient cependant la longitude et lattitude en degrés. Il était donc possible d'utiliser l'API de OpenMeteo afin de trouver une altitude pour une lattitude et longitude donnée. Il suffisait ensuite de faire le calcul suivant pour trouver le slope en %.
@@ -236,8 +236,28 @@ sequenceDiagram
     API-->>UI: resultats.html   (range, distance, duration, ... , consomation_per_km)
     UI-->>User: Affiche autonomie predite
 ```
+
+##Création d’un projet fastAPI
+
+Qu’est-ce qu’une API?
+###C’est tout simplement un intermédiaire qui permet à différentes applications de communiquer entre elles. Par exemple, il existe des API pour la météo où, dans l’URL, tu spécifies la position voulue, la date voulue, et l’API de météo va te renvoyer les informations de température et de précipitation pour cette localisation et date spécifique.
+Qu’est-ce que FastAPI?
+###	C’est un framework qui permet de créer des API de manière simple et efficace. Il est notamment utilisé par des géants du web comme Netflix.
+Et un framework, c’est quoi?
+###Un framework est une structure de base pour construire un projet avec de nombreux outils. Dans le cas de FastAPI, il permet de recevoir/envoyer des informations au site web avec Python.
+
+
+##Reference intéressante: https://www.jetbrains.com/help/pycharm/fastapi-project.html#create-project
 ## Tutoriel
 A FAIRE
+###1)	Installer PyCharm (si ce n’est pas déjà fait)
+###2)	Créer un nouveau projet
+###3)	Sélectionner FastAPI comme type de projet[
+###4)	Spécifier le nom de votre projet, son emplacement et si vous désirez créer un répertoire Git
+###5)	Cliquer sur Create
+À ce moment-là PyCharm va installer le framework de FastAPI et uvicorn (un serveur web). Vous allez aussi voir apparaitre un ###fichier main.py qui contient du code de base pour la création d’API.
+###6) //install requirements? rechercher comment faire pour installer dans le venv
+Pour accéder au site, exécutez main.py dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
 
 ## Technologie utilisé
 - **Technologies à utiliser** :
@@ -278,7 +298,7 @@ A FAIRE
     - Version control: Git et Github
 
 
-Pour accéder au site, exécutez main.py dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
+
 ## Analyse finale
 ### Difficulté rencontrée
 #### 1. Les erreurs de logique
