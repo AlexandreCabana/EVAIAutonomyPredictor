@@ -41,6 +41,8 @@
       * [4. Design fait par des LLMs:](#4-design-fait-par-des-llms-)
       * [5. Oubli de clear le cache](#5-oubli-de-clear-le-cache)
       * [6. A FAIRE](#6-a-faire)
+  * [Analyse final](#analyse-final)
+    * [Difficulté rencontrer](#difficulté-rencontrer)
     * [Diagramme de Gant](#diagramme-de-gant)
     * [Respect de l'échéancier](#respect-de-léchéancier)
     * [Percepective](#percepective)
@@ -78,7 +80,6 @@ Problème à résoudre : Les manufacturiers de véhicules électriques prédisen
 Solution : Prédire l’autonomie avec un modèle de machine learning qui est entrainé avec des données de trajets réels.
 
 ### Inovation
-à FAIRE
 ### Cas d'utilisation
 1. Un utilisateur de VÉ veut connaitre avec une meilleure précision son range pour planifier ses déplacements
 2. Un manufacturier de VÉ intègre notre app à ses véhicules pour offrir une meilleure prédiction du range à ses clients
@@ -90,7 +91,7 @@ Toutes les personnes qui ont accès à un véhicule électrique ou qui souhaiten
 Maths et informatique : Machine learning, analyse de données
 
 Physique : Paramètres du modèle modifiées par des fonctions physiques pour des prédictions plus précises.
-Certains calculs basés sur la physique pour : Distance, altitude, énergie du chauffage/climatisation, énergie et autonomie
+Certains calculs basés sur la physique pour : Distance, altitude, énergie du chauffage/climatisation
 
 ## Fonctionemment de l'application
 Pour avoir un produit final, il y a trois sections importantes. La première partie est la transformation des données. La deuxième partie est l’entrainement de l’intelligence artificielle pour avoir une fonction mathématique qui prédit l’autonomie. Ensuite, il y a la partie du site-web qui permet à l’utilisateur d’utiliser la fonction mathématique.
@@ -174,20 +175,7 @@ pip install torch --index-url https://download.pytorch.org/whl/cu130
 ### IA sur les vraies données
 #### Impact des facteurs pris en compte pour prédire l'autonomie des véhicules électriques
 Après avoir fait des recherches, nous avons déterminé telle relation pour estimer l'autonomie d'un véhicule électrique.
-En premier lieu, voici une liste de définition
-- E: énergie consomé sur le trajet
-- V: vitesse
-- S: pente
-- M: masse
-- D: distance
-- $T_{ext}$: température extérieure
-- $T_{int}$: température intérieure
-- $f_n$ est une fonction de degré n
-- $\alpha$ veut dire proportionnelle
-
-$$E \hspace{0.5em} \alpha \hspace{0.5em} f_1(D) \cdot f_1(M) \cdot f_3(S)$$
-$$E \hspace{0.5em} \alpha \hspace{0.5em} f_1(D) \cdot f_2(V) $$
-$$E \hspace{0.5em} \alpha \hspace{0.5em} f_1(D) \cdot f_2(T_{ext} - T_{int})$$
+Il existe une corrélation entre X et Y
 #### Overtrainnimg
 Normalement, sur un jeu de donnée aléatoire où toutes les données n'ont pas de bruit. Le plus que le programme roule le mieux que c'est. Cependant, lorsque les données ont du bruit, l'IA va trop optimiser sur le jeu de donnée et ne plus être précis. Ainsi, il faut séparer les données en deux, soit une partie pour l'entrainement et une autre pour valider. Lorsque les données sont séparées, on calcule l'erreur sur la partie de validation et d'entrainement. Lorsque que le programme est surentrainé, l'erreur sur les données de validation montre en flèche comme qu'on peut le voir sur le graphique suivant. 
 ![My image](./images/overtrainExample.png)
@@ -254,22 +242,40 @@ A FAIRE
 2)	Créer un nouveau projet
 3)	Sélectionner FastAPI comme type de projet
 
-![My image](./images/1.png)
+![My image](./images/tutoriel/projet_fastAPI.png)
 
 4)	Spécifier le nom de votre projet, son emplacement et si vous désirez créer un répertoire Git
 5)	Cliquer sur Create
 
 À ce moment-là PyCharm va installer le framework de FastAPI et uvicorn (un serveur web). Vous allez aussi voir apparaitre un fichier main.py qui contient du code de base pour la création d’API.
 
-![My image](./images/2.png)
+![My image](./images/tutoriel/main_py.png)
 
 
 ### Pour accéder au site:
 Si le site est actif, dirigez-vous sur : https://evaiautonomypredictor.onrender.com/
 Sinon,
 1) Importez notre projet dans PyCharm
-2) Créez un envivronnment venv //A FAIRE
-3) Installer les librairies requises: // A FAIRE (installées dans venv)
+2) Créez un envivronnment venv
+    Pour s'y faire vous devez ouvrir le terminal et être au root du projet (vous devriez y voir ```EVAIAutonomyPredictor %```). Ensuite, si vous n'avez pas encore d'environnement virtuel, faites la commande suivante: 
+    ```bash
+    python -m venv .venv
+    ```
+    Puis, activer cette environnement de la façon suivante si vous êtes sur _**Windows**_:
+   
+    ```bash
+    .venv\Scripts\activate
+    ```
+
+    Sinon, si vous êtes sur **_macOS / Linux_**
+    ```bash
+    source .venv/bin/activate
+    ```
+   À présent vous devrez voir un ```(.venv)``` dans votre terminal.
+3) Installer les librairies requises:
+    ```
+    pip install -r requirements.txt
+    ```
 4) Exécutez main.py 
 5) Dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
 
@@ -310,9 +316,10 @@ Sinon,
         - VicomTech (https://github.com/Vicomtech/d-EVD_dual-Electric-Vehicle-Dataset)
         - VEDElectrique (https://github.com/gsoh/VED)
     - Version control: Git et Github
+## Tutoriel
+A FAIRE
 
-
-
+Pour accéder au site, exécutez main.py dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
 ## Analyse finale
 ### Difficulté rencontrée
 #### 1. Les erreurs de logique
@@ -353,14 +360,66 @@ Nous avons décidé de rendre notre site plus beau en modifiant notre CSS avec G
 Un des problèmes qui est survenu à quelques reprises est celui de voir aucun changement lors qu'on modifie le code de l'interface graphique. Cela est dû au cache du navigateur. Pour résoudre le problème, il suffit seulement de clear le cache et de le désactiver. Cependant, lorsqu'on y pense pas, cela peut nous faire perdre un temps précieux.
 
 #### 6. A FAIRE
+## Analyse final
 A FAIRE
+
+### Diagramme de fonctionnement
+
+```mermaid
+sequenceDiagram
+    participant User as Utilisateur
+    participant UI as Frontend
+    participant API as FastAPI
+    participant Meteo as Open-Meteo
+    participant Route as TomTom/OSRM
+    participant Model as model.json
+    participant Cars as car_info.csv
+
+    User->>UI: Ouvre la page
+    UI->>API: GET /
+    API-->>UI: index.html
+    UI->>Cars: Charger la liste des vehicules
+    Cars-->>UI: Marques + modeles
+
+    User->>UI: Selectionne le trajet sur la carte
+    UI->>API: POST /meteo (lat, lon, date, heure)
+    API->>Meteo: Forecast courant ou horaire
+    Meteo-->>API: Temperature + meteo
+    API-->>UI: JSON meteo
+
+    UI->>API: POST /route (start_lat/lon, end_lat/lo)
+    API->>Route: Position de départ et d'arrivée
+    Route-->>API: Distance + duree + geometrie
+    API-->>UI: JSON route
+
+    User->>UI: Soumet le formulaire
+    UI->>API: POST /submit (modele, ac_target_temp, ..., meteo, start, end, distance, duration)
+    Cars->>API: Recuperer dimensions + batterie
+    API->>Meteo: Position de départ et d'arrivée
+    Meteo-->>API: Récuperer données d'altitude
+    Model->>API: Charger les coefficients appris
+    API->>API: Calcul pente, vitesse moyenne, consommation, autonomie
+    UI->>API: GET /result 
+    API-->>UI: resultats.html   (range, distance, duration, ... , consomation_per_km)
+    UI-->>User: Affiche autonomie predite
+```
+
+
+### Répartition des tâches
+Pour la répartition des tâches, nous avons d'abord décidé de séparer le tout en 3 grande composantes:
+* Conception de l'interface graphique (**Guillaume** et Lucas)
+* Transformation des données (Thierry)
+* Conception et entrainement d'une intelligence artificielle (**Alexandre** et Lucas)
 
 ### Diagramme de Gant
 ![image](images/Diagramme_de_Gantt.png)
 
 ### Respect de l'échéancier
-A FAIRE
-### Percepective
+
+Dans l’ensemble, nous avons respect l’échéancier comme prévu, mais nous avons fait quelque changement à l’échéancier de départ. Par exemple, pour le diagramme de Gantt final, nous avons ajouté la tâche d’obtenir la météo automatiquement et aussi celle de créer une fonctionnalité pour choisir son trajet et d’obtenir les informations sur celui-ci.
+
+
+### Perspective
 
 Si nous avions eu le double du temps pour réaliser notre projet, nous aurions ajouté et amélioré les fonctionnalités suivantes :
 
