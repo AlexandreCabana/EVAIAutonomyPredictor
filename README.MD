@@ -93,7 +93,7 @@ Toutes les personnes qui ont accès à un véhicule électrique ou qui souhaiten
 Maths et informatique : Machine learning, analyse de données
 
 Physique : Paramètres du modèle modifiées par des fonctions physiques pour des prédictions plus précises.
-Certains calculs basés sur la physique pour : Distance, altitude, énergie du chauffage/climatisation
+Certains calculs basés sur la physique pour : Distance, altitude, énergie du chauffage/climatisation, énergie et autonomie
 
 ## Fonctionemment de l'application
 Pour avoir un produit final, il y a trois sections importantes. La première partie est la transformation des données. La deuxième partie est l’entrainement de l’intelligence artificielle pour avoir une fonction mathématique qui prédit l’autonomie. Ensuite, il y a la partie du site-web qui permet à l’utilisateur d’utiliser la fonction mathématique.
