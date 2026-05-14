@@ -6,11 +6,10 @@ Lien du dépôt github: https://github.com/AlexandreCabana/EVAIAutonomyPredictor
     * [L'équipe](#léquipe)
     * [Idée](#idée)
     * [Utilité](#utilité)
-    * [Inovation](#inovation)
     * [Cas d'utilisation](#cas-dutilisation)
     * [Public cible](#public-cible)
     * [Lien avec autre matière](#lien-avec-autre-matière)
-  * [Fonctionemment de l'application](#fonctionemment-de-lapplication)
+  * [Fonctionnement de l'application](#fonctionnement-de-lapplication)
     * [Source de donnée et transformation](#source-de-donnée-et-transformation)
       * [Kagle](#kagle)
       * [VicomTech](#vicomtech)
@@ -18,7 +17,7 @@ Lien du dépôt github: https://github.com/AlexandreCabana/EVAIAutonomyPredictor
       * [Calcul de la pente lorsque l'info est manquante](#calcul-de-la-pente-lorsque-linfo-est-manquante)
     * [AI sur des données suivant une somme de fonction polynomiale](#ai-sur-des-données-suivant-une-somme-de-fonction-polynomiale)
       * [Base de l'optimisation par l'IA](#base-de-loptimisation-par-lia)
-      * [Graphique de l'erreur en fonction du nombre d'iteration](#graphique-de-lerreur-en-fonction-du-nombre-diteration)
+      * [Graphique de l'erreur en fonction du nombre d'itérations](#graphique-de-lerreur-en-fonction-du-nombre-ditérations)
         * [Calcul de l'erreur](#calcul-de-lerreur)
         * [Optimisation et ligne continue](#optimisation-et-ligne-continue)
       * [Test sur jeux de donnée aléatoire](#test-sur-jeux-de-donnée-aléatoire)
@@ -35,8 +34,8 @@ Lien du dépôt github: https://github.com/AlexandreCabana/EVAIAutonomyPredictor
       * [Diagramme de fonctionnement](#diagramme-de-fonctionnement)
   * [Création d’un projet fastAPI](#création-dun-projet-fastapi)
     * [Pour accéder au site:](#pour-accéder-au-site)
+    * [Utilisation du site web](#utilisation-du-site-web)
   * [Technologie utilisé](#technologie-utilisé)
-  * [Tutoriel](#tutoriel)
   * [Analyse finale](#analyse-finale)
     * [Difficulté rencontrée](#difficulté-rencontrée)
       * [1. Les erreurs de logique](#1-les-erreurs-de-logique)
@@ -46,9 +45,13 @@ Lien du dépôt github: https://github.com/AlexandreCabana/EVAIAutonomyPredictor
       * [3. Difficulté à travailler sur l'IA à 2:](#3-difficulté-à-travailler-sur-lia-à-2-)
       * [4. Design fait par des LLMs:](#4-design-fait-par-des-llms-)
       * [5. Oubli de clear le cache](#5-oubli-de-clear-le-cache)
-      * [6. A FAIRE](#6-a-faire)
+      * [6. Altitude non indiquée](#6-altitude-non-indiquée)
   * [Analyse final](#analyse-final)
     * [Répartition des tâches](#répartition-des-tâches)
+      * [Guillaume](#guillaume)
+      * [Luca](#luca)
+      * [Alexandre](#alexandre)
+      * [Thierry](#thierry)
     * [Diagramme de Gant](#diagramme-de-gant)
     * [Respect de l'échéancier](#respect-de-léchéancier)
     * [Perspective](#perspective)
@@ -255,30 +258,10 @@ sequenceDiagram
 ```
 Référence intéressante: https://www.jetbrains.com/help/pycharm/fastapi-project.html#create-project
 
-## Création d’un projet fastAPI
-
-[//]: # (1&#41;	Installer PyCharm &#40;https://www.jetbrains.com/pycharm/&#41;)
-
-[//]: # (2&#41;	Créer un nouveau projet)
-
-[//]: # (3&#41;	Sélectionner FastAPI comme type de projet)
-
-[//]: # ()
-[//]: # (![My image]&#40;./images/tutoriel/projet_fastAPI.png&#41;)
-
-[//]: # ()
-[//]: # (4&#41;	Spécifier le nom de votre projet, son emplacement et si vous désirez créer un répertoire Git)
-
-[//]: # (5&#41;	Cliquer sur Create)
-
-[//]: # ()
-[//]: # (À ce moment-là PyCharm va installer le framework de FastAPI et uvicorn &#40;un serveur web&#41;. Vous allez aussi voir apparaitre un fichier main.py qui contient du code de base pour la création d’API.)
-
-[//]: # ()
-[//]: # (![My image]&#40;./images/tutoriel/main_py.png&#41;)
+## Utilisation du siteweb
 
 
-### Pour accéder au site:
+### Pour accéder au site :
 Si le site est actif, dirigez-vous sur : https://evaiautonomypredictor.onrender.com/
 Sinon,
 1) Importez notre projet dans PyCharm
