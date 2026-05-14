@@ -319,9 +319,9 @@ python main.py
     Vous pouvez entrez la charge de votre véhicule.
 3. #### Style de conduite
     Ici, vous pouvez spécifier votre style de conduite.
-   * Éco-conduite : Accéléreration et décéléreration graduelles
-   * Normal: Accélérations et décélérations normales
-   * Sport: Accélération et décélération très prononcées
+   * Éco-conduite : Vitesse réduite
+   * Normal: Vitesse courante
+   * Sport: Haute vitesse
 
 ![image](images/tutoriel/carte.png)
 4. #### Sélection du trajet
