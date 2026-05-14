@@ -424,7 +424,8 @@ Nous avons décidé de rendre notre site plus beau en modifiant notre CSS avec G
 #### 5. Oubli de clear le cache
 Un des problèmes qui est survenu à quelques reprises est celui de voir aucun changement lors qu'on modifie le code de l'interface graphique. Cela est dû au cache du navigateur. Pour résoudre le problème, il suffit seulement de clear le cache et de le désactiver. Cependant, lorsqu'on n'y pense pas, cela peut nous faire perdre un temps précieux.
 
-#### 6. A FAIRE
+#### 6. Altitude non indiquée
+Dans les sources de données, l'altitude n'était jamais indiquée et elle était nécessaire au calcul de la pente, qui elle est nécessaire à l'entrainement de l'IA. Il a donc fallu trouver une API pour trouver une altitude à partir d'une longitude et lattitude donnée. 
 ## Analyse final
 
 
