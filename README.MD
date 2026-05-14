@@ -56,13 +56,13 @@ Lien du dépôt github: https://github.com/AlexandreCabana/EVAIAutonomyPredictor
 <!-- TOC -->
 ## Description du projet
 ### L'équipe
-**Alexandre (AlexandreCabana):** Backend/IA
+**Alexandre Cabana (AlexandreCabana):** Backend/IA
 
-**Luca (LucaFL02):** Modèle et SiteWeb
+**Luca Ferrante Lalonde (LucaFL02):** Modèle et SiteWeb
 
-**Thierry (EatANapkin):** Traitement des données
+**Thierry Leblanc (EatANapkin):** Traitement des données
 
-**Guillaume (gliglo7):** SiteWeb
+**Guillaume Lavertu  (gliglo7):** SiteWeb
 ### Idée
 Nous souhaitons créer une application qui permet à ses utilisateurs de prédire avec une IA la distance qu'ils peuvent 
 parcourir avec l'énergie restante dans leur véhicule électrique.
