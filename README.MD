@@ -256,18 +256,26 @@ sequenceDiagram
 Référence intéressante: https://www.jetbrains.com/help/pycharm/fastapi-project.html#create-project
 
 ## Création d’un projet fastAPI
-1)	Installer PyCharm (https://www.jetbrains.com/pycharm/)
-2)	Créer un nouveau projet
-3)	Sélectionner FastAPI comme type de projet
 
-![My image](./images/tutoriel/projet_fastAPI.png)
+[//]: # (1&#41;	Installer PyCharm &#40;https://www.jetbrains.com/pycharm/&#41;)
 
-4)	Spécifier le nom de votre projet, son emplacement et si vous désirez créer un répertoire Git
-5)	Cliquer sur Create
+[//]: # (2&#41;	Créer un nouveau projet)
 
-À ce moment-là PyCharm va installer le framework de FastAPI et uvicorn (un serveur web). Vous allez aussi voir apparaitre un fichier main.py qui contient du code de base pour la création d’API.
+[//]: # (3&#41;	Sélectionner FastAPI comme type de projet)
 
-![My image](./images/tutoriel/main_py.png)
+[//]: # ()
+[//]: # (![My image]&#40;./images/tutoriel/projet_fastAPI.png&#41;)
+
+[//]: # ()
+[//]: # (4&#41;	Spécifier le nom de votre projet, son emplacement et si vous désirez créer un répertoire Git)
+
+[//]: # (5&#41;	Cliquer sur Create)
+
+[//]: # ()
+[//]: # (À ce moment-là PyCharm va installer le framework de FastAPI et uvicorn &#40;un serveur web&#41;. Vous allez aussi voir apparaitre un fichier main.py qui contient du code de base pour la création d’API.)
+
+[//]: # ()
+[//]: # (![My image]&#40;./images/tutoriel/main_py.png&#41;)
 
 
 ### Pour accéder au site:
@@ -303,6 +311,42 @@ python main.py
 ```
 5) Dirigez-vous sur http://127.0.0.1:8000 dans votre navigateur
 
+### Utilisation du site web
+![image](images/tutoriel/choix_vehicule.png)
+1. #### Choix du véhicule
+    Vous devez d'abord entrez le marque et le modèle de votre véhicule. De cette manière, le système peut prendre en compte des paramètres spécifiques à votre véhicule comme la capacité électrique.
+2. #### Charge du véhicule
+    Vous pouvez entrez la charge de votre véhicule.
+3. #### Style de conduite
+    Ici, vous pouvez spécifier votre style de conduite.
+   * Éco-conduite : Accéléreration et décéléreration graduelles
+   * Normal: Accélérations et décélérations normales
+   * Sport: Accélération et décélération très prononcées
+
+![image](images/tutoriel/carte.png)
+4. #### Sélection du trajet
+    Dans cette section vous pouvez personnaliser votre trajet. Le fonctionnement est très simple : vous devez placer deux points géographique et le meilleur itinéraire va être calculer automatiquement. Pour s'y faire vous avez trois façon de placer des points.\
+   * Utiliser la barre de recherche (4.1)
+   * Utiliser votre propre localisation (4.2)
+   * Utiliser la carte interactive et cliquer sur la localisation\
+
+    Lorsque vous êtes satisfait de votre trajet, vous pouvez cliquer sur _**Calculer les détails du trajet**_ (4.3)
+    ![image](images/tutoriel/detail_trajet.png)
+    À ce moment-là, vous allez pouvoir voir des informations pertients concernant votre trajet
+   * Distance
+   * Durée (avec et sans traffic)
+   * Retard causé par le traffic
+5. #### Spécification de la date et de l'heure de départ
+    ![image](images/tutoriel/date_depart.png)
+    Vous pouvez aussi spécifier la date et l'heure de départ. Cela permet d'obtenir la météo automatiquement pour une certaine date et heure.
+6. #### Météo (mode auto/manuel)
+    Vous pouvez décider de prendre les prévisions météos ou d'entrez vos propres conditions météos pour voir l'influence sur le résultat.
+    ![image](images/tutoriel/meteo_automatique.png)
+7. #### Climatisation
+   Vous pouvez ajuster la climastisation de votre véhicule.
+8. #### Résultats
+    Lorsque vous êtes satisfait des paramètres entrées, vous pouvez cliquer sur envoyer au bas de la page et vous allez voir les résultats de la prédiction.
+    ![image](images/tutoriel/resultats.png)
 ## Technologie utilisé
 - **Technologies à utiliser** :
     - Language frontend: JavaScript (HTML et CSS)
